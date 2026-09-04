@@ -769,19 +769,26 @@ function closeIncomeModal(){
 
 /* ---------- FORM DATA ---------- */
 
-async function loadIncomeFormData(){
+async function loadIncomeFormData() {
 
-  console.log("Loading Income Form Data...");
+  const categorySelect =
+    document.getElementById("incomeCategory");
+
+  const accountSelect =
+    document.getElementById("incomeAccount");
+
+  const customerSelect =
+    document.getElementById("incomeCustomer");
+
+  const vehicleSelect =
+    document.getElementById("incomeVehicle");
 
 
   /* =====================================================
      INCOME CATEGORIES
   ===================================================== */
 
-  const categorySelect =
-    document.getElementById("incomeCategory");
-
-  if(categorySelect){
+  if (categorySelect) {
 
     categorySelect.innerHTML =
       `<option value="">Loading categories...</option>`;
@@ -789,91 +796,46 @@ async function loadIncomeFormData(){
   }
 
 
-  try{
+  try {
 
-    const result =
+    const response =
       await sb
         .from("income_categories")
-        .select("id,name")
-        .order("name");
+        .select("*");
 
 
-    console.log(
-      "Income categories result:",
-      result
-    );
+    if (response.error) {
 
-
-    if(result.error){
-
-      throw result.error;
+      throw response.error;
 
     }
 
 
     const categories =
-      result.data || [];
+      response.data || [];
 
 
-    incomeCategories =
-      categories;
+    console.log(
+      "CATEGORIES FROM SUPABASE:",
+      categories
+    );
 
 
-    if(!categorySelect){
+    if (!categories.length) {
 
-      throw new Error(
-        "Element #incomeCategory was not found."
-      );
+      categorySelect.innerHTML =
+        `<option value="">
+          No categories found
+        </option>`;
 
     }
 
+    else {
 
-    /*
-      Clear dropdown
-    */
-
-    categorySelect.innerHTML =
-      `<option value="">Select category</option>`;
-
-
-    /*
-      Add categories WITHOUT using esc().
-      This removes another possible source
-      of JavaScript failure.
-    */
-
-    categories.forEach(category => {
-
-      const option =
-        document.createElement("option");
-
-      option.value =
-        category.id;
-
-      option.textContent =
-        category.name;
-
-      categorySelect.appendChild(
-        option
-      );
-
-    });
-
-
-    /*
-      Category filter
-    */
-
-    const categoryFilter =
-      document.getElementById(
-        "incomeCategoryFilter"
-      );
-
-
-    if(categoryFilter){
-
-      categoryFilter.innerHTML =
-        `<option value="">All Categories</option>`;
+      categorySelect.innerHTML =
+        `<option value="">
+          Select category
+        </option>`;
 
 
       categories.forEach(category => {
@@ -881,13 +843,16 @@ async function loadIncomeFormData(){
         const option =
           document.createElement("option");
 
+
         option.value =
           category.id;
+
 
         option.textContent =
           category.name;
 
-        categoryFilter.appendChild(
+
+        categorySelect.appendChild(
           option
         );
 
@@ -896,29 +861,20 @@ async function loadIncomeFormData(){
     }
 
 
-    console.log(
-      "Categories loaded:",
-      categories.length
-    );
-
   }
 
-  catch(error){
+  catch (error) {
 
     console.error(
-      "CATEGORY ERROR:",
+      "CATEGORY LOAD ERROR:",
       error
     );
 
 
-    if(categorySelect){
-
-      categorySelect.innerHTML =
-        `<option value="">
-          Error loading categories
-        </option>`;
-
-    }
+    categorySelect.innerHTML =
+      `<option value="">
+        Category error
+      </option>`;
 
   }
 
@@ -928,25 +884,19 @@ async function loadIncomeFormData(){
      ACCOUNTS
   ===================================================== */
 
-  const accountSelect =
-    document.getElementById(
-      "incomeAccount"
-    );
-
-
-  if(accountSelect){
+  if (accountSelect) {
 
     accountSelect.innerHTML =
       `<option value="">
-        Loading accounts...
+        No accounts available
       </option>`;
 
   }
 
 
-  try{
+  try {
 
-    const result =
+    const response =
       await sb
         .from("accounts")
         .select(
@@ -959,32 +909,22 @@ async function loadIncomeFormData(){
         .order("name");
 
 
-    console.log(
-      "Accounts result:",
-      result
-    );
+    if (response.error) {
 
-
-    if(result.error){
-
-      throw result.error;
+      throw response.error;
 
     }
 
 
     const accounts =
-      result.data || [];
+      response.data || [];
 
 
-    if(accountSelect){
+    if (accounts.length) {
 
       accountSelect.innerHTML =
         `<option value="">
-          ${
-            accounts.length
-              ? "Select account"
-              : "No accounts available"
-          }
+          Select account
         </option>`;
 
 
@@ -993,11 +933,14 @@ async function loadIncomeFormData(){
         const option =
           document.createElement("option");
 
+
         option.value =
           account.id;
 
+
         option.textContent =
           `${account.name} — ${account.currency}`;
+
 
         accountSelect.appendChild(
           option
@@ -1009,22 +952,12 @@ async function loadIncomeFormData(){
 
   }
 
-  catch(error){
+  catch (error) {
 
     console.error(
-      "ACCOUNT ERROR:",
+      "ACCOUNT LOAD ERROR:",
       error
     );
-
-
-    if(accountSelect){
-
-      accountSelect.innerHTML =
-        `<option value="">
-          Error loading accounts
-        </option>`;
-
-    }
 
   }
 
@@ -1034,25 +967,19 @@ async function loadIncomeFormData(){
      CUSTOMERS
   ===================================================== */
 
-  const customerSelect =
-    document.getElementById(
-      "incomeCustomer"
-    );
-
-
-  if(customerSelect){
+  if (customerSelect) {
 
     customerSelect.innerHTML =
       `<option value="">
-        Loading customers...
+        None / Other
       </option>`;
 
   }
 
 
-  try{
+  try {
 
-    const result =
+    const response =
       await sb
         .from("customers")
         .select(
@@ -1061,74 +988,47 @@ async function loadIncomeFormData(){
         .order("full_name");
 
 
-    console.log(
-      "Customers result:",
-      result
-    );
+    if (response.error) {
 
-
-    if(result.error){
-
-      throw result.error;
+      throw response.error;
 
     }
 
 
     const customers =
-      result.data || [];
+      response.data || [];
 
 
-    if(customerSelect){
+    customers.forEach(customer => {
 
-      customerSelect.innerHTML =
-        `<option value="">
-          ${
-            customers.length
-              ? "None / Other"
-              : "None / Other"
-          }
-        </option>`;
+      const option =
+        document.createElement("option");
 
 
-      customers.forEach(customer => {
+      option.value =
+        customer.id;
 
-        const option =
-          document.createElement("option");
 
-        option.value =
-          customer.id;
+      option.textContent =
+        customer.phone
+          ? `${customer.full_name} — ${customer.phone}`
+          : customer.full_name;
 
-        option.textContent =
-          customer.phone
-            ? `${customer.full_name} — ${customer.phone}`
-            : customer.full_name;
 
-        customerSelect.appendChild(
-          option
-        );
+      customerSelect.appendChild(
+        option
+      );
 
-      });
-
-    }
+    });
 
   }
 
-  catch(error){
+  catch (error) {
 
     console.error(
-      "CUSTOMER ERROR:",
+      "CUSTOMER LOAD ERROR:",
       error
     );
-
-
-    if(customerSelect){
-
-      customerSelect.innerHTML =
-        `<option value="">
-          No customers available
-        </option>`;
-
-    }
 
   }
 
@@ -1138,25 +1038,19 @@ async function loadIncomeFormData(){
      VEHICLES
   ===================================================== */
 
-  const vehicleSelect =
-    document.getElementById(
-      "incomeVehicle"
-    );
-
-
-  if(vehicleSelect){
+  if (vehicleSelect) {
 
     vehicleSelect.innerHTML =
       `<option value="">
-        Loading vehicles...
+        None / Other
       </option>`;
 
   }
 
 
-  try{
+  try {
 
-    const result =
+    const response =
       await sb
         .from("vehicles")
         .select(
@@ -1165,87 +1059,58 @@ async function loadIncomeFormData(){
         .order(
           "created_at",
           {
-            ascending:false
+            ascending: false
           }
         );
 
 
-    console.log(
-      "Vehicles result:",
-      result
-    );
+    if (response.error) {
 
-
-    if(result.error){
-
-      throw result.error;
+      throw response.error;
 
     }
 
 
     const vehicles =
-      result.data || [];
+      response.data || [];
 
 
-    if(vehicleSelect){
+    vehicles.forEach(vehicle => {
 
-      vehicleSelect.innerHTML =
-        `<option value="">
-          None / Other
-        </option>`;
+      const option =
+        document.createElement("option");
 
 
-      vehicles.forEach(vehicle => {
+      option.value =
+        vehicle.id;
 
-        const option =
-          document.createElement("option");
 
-        option.value =
-          vehicle.id;
+      option.textContent =
+        `${vehicle.stock_number} — ${vehicle.make} ${vehicle.model}${
+          vehicle.year
+            ? ` (${vehicle.year})`
+            : ""
+        }`;
 
-        option.textContent =
-          `${vehicle.stock_number} — ${vehicle.make} ${vehicle.model}${
-            vehicle.year
-              ? ` (${vehicle.year})`
-              : ""
-          }`;
 
-        vehicleSelect.appendChild(
-          option
-        );
+      vehicleSelect.appendChild(
+        option
+      );
 
-      });
-
-    }
+    });
 
   }
 
-  catch(error){
+  catch (error) {
 
     console.error(
-      "VEHICLE ERROR:",
+      "VEHICLE LOAD ERROR:",
       error
     );
 
-
-    if(vehicleSelect){
-
-      vehicleSelect.innerHTML =
-        `<option value="">
-          No vehicles available
-        </option>`;
-
-    }
-
   }
 
-
-  console.log(
-    "Income Form Data loading completed."
-  );
-
 }
-
 /* ---------- SAVE INCOME ---------- */
 
 async function saveIncome(){
