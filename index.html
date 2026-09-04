@@ -1108,190 +1108,352 @@
     <!-- =========================================================
          JAVASCRIPT
     ========================================================= -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script>
+<script>
 
-        /* =========================================================
-           ELEMENTS
-        ========================================================= */
+    /* =========================================================
+       SUPABASE CONFIGURATION
+    ========================================================= */
 
-        const loginForm =
-            document.getElementById("loginForm");
+    const SUPABASE_URL =
+        "https://tstpqwckgiwmcvsurqiq.supabase.co";
 
-        const emailInput =
-            document.getElementById("email");
+    const SUPABASE_KEY =
+        "sb_publishable_WfPh8lbd-UKxBRGLRAfWWw_dJuDV5TP";
 
-        const passwordInput =
-            document.getElementById("password");
-
-        const loginButton =
-            document.getElementById("loginButton");
-
-        const togglePassword =
-            document.getElementById("togglePassword");
-
-        const statusMessage =
-            document.getElementById("statusMessage");
-
-        const forgotPassword =
-            document.getElementById("forgotPassword");
-
-
-        /* =========================================================
-           PASSWORD VISIBILITY
-        ========================================================= */
-
-        togglePassword.addEventListener(
-            "click",
-            function () {
-
-                const isPassword =
-                    passwordInput.type === "password";
-
-                passwordInput.type =
-                    isPassword
-                        ? "text"
-                        : "password";
-
-                togglePassword.textContent =
-                    isPassword
-                        ? "Hide"
-                        : "Show";
-
-            }
+    const supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
         );
 
 
-        /* =========================================================
-           STATUS MESSAGE
-        ========================================================= */
+    /* =========================================================
+       ELEMENTS
+    ========================================================= */
 
-        function showMessage(message, type) {
+    const loginForm =
+        document.getElementById("loginForm");
 
-            statusMessage.textContent = message;
+    const emailInput =
+        document.getElementById("email");
 
-            statusMessage.className =
-                "status-message " + type;
+    const passwordInput =
+        document.getElementById("password");
 
+    const loginButton =
+        document.getElementById("loginButton");
+
+    const togglePassword =
+        document.getElementById("togglePassword");
+
+    const statusMessage =
+        document.getElementById("statusMessage");
+
+    const forgotPassword =
+        document.getElementById("forgotPassword");
+
+
+    /* =========================================================
+       PASSWORD VISIBILITY
+    ========================================================= */
+
+    togglePassword.addEventListener(
+        "click",
+        function () {
+
+            const isPassword =
+                passwordInput.type === "password";
+
+            passwordInput.type =
+                isPassword
+                    ? "text"
+                    : "password";
+
+            togglePassword.textContent =
+                isPassword
+                    ? "Hide"
+                    : "Show";
         }
+    );
 
 
-        function clearMessage() {
+    /* =========================================================
+       STATUS MESSAGE
+    ========================================================= */
 
-            statusMessage.textContent = "";
+    function showMessage(message, type) {
 
-            statusMessage.className =
-                "status-message";
+        statusMessage.textContent =
+            message;
 
-        }
+        statusMessage.className =
+            "status-message " + type;
+    }
 
 
-        /* =========================================================
-           LOGIN
-           
-           Supabase authentication will be connected here.
-        ========================================================= */
+    function clearMessage() {
 
-        loginForm.addEventListener(
-            "submit",
-            async function (event) {
+        statusMessage.textContent = "";
 
-                event.preventDefault();
+        statusMessage.className =
+            "status-message";
+    }
 
-                clearMessage();
 
-                const email =
-                    emailInput.value.trim();
+    /* =========================================================
+       LOGIN
+    ========================================================= */
 
-                const password =
-                    passwordInput.value;
+    loginForm.addEventListener(
+        "submit",
+        async function (event) {
 
-                if (!email || !password) {
+            event.preventDefault();
 
-                    showMessage(
-                        "Please enter your email and password.",
-                        "error"
-                    );
+            clearMessage();
 
-                    return;
+            const email =
+                emailInput.value.trim();
+
+            const password =
+                passwordInput.value;
+
+
+            if (!email || !password) {
+
+                showMessage(
+                    "Please enter your email and password.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            loginButton.disabled = true;
+
+            loginButton.classList.add(
+                "loading"
+            );
+
+            loginButton.textContent =
+                "Authenticating...";
+
+
+            try {
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.auth
+                        .signInWithPassword({
+
+                            email: email,
+
+                            password: password
+
+                        });
+
+
+                if (error) {
+
+                    throw error;
+
                 }
 
 
-                loginButton.disabled = true;
+                if (!data.user) {
 
-                loginButton.classList.add("loading");
+                    throw new Error(
+                        "Authentication failed."
+                    );
 
-                loginButton.textContent =
-                    "Authenticating...";
+                }
 
 
-                /*
-                    SUPABASE LOGIN WILL GO HERE.
-
-                    Example later:
-
-                    const { data, error } =
-                        await supabase.auth.signInWithPassword({
-                            email,
-                            password
-                        });
-                */
+                showMessage(
+                    "Authentication successful. Opening Finance OS...",
+                    "success"
+                );
 
 
                 setTimeout(
                     function () {
 
-                        loginButton.disabled = false;
-
-                        loginButton.classList.remove(
-                            "loading"
-                        );
-
-                        loginButton.textContent =
-                            "Sign in to Finance OS";
-
-
-                        showMessage(
-                            "Supabase authentication is not connected yet. We will connect it in the next step.",
-                            "error"
-                        );
+                        window.location.href =
+                            "dashboard.html";
 
                     },
-                    800
+                    700
                 );
 
-            }
-        );
 
+            } catch (error) {
 
-        /* =========================================================
-           FORGOT PASSWORD
-        ========================================================= */
+                console.error(
+                    "Login error:",
+                    error
+                );
 
-        forgotPassword.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
 
                 showMessage(
-                    "Password recovery will be available after Supabase authentication is connected.",
+                    error.message ||
+                    "Unable to sign in. Please check your credentials.",
+                    "error"
+                );
+
+
+                loginButton.disabled =
+                    false;
+
+                loginButton.classList.remove(
+                    "loading"
+                );
+
+                loginButton.textContent =
+                    "Sign in to Finance OS";
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       FORGOT PASSWORD
+    ========================================================= */
+
+    forgotPassword.addEventListener(
+        "click",
+        async function (event) {
+
+            event.preventDefault();
+
+            const email =
+                emailInput.value.trim();
+
+
+            if (!email) {
+
+                showMessage(
+                    "Enter your email address first.",
+                    "error"
+                );
+
+                emailInput.focus();
+
+                return;
+            }
+
+
+            try {
+
+                const {
+                    error
+                } =
+                    await supabaseClient.auth
+                        .resetPasswordForEmail(
+                            email,
+                            {
+                                redirectTo:
+                                    window.location.origin +
+                                    "/reset-password.html"
+                            }
+                        );
+
+
+                if (error) {
+
+                    throw error;
+
+                }
+
+
+                showMessage(
+                    "Password reset instructions have been sent to your email.",
+                    "success"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Password reset error:",
+                    error
+                );
+
+
+                showMessage(
+                    error.message ||
+                    "Unable to send password reset email.",
                     "error"
                 );
 
             }
-        );
+
+        }
+    );
 
 
-        /* =========================================================
-           INITIALIZATION
-        ========================================================= */
+    /* =========================================================
+       CHECK EXISTING SESSION
+    ========================================================= */
 
-        console.log(
-            "Mattex Finance OS initialized."
-        );
+    async function checkExistingSession() {
 
-    </script>
+        try {
+
+            const {
+                data
+            } =
+                await supabaseClient.auth
+                    .getSession();
+
+
+            if (
+                data &&
+                data.session &&
+                window.location.pathname.endsWith(
+                    "/index.html"
+                )
+            ) {
+
+                window.location.href =
+                    "dashboard.html";
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Session check failed:",
+                error
+            );
+
+        }
+
+    }
+
+
+    checkExistingSession();
+
+
+    /* =========================================================
+       INITIALIZATION
+    ========================================================= */
+
+    console.log(
+        "MATTEX FINANCE OS"
+    );
+
+    console.log(
+        "Supabase connection initialized."
+    );
+
+</script>
 
 </body>
 </html>
