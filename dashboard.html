@@ -249,7 +249,120 @@ tr:hover td{background:#fbfcfd}
     </div>
 
     <!-- OTHER VIEWS -->
-    <div class="view" id="view-income"></div>
+    <div class="view" id="view-income">
+
+  <div class="hero">
+    <div>
+      <h2>Income</h2>
+      <p>Track every source of money received by Mattex Company Limited.</p>
+    </div>
+
+    <button class="primary" onclick="openIncomeModal()">
+      + Record Income
+    </button>
+  </div>
+
+  <div class="cards">
+
+    <div class="card kpi">
+      <div class="kpi-top">
+        <div class="kpi-label">Total Income</div>
+        <div class="kpi-icon">TZS</div>
+      </div>
+
+      <div class="kpi-value" id="incomeTotal">
+        TZS 0
+      </div>
+
+      <div class="kpi-note">
+        All recorded income
+      </div>
+    </div>
+
+    <div class="card kpi">
+      <div class="kpi-top">
+        <div class="kpi-label">This Month</div>
+        <div class="kpi-icon">↗</div>
+      </div>
+
+      <div class="kpi-value" id="incomeMonth">
+        TZS 0
+      </div>
+
+      <div class="kpi-note">
+        Income received this month
+      </div>
+    </div>
+
+    <div class="card kpi">
+      <div class="kpi-top">
+        <div class="kpi-label">Vehicle Sales</div>
+        <div class="kpi-icon">V</div>
+      </div>
+
+      <div class="kpi-value" id="incomeVehicle">
+        TZS 0
+      </div>
+
+      <div class="kpi-note">
+        Income linked to vehicles
+      </div>
+    </div>
+
+    <div class="card kpi">
+      <div class="kpi-top">
+        <div class="kpi-label">Other Income</div>
+        <div class="kpi-icon">+</div>
+      </div>
+
+      <div class="kpi-value" id="incomeOther">
+        TZS 0
+      </div>
+
+      <div class="kpi-note">
+        Other recorded income
+      </div>
+    </div>
+
+  </div>
+
+  <div class="panel">
+
+    <div class="toolbar">
+
+      <input
+        class="search"
+        id="incomeSearch"
+        placeholder="Search income..."
+        oninput="filterIncome()"
+      >
+
+      <div class="filters">
+
+        <select id="incomeCategoryFilter" onchange="filterIncome()">
+          <option value="">All Categories</option>
+        </select>
+
+        <select id="incomeCurrencyFilter" onchange="filterIncome()">
+          <option value="">All Currencies</option>
+          <option value="TZS">TZS</option>
+          <option value="USD">USD</option>
+          <option value="JPY">JPY</option>
+        </select>
+
+      </div>
+
+    </div>
+
+    <div id="incomeTableContainer">
+      <div class="empty">
+        Loading income...
+      </div>
+    </div>
+
+  </div>
+
+</div>
     <div class="view" id="view-expenses"></div>
     <div class="view" id="view-transactions"></div>
     <div class="view" id="view-transfers"></div>
@@ -264,6 +377,190 @@ tr:hover td{background:#fbfcfd}
 </main>
 </div>
 
+<!-- INCOME MODAL -->
+
+<div class="modal-bg" id="incomeModal">
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <h3>Record Income</h3>
+
+      <button
+        class="close"
+        onclick="closeIncomeModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <form class="form" id="incomeForm">
+
+      <div class="form-grid">
+
+        <div class="field">
+
+          <label>AMOUNT *</label>
+
+          <input
+            id="incomeAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+            required
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>CURRENCY *</label>
+
+          <select id="incomeCurrency" required>
+
+            <option value="TZS">
+              TZS — Tanzanian Shilling
+            </option>
+
+            <option value="USD">
+              USD — US Dollar
+            </option>
+
+            <option value="JPY">
+              JPY — Japanese Yen
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>INCOME CATEGORY *</label>
+
+          <select id="incomeCategory" required>
+
+            <option value="">
+              Select category
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>RECEIVING ACCOUNT</label>
+
+          <select id="incomeAccount">
+
+            <option value="">
+              Select account
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>CUSTOMER</label>
+
+          <select id="incomeCustomer">
+
+            <option value="">
+              None / Other
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>VEHICLE</label>
+
+          <select id="incomeVehicle">
+
+            <option value="">
+              None / Other
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>INCOME DATE *</label>
+
+          <input
+            id="incomeDate"
+            type="date"
+            required
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>REFERENCE NUMBER</label>
+
+          <input
+            id="incomeReference"
+            placeholder="e.g. RCPT-0001"
+          >
+
+        </div>
+
+
+        <div class="field full">
+
+          <label>DESCRIPTION</label>
+
+          <input
+            id="incomeDescription"
+            placeholder="Describe where this money came from..."
+          >
+
+        </div>
+
+      </div>
+
+    </form>
+
+
+    <div class="modal-foot">
+
+      <button
+        class="secondary"
+        onclick="closeIncomeModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="primary"
+        onclick="saveIncome()"
+      >
+        Save Income
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 <!-- ACCOUNT MODAL -->
 <div class="modal-bg" id="accountModal">
   <div class="modal">
@@ -326,12 +623,14 @@ function go(view){
   document.getElementById("pageTitle").textContent=viewTitles[view]||view;
   document.getElementById("crumb").textContent=(viewTitles[view]||view).toUpperCase();
   if(view==="accounts") loadAccounts();
-  if(view==="overview") loadOverview();
+
+if(view==="income") loadIncome();
+
+if(view==="overview") loadOverview();
 }
 
 function buildPlaceholders(){
   const data={
-    income:["↗","Income","This module will record customer deposits, vehicle sales, financing income and other company income."],
     expenses:["↘","Expenses","This module will manage office expenses, staff costs and company operating expenses."],
     transactions:["≡","Transactions","Central ledger view for all money movements across Mattex accounts."],
     transfers:["⇄","Transfers","Move money between Mattex bank, cash and mobile-money accounts."],
@@ -366,9 +665,38 @@ async function refreshAll(){
 }
 
 async function refreshCurrent(){
-  if(currentView==="overview") await loadOverview();
-  else if(currentView==="accounts") await loadAccounts();
-  else await refreshAll();
+  async function refreshCurrent(){
+
+  if(currentView==="overview"){
+
+    await loadOverview();
+
+  }
+
+  else if(currentView==="accounts"){
+
+    await loadAccounts();
+
+  }
+
+  else if(currentView==="income"){
+
+    await loadIncome();
+
+  }
+
+  else{
+
+    await refreshAll();
+
+  }
+
+  toast(
+    "Data refreshed",
+    "ok"
+  );
+
+}
   toast("Data refreshed","ok");
 }
 
@@ -388,6 +716,856 @@ async function loadOverview(){
     console.error(e);
   }
 }
+
+/* =========================================================
+   INCOME MODULE
+========================================================= */
+
+let incomeRecords = [];
+let incomeCategories = [];
+
+
+/* ---------- OPEN MODAL ---------- */
+
+async function openIncomeModal(){
+
+  document.getElementById("incomeForm").reset();
+
+  const today = new Date().toISOString().split("T")[0];
+
+  document.getElementById("incomeDate").value = today;
+
+  document.getElementById("incomeModal").classList.add("show");
+
+  await loadIncomeFormData();
+}
+
+
+function closeIncomeModal(){
+
+  document
+    .getElementById("incomeModal")
+    .classList.remove("show");
+
+}
+
+
+/* ---------- FORM DATA ---------- */
+
+async function loadIncomeFormData(){
+
+  try{
+
+    /*
+      Categories
+    */
+
+    const { data: categories, error: categoryError } =
+      await sb
+        .from("income_categories")
+        .select("*")
+        .order("name");
+
+    if(categoryError) throw categoryError;
+
+    incomeCategories = categories || [];
+
+
+    const categorySelect =
+      document.getElementById("incomeCategory");
+
+    categorySelect.innerHTML =
+      `<option value="">Select category</option>` +
+      incomeCategories
+        .map(category => `
+          <option value="${category.id}">
+            ${esc(category.name)}
+          </option>
+        `)
+        .join("");
+
+
+    /*
+      Accounts
+    */
+
+    const { data: accountData, error: accountError } =
+      await sb
+        .from("accounts")
+        .select("id,name,account_type,currency")
+        .eq("is_active", true)
+        .order("name");
+
+    if(accountError) throw accountError;
+
+
+    const accountSelect =
+      document.getElementById("incomeAccount");
+
+    accountSelect.innerHTML =
+      `<option value="">Select account</option>` +
+      (accountData || [])
+        .map(account => `
+          <option value="${account.id}">
+            ${esc(account.name)}
+            — ${esc(account.currency)}
+          </option>
+        `)
+        .join("");
+
+
+    /*
+      Customers
+    */
+
+    const { data: customerData, error: customerError } =
+      await sb
+        .from("customers")
+        .select("id,full_name,phone")
+        .order("full_name");
+
+    if(customerError) throw customerError;
+
+
+    const customerSelect =
+      document.getElementById("incomeCustomer");
+
+    customerSelect.innerHTML =
+      `<option value="">None / Other</option>` +
+      (customerData || [])
+        .map(customer => `
+          <option value="${customer.id}">
+            ${esc(customer.full_name)}
+            ${customer.phone ? " — " + esc(customer.phone) : ""}
+          </option>
+        `)
+        .join("");
+
+
+    /*
+      Vehicles
+    */
+
+    const { data: vehicleData, error: vehicleError } =
+      await sb
+        .from("vehicles")
+        .select("id,stock_number,make,model,year")
+        .order("created_at", { ascending:false });
+
+    if(vehicleError) throw vehicleError;
+
+
+    const vehicleSelect =
+      document.getElementById("incomeVehicle");
+
+    vehicleSelect.innerHTML =
+      `<option value="">None / Other</option>` +
+      (vehicleData || [])
+        .map(vehicle => `
+          <option value="${vehicle.id}">
+            ${esc(vehicle.stock_number)}
+            — ${esc(vehicle.make)}
+            ${esc(vehicle.model)}
+            ${vehicle.year ? " (" + vehicle.year + ")" : ""}
+          </option>
+        `)
+        .join("");
+
+  }
+
+  catch(error){
+
+    console.error("Income form error:", error);
+
+    toast(
+      "Failed to load income form data",
+      "err"
+    );
+
+  }
+
+}
+
+
+/* ---------- SAVE INCOME ---------- */
+
+async function saveIncome(){
+
+  const amount =
+    Number(
+      document.getElementById("incomeAmount").value
+    );
+
+  const currency =
+    document.getElementById("incomeCurrency").value;
+
+  const categoryId =
+    document.getElementById("incomeCategory").value;
+
+  const accountId =
+    document.getElementById("incomeAccount").value || null;
+
+  const customerId =
+    document.getElementById("incomeCustomer").value || null;
+
+  const vehicleId =
+    document.getElementById("incomeVehicle").value || null;
+
+  const incomeDate =
+    document.getElementById("incomeDate").value;
+
+  const reference =
+    document.getElementById("incomeReference").value.trim()
+    || null;
+
+  const description =
+    document.getElementById("incomeDescription").value.trim()
+    || null;
+
+
+  if(!amount || amount <= 0){
+
+    toast(
+      "Enter a valid income amount",
+      "err"
+    );
+
+    return;
+  }
+
+
+  if(!categoryId){
+
+    toast(
+      "Select an income category",
+      "err"
+    );
+
+    return;
+  }
+
+
+  if(!incomeDate){
+
+    toast(
+      "Select income date",
+      "err"
+    );
+
+    return;
+  }
+
+
+  try{
+
+    /*
+      1. Create income record
+    */
+
+    const incomePayload = {
+
+      category_id: categoryId,
+
+      customer_id: customerId,
+
+      vehicle_id: vehicleId,
+
+      account_id: accountId,
+
+      amount: amount,
+
+      currency: currency,
+
+      description: description,
+
+      income_date: incomeDate,
+
+      reference_number: reference
+
+    };
+
+
+    const {
+      data: incomeData,
+      error: incomeError
+    } = await sb
+      .from("income")
+      .insert([incomePayload])
+      .select()
+      .single();
+
+
+    if(incomeError)
+      throw incomeError;
+
+
+    /*
+      2. If an account was selected,
+         create the money movement in the ledger.
+    */
+
+    if(accountId && incomeData){
+
+      const transactionPayload = {
+
+        account_id: accountId,
+
+        transaction_type: "income",
+
+        amount: amount,
+
+        currency: currency,
+
+        reference_id: incomeData.id,
+
+        reference_type: "income",
+
+        description:
+          description ||
+          "Income received",
+
+        transaction_date: incomeDate
+
+      };
+
+
+      const {
+        error: transactionError
+      } = await sb
+        .from("account_transactions")
+        .insert([transactionPayload]);
+
+
+      if(transactionError){
+
+        console.error(
+          "Ledger transaction error:",
+          transactionError
+        );
+
+        /*
+          Income itself was saved.
+          We warn the user because the ledger
+          transaction failed.
+        */
+
+        toast(
+          "Income saved, but account ledger update failed",
+          "err"
+        );
+
+      }
+
+    }
+
+
+    closeIncomeModal();
+
+    toast(
+      "Income recorded successfully",
+      "ok"
+    );
+
+
+    await refreshAll();
+
+    await loadIncome();
+
+  }
+
+  catch(error){
+
+    console.error(
+      "Save income error:",
+      error
+    );
+
+    toast(
+      error.message ||
+      "Failed to save income",
+      "err"
+    );
+
+  }
+
+}
+
+
+/* ---------- LOAD INCOME ---------- */
+
+async function loadIncome(){
+
+  const container =
+    document.getElementById(
+      "incomeTableContainer"
+    );
+
+  container.innerHTML =
+    `<div class="empty">Loading income...</div>`;
+
+
+  try{
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("income")
+      .select(`
+        *,
+        income_categories(name),
+        customers(full_name),
+        vehicles(stock_number,make,model)
+      `)
+      .order(
+        "income_date",
+        { ascending:false }
+      );
+
+
+    if(error) throw error;
+
+
+    incomeRecords = data || [];
+
+
+    renderIncome(incomeRecords);
+
+    calculateIncomeSummary();
+
+  }
+
+  catch(error){
+
+    console.error(
+      "Load income error:",
+      error
+    );
+
+    container.innerHTML = `
+      <div class="empty">
+
+        <strong>
+          Unable to load income
+        </strong>
+
+        ${esc(error.message)}
+
+      </div>
+    `;
+
+  }
+
+}
+
+
+/* ---------- RENDER ---------- */
+
+function renderIncome(records){
+
+  const container =
+    document.getElementById(
+      "incomeTableContainer"
+    );
+
+
+  if(!records.length){
+
+    container.innerHTML = `
+      <div class="empty">
+
+        <strong>
+          No income recorded yet
+        </strong>
+
+        Click
+        <b>+ Record Income</b>
+        to add the first income transaction.
+
+      </div>
+    `;
+
+    return;
+  }
+
+
+  container.innerHTML = `
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>Date</th>
+
+            <th>Description</th>
+
+            <th>Category</th>
+
+            <th>Customer</th>
+
+            <th>Vehicle</th>
+
+            <th>Account</th>
+
+            <th>Amount</th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          ${
+            records.map(record => `
+
+              <tr>
+
+                <td>
+                  ${formatDate(record.income_date)}
+                </td>
+
+
+                <td>
+
+                  <div class="name">
+
+                    ${
+                      esc(
+                        record.description ||
+                        "Income"
+                      )
+                    }
+
+                  </div>
+
+                  ${
+                    record.reference_number
+                    ? `
+                      <div class="sub">
+                        Ref:
+                        ${esc(
+                          record.reference_number
+                        )}
+                      </div>
+                    `
+                    : ""
+                  }
+
+                </td>
+
+
+                <td>
+
+                  <span class="badge orange">
+
+                    ${
+                      esc(
+                        record.income_categories?.name
+                        || "Uncategorized"
+                      )
+                    }
+
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  ${
+                    record.customers?.full_name
+                    ? esc(
+                        record.customers.full_name
+                      )
+                    : '<span class="sub">—</span>'
+                  }
+
+                </td>
+
+
+                <td>
+
+                  ${
+                    record.vehicles
+                    ? `
+                      <div class="name">
+                        ${esc(
+                          record.vehicles.stock_number
+                        )}
+                      </div>
+
+                      <div class="sub">
+                        ${esc(
+                          record.vehicles.make
+                        )}
+                        ${esc(
+                          record.vehicles.model
+                        )}
+                      </div>
+                    `
+                    : '<span class="sub">—</span>'
+                  }
+
+                </td>
+
+
+                <td>
+
+                  ${
+                    record.account_id
+                    ? '<span class="badge green">Recorded</span>'
+                    : '<span class="badge gray">Unassigned</span>'
+                  }
+
+                </td>
+
+
+                <td class="amount">
+
+                  ${money(
+                    record.amount,
+                    record.currency
+                  )}
+
+                </td>
+
+              </tr>
+
+            `).join("")
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  `;
+
+}
+
+
+/* ---------- SUMMARY ---------- */
+
+function calculateIncomeSummary(){
+
+  let total = 0;
+
+  let month = 0;
+
+  let vehicle = 0;
+
+  let other = 0;
+
+
+  const now =
+    new Date();
+
+
+  const currentMonth =
+    now.getMonth();
+
+
+  const currentYear =
+    now.getFullYear();
+
+
+  incomeRecords.forEach(record => {
+
+    const amount =
+      Number(
+        record.amount || 0
+      );
+
+
+    /*
+      Summary is primarily displayed in TZS.
+      Different currencies should eventually
+      use FX conversion.
+    */
+
+    if(record.currency === "TZS"){
+
+      total += amount;
+
+
+      const d =
+        new Date(
+          record.income_date
+        );
+
+
+      if(
+        d.getMonth() === currentMonth &&
+        d.getFullYear() === currentYear
+      ){
+
+        month += amount;
+
+      }
+
+
+      if(record.vehicle_id){
+
+        vehicle += amount;
+
+      }
+      else{
+
+        other += amount;
+
+      }
+
+    }
+
+  });
+
+
+  set(
+    "incomeTotal",
+    money(total,"TZS")
+  );
+
+  set(
+    "incomeMonth",
+    money(month,"TZS")
+  );
+
+  set(
+    "incomeVehicle",
+    money(vehicle,"TZS")
+  );
+
+  set(
+    "incomeOther",
+    money(other,"TZS")
+  );
+
+}
+
+
+/* ---------- SEARCH / FILTER ---------- */
+
+function filterIncome(){
+
+  const search =
+    document.getElementById(
+      "incomeSearch"
+    ).value
+    .toLowerCase()
+    .trim();
+
+
+  const category =
+    document.getElementById(
+      "incomeCategoryFilter"
+    ).value;
+
+
+  const currency =
+    document.getElementById(
+      "incomeCurrencyFilter"
+    ).value;
+
+
+  const filtered =
+    incomeRecords.filter(record => {
+
+      const text = [
+
+        record.description,
+
+        record.reference_number,
+
+        record.income_categories?.name,
+
+        record.customers?.full_name,
+
+        record.vehicles?.stock_number,
+
+        record.vehicles?.make,
+
+        record.vehicles?.model
+
+      ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+
+      const searchMatch =
+        !search ||
+        text.includes(search);
+
+
+      const categoryMatch =
+        !category ||
+        record.category_id === category;
+
+
+      const currencyMatch =
+        !currency ||
+        record.currency === currency;
+
+
+      return (
+        searchMatch &&
+        categoryMatch &&
+        currencyMatch
+      );
+
+    });
+
+
+  renderIncome(filtered);
+
+}
+
+
+/* ---------- HELPERS ---------- */
+
+function formatDate(date){
+
+  if(!date) return "—";
+
+
+  return new Date(
+    date + "T00:00:00"
+  ).toLocaleDateString(
+    "en-GB",
+    {
+      day:"2-digit",
+      month:"short",
+      year:"numeric"
+    }
+  );
+
+}
+
+
+/* ---------- INCOME MODAL CLOSE ---------- */
+
+document
+  .getElementById("incomeModal")
+  .addEventListener(
+    "click",
+    e => {
+
+      if(
+        e.target === e.currentTarget
+      ){
+
+        closeIncomeModal();
+
+      }
+
+    }
+  );
 
 async function loadAccounts(){
   const box=document.getElementById("accountsContainer");
