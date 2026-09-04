@@ -1,0 +1,3066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Dashboard • Mattex Finance OS
+    </title>
+
+
+    <style>
+
+        /* =========================================================
+           MATTEX FINANCE OS
+           PREMIUM DASHBOARD
+        ========================================================= */
+
+        :root {
+
+            --bg: #080a0d;
+            --sidebar: #0d1014;
+            --panel: #11151a;
+            --panel-hover: #161b21;
+
+            --border:
+                rgba(255,255,255,0.07);
+
+            --border-strong:
+                rgba(255,255,255,0.11);
+
+            --orange: #f47b20;
+            --orange-light: #ff9a4d;
+
+            --white: #f5f7fa;
+            --text: #dfe3e8;
+            --muted: #7f8994;
+
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+
+            --radius: 16px;
+
+            --sidebar-width: 250px;
+        }
+
+
+        /* =========================================================
+           RESET
+        ========================================================= */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background:
+                var(--bg);
+
+            color:
+                var(--text);
+
+            min-height:
+                100vh;
+
+            overflow-x:
+                hidden;
+        }
+
+
+        button,
+        input,
+        select {
+
+            font-family:
+                inherit;
+        }
+
+
+        /* =========================================================
+           APP
+        ========================================================= */
+
+        .app {
+
+            min-height:
+                100vh;
+
+            display:
+                flex;
+        }
+
+
+        /* =========================================================
+           SIDEBAR
+        ========================================================= */
+
+        .sidebar {
+
+            width:
+                var(--sidebar-width);
+
+            position:
+                fixed;
+
+            top: 0;
+            left: 0;
+            bottom: 0;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #0c0f13 0%,
+                    #090b0e 100%
+                );
+
+            border-right:
+                1px solid var(--border);
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            z-index:
+                100;
+
+            transition:
+                transform .3s ease;
+        }
+
+
+        /* =========================================================
+           BRAND
+        ========================================================= */
+
+        .sidebar-brand {
+
+            height:
+                82px;
+
+            padding:
+                0 23px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            border-bottom:
+                1px solid var(--border);
+        }
+
+
+        .brand {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                11px;
+        }
+
+
+        .brand-mark {
+
+            width:
+                38px;
+
+            height:
+                38px;
+
+            border-radius:
+                11px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--orange),
+                    #ff9b4c
+                );
+
+            color:
+                #111;
+
+            font-weight:
+                900;
+
+            box-shadow:
+                0 8px 25px
+                rgba(244,123,32,.18);
+        }
+
+
+        .brand-name {
+
+            font-size:
+                13px;
+
+            font-weight:
+                800;
+
+            color:
+                var(--white);
+
+            letter-spacing:
+                .3px;
+        }
+
+
+        .brand-system {
+
+            display:
+                block;
+
+            margin-top:
+                2px;
+
+            font-size:
+                9px;
+
+            text-transform:
+                uppercase;
+
+            letter-spacing:
+                1.2px;
+
+            color:
+                var(--muted);
+        }
+
+
+        /* =========================================================
+           NAVIGATION
+        ========================================================= */
+
+        .nav {
+
+            padding:
+                22px 13px;
+
+            flex:
+                1;
+
+            overflow-y:
+                auto;
+        }
+
+
+        .nav-label {
+
+            padding:
+                0 11px;
+
+            margin:
+                0 0 10px;
+
+            font-size:
+                9px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                1.5px;
+
+            color:
+                #56606b;
+
+            text-transform:
+                uppercase;
+        }
+
+
+        .nav-section {
+
+            margin-bottom:
+                22px;
+        }
+
+
+        .nav-item {
+
+            width:
+                100%;
+
+            height:
+                43px;
+
+            border:
+                none;
+
+            border-radius:
+                10px;
+
+            background:
+                transparent;
+
+            color:
+                #858e98;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                12px;
+
+            padding:
+                0 12px;
+
+            margin-bottom:
+                3px;
+
+            cursor:
+                pointer;
+
+            font-size:
+                12px;
+
+            text-align:
+                left;
+
+            transition:
+                .2s;
+        }
+
+
+        .nav-item:hover {
+
+            color:
+                var(--white);
+
+            background:
+                rgba(255,255,255,.035);
+        }
+
+
+        .nav-item.active {
+
+            color:
+                var(--white);
+
+            background:
+                rgba(244,123,32,.10);
+
+            box-shadow:
+                inset 3px 0 0 var(--orange);
+        }
+
+
+        .nav-icon {
+
+            width:
+                19px;
+
+            text-align:
+                center;
+
+            color:
+                #69737e;
+
+            font-size:
+                13px;
+        }
+
+
+        .nav-item.active .nav-icon {
+
+            color:
+                var(--orange);
+        }
+
+
+        /* =========================================================
+           SIDEBAR FOOTER
+        ========================================================= */
+
+        .sidebar-footer {
+
+            padding:
+                15px;
+
+            border-top:
+                1px solid var(--border);
+        }
+
+
+        .user-mini {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                10px;
+
+            padding:
+                8px;
+        }
+
+
+        .user-avatar {
+
+            width:
+                34px;
+
+            height:
+                34px;
+
+            border-radius:
+                10px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #20262e,
+                    #11151a
+                );
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            color:
+                var(--orange);
+
+            font-size:
+                11px;
+
+            font-weight:
+                800;
+        }
+
+
+        .user-info {
+
+            min-width:
+                0;
+        }
+
+
+        .user-name {
+
+            font-size:
+                11px;
+
+            font-weight:
+                700;
+
+            color:
+                var(--white);
+
+            white-space:
+                nowrap;
+
+            overflow:
+                hidden;
+
+            text-overflow:
+                ellipsis;
+        }
+
+
+        .user-role {
+
+            font-size:
+                9px;
+
+            color:
+                var(--muted);
+
+            margin-top:
+                2px;
+        }
+
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        .main {
+
+            margin-left:
+                var(--sidebar-width);
+
+            width:
+                calc(
+                    100% - var(--sidebar-width)
+                );
+
+            min-height:
+                100vh;
+        }
+
+
+        /* =========================================================
+           TOPBAR
+        ========================================================= */
+
+        .topbar {
+
+            height:
+                82px;
+
+            border-bottom:
+                1px solid var(--border);
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            padding:
+                0 34px;
+
+            background:
+                rgba(8,10,13,.78);
+
+            backdrop-filter:
+                blur(18px);
+
+            position:
+                sticky;
+
+            top:
+                0;
+
+            z-index:
+                50;
+        }
+
+
+        .page-title {
+
+            font-size:
+                15px;
+
+            font-weight:
+                750;
+
+            color:
+                var(--white);
+        }
+
+
+        .breadcrumb {
+
+            margin-top:
+                4px;
+
+            font-size:
+                10px;
+
+            color:
+                var(--muted);
+        }
+
+
+        .top-actions {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                9px;
+        }
+
+
+        .icon-button {
+
+            width:
+                38px;
+
+            height:
+                38px;
+
+            border:
+                1px solid var(--border);
+
+            background:
+                rgba(255,255,255,.025);
+
+            border-radius:
+                10px;
+
+            color:
+                #858e98;
+
+            cursor:
+                pointer;
+
+            transition:
+                .2s;
+        }
+
+
+        .icon-button:hover {
+
+            color:
+                var(--white);
+
+            border-color:
+                var(--border-strong);
+        }
+
+
+        .notification {
+
+            position:
+                relative;
+        }
+
+
+        .notification-dot {
+
+            position:
+                absolute;
+
+            width:
+                6px;
+
+            height:
+                6px;
+
+            border-radius:
+                50%;
+
+            background:
+                var(--orange);
+
+            top:
+                8px;
+
+            right:
+                8px;
+
+            box-shadow:
+                0 0 10px
+                rgba(244,123,32,.7);
+        }
+
+
+        /* =========================================================
+           CONTENT
+        ========================================================= */
+
+        .content {
+
+            padding:
+                32px 34px 50px;
+        }
+
+
+        .welcome {
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                flex-end;
+
+            margin-bottom:
+                27px;
+        }
+
+
+        .welcome h1 {
+
+            font-size:
+                25px;
+
+            letter-spacing:
+                -.8px;
+
+            color:
+                var(--white);
+        }
+
+
+        .welcome p {
+
+            margin-top:
+                7px;
+
+            font-size:
+                11px;
+
+            color:
+                var(--muted);
+        }
+
+
+        .date-pill {
+
+            border:
+                1px solid var(--border);
+
+            background:
+                rgba(255,255,255,.025);
+
+            padding:
+                9px 13px;
+
+            border-radius:
+                10px;
+
+            color:
+                #929aa4;
+
+            font-size:
+                10px;
+        }
+
+
+        /* =========================================================
+           KPI GRID
+        ========================================================= */
+
+        .kpi-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap:
+                14px;
+
+            margin-bottom:
+                16px;
+        }
+
+
+        .kpi {
+
+            position:
+                relative;
+
+            overflow:
+                hidden;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.035),
+                    rgba(255,255,255,.012)
+                );
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                var(--radius);
+
+            padding:
+                20px;
+
+            min-height:
+                145px;
+
+            transition:
+                .25s;
+        }
+
+
+        .kpi:hover {
+
+            transform:
+                translateY(-2px);
+
+            border-color:
+                var(--border-strong);
+
+            background:
+                var(--panel-hover);
+        }
+
+
+        .kpi::after {
+
+            content:
+                "";
+
+            position:
+                absolute;
+
+            width:
+                120px;
+
+            height:
+                120px;
+
+            right:
+                -55px;
+
+            bottom:
+                -55px;
+
+            border-radius:
+                50%;
+
+            background:
+                rgba(244,123,32,.06);
+        }
+
+
+        .kpi-top {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+        }
+
+
+        .kpi-label {
+
+            color:
+                var(--muted);
+
+            font-size:
+                10px;
+
+            font-weight:
+                700;
+
+            letter-spacing:
+                .5px;
+
+            text-transform:
+                uppercase;
+        }
+
+
+        .kpi-icon {
+
+            width:
+                28px;
+
+            height:
+                28px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            border-radius:
+                8px;
+
+            background:
+                rgba(244,123,32,.08);
+
+            color:
+                var(--orange);
+
+            font-size:
+                11px;
+        }
+
+
+        .kpi-value {
+
+            margin-top:
+                18px;
+
+            color:
+                var(--white);
+
+            font-size:
+                25px;
+
+            font-weight:
+                750;
+
+            letter-spacing:
+                -1px;
+        }
+
+
+        .kpi-bottom {
+
+            margin-top:
+                8px;
+
+            display:
+                flex;
+
+            gap:
+                7px;
+
+            align-items:
+                center;
+
+            font-size:
+                10px;
+        }
+
+
+        .positive {
+
+            color:
+                var(--success);
+        }
+
+
+        .negative {
+
+            color:
+                var(--danger);
+        }
+
+
+        .kpi-note {
+
+            color:
+                var(--muted);
+        }
+
+
+        /* =========================================================
+           MAIN GRID
+        ========================================================= */
+
+        .dashboard-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                minmax(0, 1.7fr)
+                minmax(300px, .8fr);
+
+            gap:
+                16px;
+
+            margin-bottom:
+                16px;
+        }
+
+
+        .panel {
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.03),
+                    rgba(255,255,255,.012)
+                );
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                var(--radius);
+
+            overflow:
+                hidden;
+        }
+
+
+        .panel-header {
+
+            padding:
+                18px 20px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            border-bottom:
+                1px solid var(--border);
+        }
+
+
+        .panel-title {
+
+            color:
+                var(--white);
+
+            font-size:
+                12px;
+
+            font-weight:
+                750;
+        }
+
+
+        .panel-subtitle {
+
+            margin-top:
+                3px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                9px;
+        }
+
+
+        .panel-action {
+
+            border:
+                none;
+
+            background:
+                transparent;
+
+            color:
+                var(--orange);
+
+            font-size:
+                10px;
+
+            cursor:
+                pointer;
+        }
+
+
+        /* =========================================================
+           CHART
+        ========================================================= */
+
+        .chart-area {
+
+            padding:
+                20px;
+
+            height:
+                290px;
+
+            position:
+                relative;
+        }
+
+
+        .chart {
+
+            width:
+                100%;
+
+            height:
+                100%;
+
+            position:
+                relative;
+        }
+
+
+        .chart-grid {
+
+            position:
+                absolute;
+
+            inset:
+                0;
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            justify-content:
+                space-between;
+        }
+
+
+        .grid-line {
+
+            border-top:
+                1px dashed
+                rgba(255,255,255,.06);
+
+            width:
+                100%;
+        }
+
+
+        .chart-svg {
+
+            position:
+                absolute;
+
+            inset:
+                15px 0 20px;
+
+            width:
+                100%;
+
+            height:
+                calc(100% - 35px);
+
+            overflow:
+                visible;
+        }
+
+
+        .chart-line {
+
+            fill:
+                none;
+
+            stroke:
+                var(--orange);
+
+            stroke-width:
+                2.5;
+
+            vector-effect:
+                non-scaling-stroke;
+
+            filter:
+                drop-shadow(
+                    0 5px 8px
+                    rgba(244,123,32,.18)
+                );
+        }
+
+
+        .chart-area-fill {
+
+            fill:
+                url(#chartGradient);
+        }
+
+
+        .chart-labels {
+
+            position:
+                absolute;
+
+            left:
+                0;
+
+            right:
+                0;
+
+            bottom:
+                0;
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            color:
+                #626b75;
+
+            font-size:
+                8px;
+        }
+
+
+        /* =========================================================
+           ALERTS
+        ========================================================= */
+
+        .alerts {
+
+            padding:
+                5px 0;
+        }
+
+
+        .alert {
+
+            display:
+                flex;
+
+            gap:
+                11px;
+
+            padding:
+                15px 20px;
+
+            border-bottom:
+                1px solid var(--border);
+        }
+
+
+        .alert:last-child {
+            border-bottom:
+                none;
+        }
+
+
+        .alert-icon {
+
+            width:
+                28px;
+
+            height:
+                28px;
+
+            flex-shrink:
+                0;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            border-radius:
+                8px;
+
+            font-size:
+                10px;
+        }
+
+
+        .alert-danger {
+
+            background:
+                rgba(239,68,68,.08);
+
+            color:
+                var(--danger);
+        }
+
+
+        .alert-warning {
+
+            background:
+                rgba(245,158,11,.08);
+
+            color:
+                var(--warning);
+        }
+
+
+        .alert-success {
+
+            background:
+                rgba(34,197,94,.08);
+
+            color:
+                var(--success);
+        }
+
+
+        .alert-content {
+
+            min-width:
+                0;
+        }
+
+
+        .alert-title {
+
+            font-size:
+                10px;
+
+            font-weight:
+                700;
+
+            color:
+                #d9dde2;
+        }
+
+
+        .alert-text {
+
+            margin-top:
+                4px;
+
+            font-size:
+                9px;
+
+            color:
+                var(--muted);
+
+            line-height:
+                1.5;
+        }
+
+
+        /* =========================================================
+           BOTTOM GRID
+        ========================================================= */
+
+        .bottom-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                1.1fr 1fr;
+
+            gap:
+                16px;
+        }
+
+
+        /* =========================================================
+           TRANSACTIONS
+        ========================================================= */
+
+        .transactions {
+
+            padding:
+                3px 0;
+        }
+
+
+        .transaction {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                35px 1fr auto;
+
+            align-items:
+                center;
+
+            gap:
+                11px;
+
+            padding:
+                13px 20px;
+
+            border-bottom:
+                1px solid var(--border);
+        }
+
+
+        .transaction:last-child {
+            border-bottom:
+                none;
+        }
+
+
+        .transaction-icon {
+
+            width:
+                30px;
+
+            height:
+                30px;
+
+            border-radius:
+                8px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            font-size:
+                10px;
+        }
+
+
+        .income-icon {
+
+            background:
+                rgba(34,197,94,.08);
+
+            color:
+                var(--success);
+        }
+
+
+        .expense-icon {
+
+            background:
+                rgba(239,68,68,.08);
+
+            color:
+                var(--danger);
+        }
+
+
+        .transaction-name {
+
+            font-size:
+                10px;
+
+            font-weight:
+                700;
+
+            color:
+                #dfe3e8;
+        }
+
+
+        .transaction-meta {
+
+            margin-top:
+                3px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                8px;
+        }
+
+
+        .transaction-amount {
+
+            font-size:
+                10px;
+
+            font-weight:
+                750;
+
+            white-space:
+                nowrap;
+        }
+
+
+        /* =========================================================
+           VEHICLE PIPELINE
+        ========================================================= */
+
+        .pipeline {
+
+            padding:
+                20px;
+        }
+
+
+        .pipeline-row {
+
+            display:
+                flex;
+
+            gap:
+                6px;
+
+            margin-bottom:
+                17px;
+        }
+
+
+        .pipeline-step {
+
+            flex:
+                1;
+
+            min-width:
+                0;
+        }
+
+
+        .pipeline-bar {
+
+            height:
+                4px;
+
+            border-radius:
+                20px;
+
+            background:
+                #242a31;
+
+            overflow:
+                hidden;
+        }
+
+
+        .pipeline-fill {
+
+            height:
+                100%;
+
+            background:
+                var(--orange);
+
+            border-radius:
+                inherit;
+        }
+
+
+        .pipeline-label {
+
+            margin-top:
+                8px;
+
+            font-size:
+                8px;
+
+            color:
+                var(--muted);
+
+            white-space:
+                nowrap;
+        }
+
+
+        .pipeline-number {
+
+            margin-top:
+                2px;
+
+            font-size:
+                13px;
+
+            font-weight:
+                750;
+
+            color:
+                var(--white);
+        }
+
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        .mobile-menu {
+
+            display:
+                none;
+
+            width:
+                38px;
+
+            height:
+                38px;
+
+            border:
+                1px solid var(--border);
+
+            background:
+                transparent;
+
+            color:
+                var(--white);
+
+            border-radius:
+                10px;
+
+            cursor:
+                pointer;
+        }
+
+
+        @media (max-width: 1100px) {
+
+            .kpi-grid {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .dashboard-grid {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+        }
+
+
+        @media (max-width: 760px) {
+
+            .sidebar {
+
+                transform:
+                    translateX(-100%);
+            }
+
+
+            .sidebar.open {
+
+                transform:
+                    translateX(0);
+            }
+
+
+            .main {
+
+                margin-left:
+                    0;
+
+                width:
+                    100%;
+            }
+
+
+            .mobile-menu {
+
+                display:
+                    block;
+            }
+
+
+            .topbar {
+
+                padding:
+                    0 18px;
+
+                gap:
+                    10px;
+            }
+
+
+            .content {
+
+                padding:
+                    24px 17px 40px;
+            }
+
+
+            .welcome {
+
+                align-items:
+                    flex-start;
+
+                gap:
+                    15px;
+
+                flex-direction:
+                    column;
+            }
+
+
+            .bottom-grid {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+        }
+
+
+        @media (max-width: 500px) {
+
+            .kpi-grid {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+
+            .kpi {
+
+                min-height:
+                    125px;
+            }
+
+
+            .page-title {
+
+                font-size:
+                    13px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <!-- =========================================================
+         SIDEBAR
+    ========================================================= -->
+
+    <aside class="sidebar" id="sidebar">
+
+
+        <div class="sidebar-brand">
+
+            <div class="brand">
+
+                <div class="brand-mark">
+                    M
+                </div>
+
+                <div>
+
+                    <div class="brand-name">
+                        MATTEX
+                    </div>
+
+                    <span class="brand-system">
+                        Finance OS
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <nav class="nav">
+
+
+            <div class="nav-section">
+
+                <div class="nav-label">
+                    Overview
+                </div>
+
+                <button
+                    class="nav-item active"
+                    data-page="dashboard"
+                >
+                    <span class="nav-icon">◈</span>
+                    Dashboard
+                </button>
+
+            </div>
+
+
+            <div class="nav-section">
+
+                <div class="nav-label">
+                    Finance
+                </div>
+
+                <button
+                    class="nav-item"
+                    data-page="income"
+                >
+                    <span class="nav-icon">↗</span>
+                    Income
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-page="expenses"
+                >
+                    <span class="nav-icon">↘</span>
+                    Expenses
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-page="accounts"
+                >
+                    <span class="nav-icon">◫</span>
+                    Accounts
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-page="payments"
+                >
+                    <span class="nav-icon">◇</span>
+                    Payments
+                </button>
+
+            </div>
+
+
+            <div class="nav-section">
+
+                <div class="nav-label">
+                    Business
+                </div>
+
+                <button
+                    class="nav-item"
+                    data-page="vehicles"
+                >
+                    <span class="nav-icon">▣</span>
+                    Vehicles
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-page="customers"
+                >
+                    <span class="nav-icon">♙</span>
+                    Customers
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-page="sales"
+                >
+                    <span class="nav-icon">◇</span>
+                    Sales
+                </button>
+
+            </div>
+
+
+            <div class="nav-section">
+
+                <div class="nav-label">
+                    Management
+                </div>
+
+                <button
+                    class="nav-item"
+                    data-page="reports"
+                >
+                    <span class="nav-icon">▤</span>
+                    Reports
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-page="settings"
+                >
+                    <span class="nav-icon">⚙</span>
+                    Settings
+                </button>
+
+            </div>
+
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <div class="user-mini">
+
+                <div
+                    class="user-avatar"
+                    id="userAvatar"
+                >
+                    HM
+                </div>
+
+                <div class="user-info">
+
+                    <div
+                        class="user-name"
+                        id="userName"
+                    >
+                        Mattex User
+                    </div>
+
+                    <div
+                        class="user-role"
+                        id="userRole"
+                    >
+                        Authorized User
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </aside>
+
+
+
+    <!-- =========================================================
+         MAIN
+    ========================================================= -->
+
+    <main class="main">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+
+            <div style="display:flex;align-items:center;gap:12px;">
+
+                <button
+                    class="mobile-menu"
+                    id="mobileMenu"
+                >
+                    ☰
+                </button>
+
+                <div>
+
+                    <div class="page-title">
+                        Financial Overview
+                    </div>
+
+                    <div class="breadcrumb">
+                        Mattex Finance OS / Dashboard
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="top-actions">
+
+                <button
+                    class="icon-button notification"
+                    title="Notifications"
+                >
+                    ♢
+                    <span class="notification-dot"></span>
+                </button>
+
+                <button
+                    class="icon-button"
+                    id="logoutButton"
+                    title="Logout"
+                >
+                    ↪
+                </button>
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- =====================================================
+             CONTENT
+        ====================================================== -->
+
+        <section class="content">
+
+
+            <!-- WELCOME -->
+
+            <div class="welcome">
+
+                <div>
+
+                    <h1>
+                        Good morning.
+                    </h1>
+
+                    <p>
+                        Here's what's happening across
+                        Mattex's financial operations today.
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="date-pill"
+                    id="currentDate"
+                >
+                    Loading date...
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 KPI CARDS
+            ================================================== -->
+
+            <div class="kpi-grid">
+
+
+                <div class="kpi">
+
+                    <div class="kpi-top">
+
+                        <span class="kpi-label">
+                            Total Cash
+                        </span>
+
+                        <span class="kpi-icon">
+                            ◉
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="kpi-value"
+                        id="cashValue"
+                    >
+                        TZS 0
+                    </div>
+
+
+                    <div class="kpi-bottom">
+
+                        <span class="positive">
+                            +8.2%
+                        </span>
+
+                        <span class="kpi-note">
+                            vs last month
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="kpi">
+
+                    <div class="kpi-top">
+
+                        <span class="kpi-label">
+                            Revenue
+                        </span>
+
+                        <span class="kpi-icon">
+                            ↗
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="kpi-value"
+                        id="revenueValue"
+                    >
+                        TZS 0
+                    </div>
+
+
+                    <div class="kpi-bottom">
+
+                        <span class="positive">
+                            +14.5%
+                        </span>
+
+                        <span class="kpi-note">
+                            this month
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="kpi">
+
+                    <div class="kpi-top">
+
+                        <span class="kpi-label">
+                            Expenses
+                        </span>
+
+                        <span class="kpi-icon">
+                            ↘
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="kpi-value"
+                        id="expenseValue"
+                    >
+                        TZS 0
+                    </div>
+
+
+                    <div class="kpi-bottom">
+
+                        <span class="negative">
+                            +4.8%
+                        </span>
+
+                        <span class="kpi-note">
+                            this month
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="kpi">
+
+                    <div class="kpi-top">
+
+                        <span class="kpi-label">
+                            Net Profit
+                        </span>
+
+                        <span class="kpi-icon">
+                            ✦
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="kpi-value"
+                        id="profitValue"
+                    >
+                        TZS 0
+                    </div>
+
+
+                    <div class="kpi-bottom">
+
+                        <span class="positive">
+                            +11.7%
+                        </span>
+
+                        <span class="kpi-note">
+                            this month
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 CHART + ALERTS
+            ================================================== -->
+
+            <div class="dashboard-grid">
+
+
+                <!-- CHART -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <div class="panel-title">
+                                Financial Performance
+                            </div>
+
+                            <div class="panel-subtitle">
+                                Revenue vs expenses • Last 6 months
+                            </div>
+
+                        </div>
+
+                        <button
+                            class="panel-action"
+                        >
+                            View report →
+                        </button>
+
+                    </div>
+
+
+                    <div class="chart-area">
+
+                        <div class="chart">
+
+                            <div class="chart-grid">
+
+                                <div class="grid-line"></div>
+                                <div class="grid-line"></div>
+                                <div class="grid-line"></div>
+                                <div class="grid-line"></div>
+                                <div class="grid-line"></div>
+
+                            </div>
+
+
+                            <svg
+                                class="chart-svg"
+                                viewBox="0 0 600 230"
+                                preserveAspectRatio="none"
+                            >
+
+                                <defs>
+
+                                    <linearGradient
+                                        id="chartGradient"
+                                        x1="0"
+                                        x2="0"
+                                        y1="0"
+                                        y2="1"
+                                    >
+
+                                        <stop
+                                            offset="0%"
+                                            stop-color="#f47b20"
+                                            stop-opacity=".22"
+                                        />
+
+                                        <stop
+                                            offset="100%"
+                                            stop-color="#f47b20"
+                                            stop-opacity="0"
+                                        />
+
+                                    </linearGradient>
+
+                                </defs>
+
+
+                                <path
+                                    class="chart-area-fill"
+                                    d="
+                                    M0 180
+                                    C70 170 80 135 125 145
+                                    C175 155 190 110 235 120
+                                    C285 130 300 75 350 95
+                                    C400 115 420 62 465 72
+                                    C510 82 535 35 600 48
+                                    L600 230
+                                    L0 230 Z
+                                    "
+                                />
+
+
+                                <path
+                                    class="chart-line"
+                                    d="
+                                    M0 180
+                                    C70 170 80 135 125 145
+                                    C175 155 190 110 235 120
+                                    C285 130 300 75 350 95
+                                    C400 115 420 62 465 72
+                                    C510 82 535 35 600 48
+                                    "
+                                />
+
+                            </svg>
+
+
+                            <div class="chart-labels">
+
+                                <span>Apr</span>
+                                <span>May</span>
+                                <span>Jun</span>
+                                <span>Jul</span>
+                                <span>Aug</span>
+                                <span>Sep</span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ALERTS -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <div class="panel-title">
+                                Financial Alerts
+                            </div>
+
+                            <div class="panel-subtitle">
+                                Items requiring attention
+                            </div>
+
+                        </div>
+
+                        <button
+                            class="panel-action"
+                        >
+                            View all
+                        </button>
+
+                    </div>
+
+
+                    <div class="alerts">
+
+
+                        <div class="alert">
+
+                            <div
+                                class="alert-icon alert-danger"
+                            >
+                                !
+                            </div>
+
+                            <div class="alert-content">
+
+                                <div class="alert-title">
+                                    Overdue customer payment
+                                </div>
+
+                                <div class="alert-text">
+                                    3 customers have outstanding
+                                    balances past their due dates.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="alert">
+
+                            <div
+                                class="alert-icon alert-warning"
+                            >
+                                !
+                            </div>
+
+                            <div class="alert-content">
+
+                                <div class="alert-title">
+                                    Vehicle costs above budget
+                                </div>
+
+                                <div class="alert-text">
+                                    2 vehicles have preparation
+                                    costs above their expected budget.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="alert">
+
+                            <div
+                                class="alert-icon alert-success"
+                            >
+                                ✓
+                            </div>
+
+                            <div class="alert-content">
+
+                                <div class="alert-title">
+                                    Strong vehicle margin
+                                </div>
+
+                                <div class="alert-text">
+                                    4 vehicles currently have
+                                    estimated margins above 15%.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 TRANSACTIONS + PIPELINE
+            ================================================== -->
+
+            <div class="bottom-grid">
+
+
+                <!-- RECENT TRANSACTIONS -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <div class="panel-title">
+                                Recent Transactions
+                            </div>
+
+                            <div class="panel-subtitle">
+                                Latest financial activity
+                            </div>
+
+                        </div>
+
+                        <button
+                            class="panel-action"
+                        >
+                            View all →
+                        </button>
+
+                    </div>
+
+
+                    <div class="transactions">
+
+
+                        <div class="transaction">
+
+                            <div
+                                class="transaction-icon income-icon"
+                            >
+                                ↗
+                            </div>
+
+                            <div>
+
+                                <div class="transaction-name">
+                                    Customer payment
+                                </div>
+
+                                <div class="transaction-meta">
+                                    Toyota Harrier • Today
+                                </div>
+
+                            </div>
+
+                            <div class="transaction-amount positive">
+                                +5,000,000
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="transaction">
+
+                            <div
+                                class="transaction-icon expense-icon"
+                            >
+                                ↘
+                            </div>
+
+                            <div>
+
+                                <div class="transaction-name">
+                                    Vehicle repair
+                                </div>
+
+                                <div class="transaction-meta">
+                                    Toyota IST • Today
+                                </div>
+
+                            </div>
+
+                            <div class="transaction-amount negative">
+                                -450,000
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="transaction">
+
+                            <div
+                                class="transaction-icon income-icon"
+                            >
+                                ↗
+                            </div>
+
+                            <div>
+
+                                <div class="transaction-name">
+                                    Vehicle deposit
+                                </div>
+
+                                <div class="transaction-meta">
+                                    Subaru Forester • Yesterday
+                                </div>
+
+                            </div>
+
+                            <div class="transaction-amount positive">
+                                +8,000,000
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="transaction">
+
+                            <div
+                                class="transaction-icon expense-icon"
+                            >
+                                ↘
+                            </div>
+
+                            <div>
+
+                                <div class="transaction-name">
+                                    Shipping payment
+                                </div>
+
+                                <div class="transaction-meta">
+                                    Japan shipment • Yesterday
+                                </div>
+
+                            </div>
+
+                            <div class="transaction-amount negative">
+                                -4,200,000
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- VEHICLE PIPELINE -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <div class="panel-title">
+                                Vehicle Pipeline
+                            </div>
+
+                            <div class="panel-subtitle">
+                                Current inventory position
+                            </div>
+
+                        </div>
+
+                        <button
+                            class="panel-action"
+                        >
+                            Vehicles →
+                        </button>
+
+                    </div>
+
+
+                    <div class="pipeline">
+
+
+                        <div class="pipeline-row">
+
+
+                            <div class="pipeline-step">
+
+                                <div class="pipeline-bar">
+
+                                    <div
+                                        class="pipeline-fill"
+                                        style="width:100%"
+                                    ></div>
+
+                                </div>
+
+                                <div class="pipeline-label">
+                                    Ordered
+                                </div>
+
+                                <div class="pipeline-number">
+                                    6
+                                </div>
+
+                            </div>
+
+
+                            <div class="pipeline-step">
+
+                                <div class="pipeline-bar">
+
+                                    <div
+                                        class="pipeline-fill"
+                                        style="width:75%"
+                                    ></div>
+
+                                </div>
+
+                                <div class="pipeline-label">
+                                    Shipped
+                                </div>
+
+                                <div class="pipeline-number">
+                                    4
+                                </div>
+
+                            </div>
+
+
+                            <div class="pipeline-step">
+
+                                <div class="pipeline-bar">
+
+                                    <div
+                                        class="pipeline-fill"
+                                        style="width:50%"
+                                    ></div>
+
+                                </div>
+
+                                <div class="pipeline-label">
+                                    Port
+                                </div>
+
+                                <div class="pipeline-number">
+                                    3
+                                </div>
+
+                            </div>
+
+
+                            <div class="pipeline-step">
+
+                                <div class="pipeline-bar">
+
+                                    <div
+                                        class="pipeline-fill"
+                                        style="width:30%"
+                                    ></div>
+
+                                </div>
+
+                                <div class="pipeline-label">
+                                    Ready
+                                </div>
+
+                                <div class="pipeline-number">
+                                    2
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+
+                        <div
+                            style="
+                                border-top:1px solid
+                                var(--border);
+                                padding-top:18px;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    display:flex;
+                                    justify-content:space-between;
+                                    margin-bottom:10px;
+                                "
+                            >
+
+                                <span
+                                    style="
+                                        font-size:9px;
+                                        color:var(--muted);
+                                    "
+                                >
+                                    Total vehicles
+                                </span>
+
+                                <strong
+                                    style="
+                                        font-size:11px;
+                                        color:var(--white);
+                                    "
+                                >
+                                    15
+                                </strong>
+
+                            </div>
+
+
+                            <div
+                                style="
+                                    display:flex;
+                                    justify-content:space-between;
+                                "
+                            >
+
+                                <span
+                                    style="
+                                        font-size:9px;
+                                        color:var(--muted);
+                                    "
+                                >
+                                    Estimated inventory value
+                                </span>
+
+                                <strong
+                                    style="
+                                        font-size:11px;
+                                        color:var(--orange);
+                                    "
+                                >
+                                    TZS 384.5M
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+
+
+<!-- =============================================================
+     SUPABASE
+============================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<script>
+
+
+    /* =========================================================
+       SUPABASE
+    ========================================================= */
+
+    const SUPABASE_URL =
+        "https://tstpqwckgiwmcvsurqiq.supabase.co";
+
+    const SUPABASE_KEY =
+        "sb_publishable_WfPh8lbd-UKxBRGLRAfWWw_dJuDV5TP";
+
+    const supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+
+    /* =========================================================
+       SESSION PROTECTION
+    ========================================================= */
+
+    async function protectPage() {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth.getSession();
+
+
+        if (
+            error ||
+            !data.session
+        ) {
+
+            window.location.href =
+                "index.html";
+
+            return null;
+        }
+
+
+        return data.session;
+
+    }
+
+
+    /* =========================================================
+       LOAD USER
+    ========================================================= */
+
+    async function loadUser() {
+
+        const session =
+            await protectPage();
+
+        if (!session) return;
+
+
+        const user =
+            session.user;
+
+
+        const email =
+            user.email || "User";
+
+
+        const initials =
+            email
+                .substring(0, 2)
+                .toUpperCase();
+
+
+        document.getElementById(
+            "userAvatar"
+        ).textContent =
+            initials;
+
+
+        document.getElementById(
+            "userName"
+        ).textContent =
+            email;
+
+
+        document.getElementById(
+            "userRole"
+        ).textContent =
+            "Authorized User";
+
+    }
+
+
+    /* =========================================================
+       LOGOUT
+    ========================================================= */
+
+    document
+        .getElementById("logoutButton")
+        .addEventListener(
+            "click",
+            async function () {
+
+                const {
+                    error
+                } =
+                    await supabaseClient.auth.signOut();
+
+
+                if (!error) {
+
+                    window.location.href =
+                        "index.html";
+
+                }
+
+            }
+        );
+
+
+    /* =========================================================
+       CURRENT DATE
+    ========================================================= */
+
+    function updateDate() {
+
+        const now =
+            new Date();
+
+
+        const formatted =
+            now.toLocaleDateString(
+                "en-US",
+                {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric"
+                }
+            );
+
+
+        document.getElementById(
+            "currentDate"
+        ).textContent =
+            formatted;
+
+    }
+
+
+    /* =========================================================
+       MOBILE SIDEBAR
+    ========================================================= */
+
+    const mobileMenu =
+        document.getElementById(
+            "mobileMenu"
+        );
+
+    const sidebar =
+        document.getElementById(
+            "sidebar"
+        );
+
+
+    mobileMenu.addEventListener(
+        "click",
+        function () {
+
+            sidebar.classList.toggle(
+                "open"
+            );
+
+        }
+    );
+
+
+    /* =========================================================
+       NAVIGATION
+    ========================================================= */
+
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(
+            function (item) {
+
+                item.addEventListener(
+                    "click",
+                    function () {
+
+                        const page =
+                            item.dataset.page;
+
+
+                        document
+                            .querySelectorAll(
+                                ".nav-item"
+                            )
+                            .forEach(
+                                function (nav) {
+
+                                    nav.classList.remove(
+                                        "active"
+                                    );
+
+                                }
+                            );
+
+
+                        item.classList.add(
+                            "active"
+                        );
+
+
+                        if (
+                            page !==
+                            "dashboard"
+                        ) {
+
+                            alert(
+                                page.toUpperCase() +
+                                " module will be connected next."
+                            );
+
+                        }
+
+
+                        sidebar.classList.remove(
+                            "open"
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    /* =========================================================
+       INIT
+    ========================================================= */
+
+    loadUser();
+
+    updateDate();
+
+
+    console.log(
+        "MATTEX FINANCE OS Dashboard initialized."
+    );
+
+
+</script>
+
+</body>
+</html>
