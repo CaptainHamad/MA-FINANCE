@@ -729,17 +729,34 @@ let incomeCategories = [];
 
 async function openIncomeModal(){
 
-  document.getElementById("incomeForm").reset();
+  const modal = document.getElementById("incomeModal");
+  const form = document.getElementById("incomeForm");
 
-  const today = new Date().toISOString().split("T")[0];
+  if(!modal){
+    alert("Income modal was not found.");
+    return;
+  }
 
-  document.getElementById("incomeDate").value = today;
+  if(form){
+    form.reset();
+  }
 
-  document.getElementById("incomeModal").classList.add("show");
+  const dateInput = document.getElementById("incomeDate");
+
+  if(dateInput){
+    dateInput.value =
+      new Date().toISOString().split("T")[0];
+  }
+
+  modal.classList.add("show");
+
+  /*
+    Load dropdown data AFTER the modal is open.
+  */
 
   await loadIncomeFormData();
-}
 
+}
 
 function closeIncomeModal(){
 
@@ -754,51 +771,239 @@ function closeIncomeModal(){
 
 async function loadIncomeFormData(){
 
+  console.log("Loading Income Form Data...");
+
+
   /* =====================================================
-     LOAD INCOME CATEGORIES
+     INCOME CATEGORIES
   ===================================================== */
 
-  try {
+  const categorySelect =
+    document.getElementById("incomeCategory");
 
-    const {
-      data,
-      error
-    } = await sb
-      .from("income_categories")
-      .select("id,name,description")
-      .order("name");
-
-    if(error) throw error;
-
-    incomeCategories = data || [];
-
-    const categorySelect =
-      document.getElementById("incomeCategory");
+  if(categorySelect){
 
     categorySelect.innerHTML =
-      `<option value="">Select category</option>` +
-      incomeCategories.map(category => `
-        <option value="${category.id}">
-          ${esc(category.name)}
-        </option>
-      `).join("");
+      `<option value="">Loading categories...</option>`;
 
-    /* Category filter */
+  }
 
-    const filter =
+
+  try{
+
+    const result =
+      await sb
+        .from("income_categories")
+        .select("id,name")
+        .order("name");
+
+
+    console.log(
+      "Income categories result:",
+      result
+    );
+
+
+    if(result.error){
+
+      throw result.error;
+
+    }
+
+
+    const categories =
+      result.data || [];
+
+
+    incomeCategories =
+      categories;
+
+
+    if(!categorySelect){
+
+      throw new Error(
+        "Element #incomeCategory was not found."
+      );
+
+    }
+
+
+    /*
+      Clear dropdown
+    */
+
+    categorySelect.innerHTML =
+      `<option value="">Select category</option>`;
+
+
+    /*
+      Add categories WITHOUT using esc().
+      This removes another possible source
+      of JavaScript failure.
+    */
+
+    categories.forEach(category => {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        category.id;
+
+      option.textContent =
+        category.name;
+
+      categorySelect.appendChild(
+        option
+      );
+
+    });
+
+
+    /*
+      Category filter
+    */
+
+    const categoryFilter =
       document.getElementById(
         "incomeCategoryFilter"
       );
 
-    if(filter){
 
-      filter.innerHTML =
-        `<option value="">All Categories</option>` +
-        incomeCategories.map(category => `
-          <option value="${category.id}">
-            ${esc(category.name)}
-          </option>
-        `).join("");
+    if(categoryFilter){
+
+      categoryFilter.innerHTML =
+        `<option value="">All Categories</option>`;
+
+
+      categories.forEach(category => {
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          category.id;
+
+        option.textContent =
+          category.name;
+
+        categoryFilter.appendChild(
+          option
+        );
+
+      });
+
+    }
+
+
+    console.log(
+      "Categories loaded:",
+      categories.length
+    );
+
+  }
+
+  catch(error){
+
+    console.error(
+      "CATEGORY ERROR:",
+      error
+    );
+
+
+    if(categorySelect){
+
+      categorySelect.innerHTML =
+        `<option value="">
+          Error loading categories
+        </option>`;
+
+    }
+
+  }
+
+
+
+  /* =====================================================
+     ACCOUNTS
+  ===================================================== */
+
+  const accountSelect =
+    document.getElementById(
+      "incomeAccount"
+    );
+
+
+  if(accountSelect){
+
+    accountSelect.innerHTML =
+      `<option value="">
+        Loading accounts...
+      </option>`;
+
+  }
+
+
+  try{
+
+    const result =
+      await sb
+        .from("accounts")
+        .select(
+          "id,name,account_type,currency"
+        )
+        .eq(
+          "is_active",
+          true
+        )
+        .order("name");
+
+
+    console.log(
+      "Accounts result:",
+      result
+    );
+
+
+    if(result.error){
+
+      throw result.error;
+
+    }
+
+
+    const accounts =
+      result.data || [];
+
+
+    if(accountSelect){
+
+      accountSelect.innerHTML =
+        `<option value="">
+          ${
+            accounts.length
+              ? "Select account"
+              : "No accounts available"
+          }
+        </option>`;
+
+
+      accounts.forEach(account => {
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          account.id;
+
+        option.textContent =
+          `${account.name} — ${account.currency}`;
+
+        accountSelect.appendChild(
+          option
+        );
+
+      });
 
     }
 
@@ -807,192 +1012,237 @@ async function loadIncomeFormData(){
   catch(error){
 
     console.error(
-      "Income categories error:",
+      "ACCOUNT ERROR:",
       error
     );
 
-    document.getElementById(
-      "incomeCategory"
-    ).innerHTML =
-      `<option value="">
-        Unable to load categories
-      </option>`;
+
+    if(accountSelect){
+
+      accountSelect.innerHTML =
+        `<option value="">
+          Error loading accounts
+        </option>`;
+
+    }
 
   }
+
 
 
   /* =====================================================
-     LOAD ACCOUNTS
+     CUSTOMERS
   ===================================================== */
 
-  try {
-
-    const {
-      data,
-      error
-    } = await sb
-      .from("accounts")
-      .select(
-        "id,name,account_type,currency"
-      )
-      .eq("is_active", true)
-      .order("name");
-
-    if(error) throw error;
-
-    const accountSelect =
-      document.getElementById(
-        "incomeAccount"
-      );
-
-    accountSelect.innerHTML =
-      `<option value="">
-        Select account
-      </option>` +
-      (data || []).map(account => `
-        <option value="${account.id}">
-          ${esc(account.name)}
-          — ${esc(account.currency)}
-        </option>
-      `).join("");
-
-  }
-
-  catch(error){
-
-    console.error(
-      "Income accounts error:",
-      error
+  const customerSelect =
+    document.getElementById(
+      "incomeCustomer"
     );
 
-    document.getElementById(
-      "incomeAccount"
-    ).innerHTML =
-      `<option value="">
-        No accounts available
-      </option>`;
 
-  }
-
-
-  /* =====================================================
-     LOAD CUSTOMERS
-  ===================================================== */
-
-  try {
-
-    const {
-      data,
-      error
-    } = await sb
-      .from("customers")
-      .select(
-        "id,full_name,phone"
-      )
-      .order("full_name");
-
-    if(error) throw error;
-
-    const customerSelect =
-      document.getElementById(
-        "incomeCustomer"
-      );
+  if(customerSelect){
 
     customerSelect.innerHTML =
       `<option value="">
-        None / Other
-      </option>` +
-      (data || []).map(customer => `
-        <option value="${customer.id}">
-          ${esc(customer.full_name)}
+        Loading customers...
+      </option>`;
+
+  }
+
+
+  try{
+
+    const result =
+      await sb
+        .from("customers")
+        .select(
+          "id,full_name,phone"
+        )
+        .order("full_name");
+
+
+    console.log(
+      "Customers result:",
+      result
+    );
+
+
+    if(result.error){
+
+      throw result.error;
+
+    }
+
+
+    const customers =
+      result.data || [];
+
+
+    if(customerSelect){
+
+      customerSelect.innerHTML =
+        `<option value="">
           ${
-            customer.phone
-              ? " — " + esc(customer.phone)
-              : ""
+            customers.length
+              ? "None / Other"
+              : "None / Other"
           }
-        </option>
-      `).join("");
+        </option>`;
+
+
+      customers.forEach(customer => {
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          customer.id;
+
+        option.textContent =
+          customer.phone
+            ? `${customer.full_name} — ${customer.phone}`
+            : customer.full_name;
+
+        customerSelect.appendChild(
+          option
+        );
+
+      });
+
+    }
 
   }
 
   catch(error){
 
     console.error(
-      "Income customers error:",
+      "CUSTOMER ERROR:",
       error
     );
 
-    document.getElementById(
-      "incomeCustomer"
-    ).innerHTML =
-      `<option value="">
-        No customers available
-      </option>`;
+
+    if(customerSelect){
+
+      customerSelect.innerHTML =
+        `<option value="">
+          No customers available
+        </option>`;
+
+    }
 
   }
+
 
 
   /* =====================================================
-     LOAD VEHICLES
+     VEHICLES
   ===================================================== */
 
-  try {
+  const vehicleSelect =
+    document.getElementById(
+      "incomeVehicle"
+    );
 
-    const {
-      data,
-      error
-    } = await sb
-      .from("vehicles")
-      .select(
-        "id,stock_number,make,model,year"
-      )
-      .order(
-        "created_at",
-        { ascending:false }
-      );
 
-    if(error) throw error;
-
-    const vehicleSelect =
-      document.getElementById(
-        "incomeVehicle"
-      );
+  if(vehicleSelect){
 
     vehicleSelect.innerHTML =
       `<option value="">
-        None / Other
-      </option>` +
-      (data || []).map(vehicle => `
-        <option value="${vehicle.id}">
-          ${esc(vehicle.stock_number)}
-          —
-          ${esc(vehicle.make)}
-          ${esc(vehicle.model)}
-          ${
-            vehicle.year
-              ? " (" + vehicle.year + ")"
-              : ""
+        Loading vehicles...
+      </option>`;
+
+  }
+
+
+  try{
+
+    const result =
+      await sb
+        .from("vehicles")
+        .select(
+          "id,stock_number,make,model,year"
+        )
+        .order(
+          "created_at",
+          {
+            ascending:false
           }
-        </option>
-      `).join("");
+        );
+
+
+    console.log(
+      "Vehicles result:",
+      result
+    );
+
+
+    if(result.error){
+
+      throw result.error;
+
+    }
+
+
+    const vehicles =
+      result.data || [];
+
+
+    if(vehicleSelect){
+
+      vehicleSelect.innerHTML =
+        `<option value="">
+          None / Other
+        </option>`;
+
+
+      vehicles.forEach(vehicle => {
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          vehicle.id;
+
+        option.textContent =
+          `${vehicle.stock_number} — ${vehicle.make} ${vehicle.model}${
+            vehicle.year
+              ? ` (${vehicle.year})`
+              : ""
+          }`;
+
+        vehicleSelect.appendChild(
+          option
+        );
+
+      });
+
+    }
 
   }
 
   catch(error){
 
     console.error(
-      "Income vehicles error:",
+      "VEHICLE ERROR:",
       error
     );
 
-    document.getElementById(
-      "incomeVehicle"
-    ).innerHTML =
-      `<option value="">
-        No vehicles available
-      </option>`;
+
+    if(vehicleSelect){
+
+      vehicleSelect.innerHTML =
+        `<option value="">
+          No vehicles available
+        </option>`;
+
+    }
 
   }
+
+
+  console.log(
+    "Income Form Data loading completed."
+  );
 
 }
 
