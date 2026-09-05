@@ -741,96 +741,341 @@ function buildSalesModule(){
   `;
 
   loadSales();
+}
+
+/* =========================================================
+   SALES — LOAD FROM SUPABASE
+========================================================= */
+
+async function loadSales(){
+
+  const container =
+    document.getElementById("salesTableContainer");
+
+  if(!container) return;
+
+  container.innerHTML = `
+    <div class="empty">
+      Loading sales...
+    </div>
+  `;
+
+  try{
+
+    const { data, error } = await sb
+      .from("sales")
+      .select(`
+        id,
+        customer_id,
+        vehicle_id,
+        selling_price,
+        currency,
+        sale_date,
+        status,
+        notes,
+        customers(
+          id,
+          full_name,
+          phone
+        ),
+        vehicles(
+          id,
+          stock_number,
+          make,
+          model,
+          year
+        )
+      `)
+      .order("sale_date", {
+        ascending:false
+      });
+
+    if(error) throw error;
+
+    salesRecords = data || [];
+
+    await loadSalePayments();
+
+    renderSales();
+
+    calculateSalesSummary();
+
+  }catch(error){
+
+    console.error(
+      "Sales loading error:",
+      error
+    );
+
+    container.innerHTML = `
+      <div class="empty">
+
+        <strong>
+          Unable to load sales
+        </strong>
+
+        <p>
+          ${esc(error.message)}
+        </p>
+
+      </div>
+    `;
+
+  }
 
 }
 
-function buildSalesModule(){
+/* =========================================================
+   SALES — LOAD CUSTOMER PAYMENTS
+========================================================= */
 
-  const view =
-    document.getElementById("view-sales");
+async function loadSalePayments(){
 
-  view.innerHTML = `
+  if(!salesRecords.length)
+    return;
 
-    <div class="hero">
+  const saleIds =
+    salesRecords.map(
+      sale => sale.id
+    );
 
-      <div>
-        <h2>Vehicle Sales</h2>
+  const { data, error } = await sb
+    .from("customer_payments")
+    .select(`
+      id,
+      sale_id,
+      amount,
+      currency,
+      payment_date,
+      payment_method,
+      reference_number
+    `)
+    .in("sale_id", saleIds);
+
+  if(error) throw error;
+
+  const payments = data || [];
+
+  salesRecords =
+    salesRecords.map(sale => {
+
+      const salePayments =
+        payments.filter(
+          payment =>
+            payment.sale_id === sale.id
+        );
+
+      const totalPaid =
+        salePayments.reduce(
+          (sum,payment) =>
+            sum +
+            Number(payment.amount || 0),
+          0
+        );
+
+      const balance =
+        Math.max(
+          Number(sale.selling_price || 0)
+          - totalPaid,
+          0
+        );
+
+      return {
+
+        ...sale,
+
+        payments:
+          salePayments,
+
+        total_paid:
+          totalPaid,
+
+        balance:
+          balance
+
+      };
+
+    });
+
+}
+
+/* =========================================================
+   SALES — RENDER
+========================================================= */
+
+function renderSales(){
+
+  const container =
+    document.getElementById(
+      "salesTableContainer"
+    );
+
+  if(!container) return;
+
+  if(!salesRecords.length){
+
+    container.innerHTML = `
+      <div class="empty">
+
+        <strong>
+          No vehicle sales recorded yet
+        </strong>
 
         <p>
-          Mattex Finance OS / Sales
+          Click <b>+ New Sale</b>
+          to record your first vehicle sale.
         </p>
-      </div>
-
-      <button
-        class="primary"
-        onclick="openSaleModal()"
-      >
-        + New Sale
-      </button>
-
-    </div>
-
-
-    <div class="mini-grid sales-summary">
-
-      <div class="mini">
-        <b id="salesTotal">0</b>
-        <span>Total Sales</span>
-      </div>
-
-      <div class="mini">
-        <b id="salesReceived">TZS 0</b>
-        <span>Total Received</span>
-      </div>
-
-      <div class="mini">
-        <b id="salesOutstanding">TZS 0</b>
-        <span>Outstanding</span>
-      </div>
-
-    </div>
-
-
-    <div class="panel">
-
-      <div class="panel-head">
-
-        <div>
-          <h3>Vehicle Sales</h3>
-
-          <span>
-            Sales, customer payments and outstanding balances
-          </span>
-        </div>
-
-        <button
-          class="secondary"
-          onclick="loadSales()"
-        >
-          Refresh
-        </button>
 
       </div>
+    `;
 
+    return;
+  }
 
-      <div
-        class="panel-body"
-        id="salesTableContainer"
-      >
+  container.innerHTML = `
 
-        <div class="empty">
-          Loading sales...
-        </div>
+    <div class="table-wrap">
 
-      </div>
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>DATE</th>
+            <th>CUSTOMER</th>
+            <th>VEHICLE</th>
+            <th>SALE PRICE</th>
+            <th>PAID</th>
+            <th>BALANCE</th>
+            <th>STATUS</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          ${
+            salesRecords.map(sale => `
+
+              <tr>
+
+                <td>
+                  ${formatDate(sale.sale_date)}
+                </td>
+
+                <td>
+
+                  <div class="name">
+                    ${esc(
+                      sale.customers?.full_name
+                      || "Unknown"
+                    )}
+                  </div>
+
+                  <div class="sub">
+                    ${esc(
+                      sale.customers?.phone
+                      || ""
+                    )}
+                  </div>
+
+                </td>
+
+                <td>
+
+                  <div class="name">
+                    ${esc(
+                      sale.vehicles?.stock_number
+                      || ""
+                    )}
+                  </div>
+
+                  <div class="sub">
+
+                    ${esc(
+                      sale.vehicles?.make
+                      || ""
+                    )}
+
+                    ${esc(
+                      sale.vehicles?.model
+                      || ""
+                    )}
+
+                    ${
+                      sale.vehicles?.year
+                      ?
+                      `(${sale.vehicles.year})`
+                      :
+                      ""
+                    }
+
+                  </div>
+
+                </td>
+
+                <td class="amount">
+
+                  ${money(
+                    sale.selling_price,
+                    sale.currency
+                  )}
+
+                </td>
+
+                <td class="amount">
+
+                  ${money(
+                    sale.total_paid,
+                    sale.currency
+                  )}
+
+                </td>
+
+                <td class="amount">
+
+                  ${money(
+                    sale.balance,
+                    sale.currency
+                  )}
+
+                </td>
+
+                <td>
+
+                  <span class="badge">
+
+                    ${
+                      sale.balance <= 0
+                      ? "PAID"
+                      :
+                      sale.total_paid > 0
+                      ? "PARTIAL"
+                      :
+                      "UNPAID"
+                    }
+
+                  </span>
+
+                </td>
+
+              </tr>
+
+            `).join("")
+          }
+
+        </tbody>
+
+      </table>
 
     </div>
 
   `;
 
-  loadSales();
-
 }
+
 async function checkAuth(){
   const {data,error}=await sb.auth.getUser();
   if(error){console.error(error);return}
