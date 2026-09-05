@@ -603,12 +603,18 @@ const viewTitles={
 };
 
 document.addEventListener("DOMContentLoaded",async()=>{
-  bindNavigation();
-  buildPlaceholders();
-  await checkAuth();
-  await refreshAll();
-});
 
+  bindNavigation();
+
+  buildPlaceholders();
+
+  buildSalesModule();
+
+  await checkAuth();
+
+  await refreshAll();
+
+});
 function bindNavigation(){
   document.querySelectorAll(".nav-btn").forEach(btn=>{
     btn.addEventListener("click",()=>go(btn.dataset.view));
@@ -648,6 +654,183 @@ function buildPlaceholders(){
   });
 }
 
+function buildSalesModule(){
+
+  const view =
+    document.getElementById("view-sales");
+
+  if(!view) return;
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+        <h2>Vehicle Sales</h2>
+
+        <p>
+          Mattex Finance OS / Sales
+        </p>
+      </div>
+
+      <button
+        class="primary"
+        onclick="openSaleModal()"
+      >
+        + New Sale
+      </button>
+
+    </div>
+
+
+    <div class="mini-grid sales-summary">
+
+      <div class="mini">
+        <b id="salesTotal">0</b>
+        <span>Total Sales</span>
+      </div>
+
+      <div class="mini">
+        <b id="salesReceived">TZS 0</b>
+        <span>Total Received</span>
+      </div>
+
+      <div class="mini">
+        <b id="salesOutstanding">TZS 0</b>
+        <span>Outstanding</span>
+      </div>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+
+        <div>
+          <h3>Vehicle Sales</h3>
+
+          <span>
+            Sales, customer payments and outstanding balances
+          </span>
+        </div>
+
+        <button
+          class="secondary"
+          onclick="loadSales()"
+        >
+          Refresh
+        </button>
+
+      </div>
+
+
+      <div
+        class="panel-body"
+        id="salesTableContainer"
+      >
+
+        <div class="empty">
+          Loading sales...
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+  loadSales();
+
+}
+
+function buildSalesModule(){
+
+  const view =
+    document.getElementById("view-sales");
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+        <h2>Vehicle Sales</h2>
+
+        <p>
+          Mattex Finance OS / Sales
+        </p>
+      </div>
+
+      <button
+        class="primary"
+        onclick="openSaleModal()"
+      >
+        + New Sale
+      </button>
+
+    </div>
+
+
+    <div class="mini-grid sales-summary">
+
+      <div class="mini">
+        <b id="salesTotal">0</b>
+        <span>Total Sales</span>
+      </div>
+
+      <div class="mini">
+        <b id="salesReceived">TZS 0</b>
+        <span>Total Received</span>
+      </div>
+
+      <div class="mini">
+        <b id="salesOutstanding">TZS 0</b>
+        <span>Outstanding</span>
+      </div>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+
+        <div>
+          <h3>Vehicle Sales</h3>
+
+          <span>
+            Sales, customer payments and outstanding balances
+          </span>
+        </div>
+
+        <button
+          class="secondary"
+          onclick="loadSales()"
+        >
+          Refresh
+        </button>
+
+      </div>
+
+
+      <div
+        class="panel-body"
+        id="salesTableContainer"
+      >
+
+        <div class="empty">
+          Loading sales...
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+  loadSales();
+
+}
 async function checkAuth(){
   const {data,error}=await sb.auth.getUser();
   if(error){console.error(error);return}
@@ -721,7 +904,10 @@ async function loadOverview(){
 let incomeRecords = [];
 let incomeCategories = [];
 
-
+let salesRecords = [];
+let saleCustomers = [];
+let saleVehicles = [];
+let saleAccounts = [];
 /* ---------- OPEN MODAL ---------- */
 
 async function openIncomeModal(){
