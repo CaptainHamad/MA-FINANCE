@@ -1076,6 +1076,58 @@ function renderSales(){
 
 }
 
+/* =========================================================
+   SALES — SUMMARY
+========================================================= */
+
+function calculateSalesSummary(){
+
+  const total =
+    salesRecords.length;
+
+  let received = 0;
+  let outstanding = 0;
+
+  salesRecords.forEach(sale => {
+
+    if(sale.currency !== "TZS"){
+      return;
+    }
+
+    received +=
+      Number(sale.total_paid || 0);
+
+    outstanding +=
+      Number(sale.balance || 0);
+
+  });
+
+  const totalEl =
+    document.getElementById("salesTotal");
+
+  const receivedEl =
+    document.getElementById("salesReceived");
+
+  const outstandingEl =
+    document.getElementById("salesOutstanding");
+
+  if(totalEl){
+    totalEl.textContent =
+      total.toLocaleString();
+  }
+
+  if(receivedEl){
+    receivedEl.textContent =
+      money(received, "TZS");
+  }
+
+  if(outstandingEl){
+    outstandingEl.textContent =
+      money(outstanding, "TZS");
+  }
+
+}
+
 async function checkAuth(){
   const {data,error}=await sb.auth.getUser();
   if(error){console.error(error);return}
