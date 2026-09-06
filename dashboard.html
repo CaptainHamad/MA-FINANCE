@@ -3871,6 +3871,10 @@ function closeSaleDetails(){
    ADD PAYMENT
 ========================================================= */
 
+/* =========================================================
+   ADD PAYMENT
+========================================================= */
+
 async function openSalePaymentModal(
   saleId,
   customerId
@@ -3882,26 +3886,601 @@ async function openSalePaymentModal(
         item.id === saleId
     );
 
+  if(!sale){
+    toast(
+      "Sale not found",
+      "error"
+    );
+    return;
+  }
 
-  if(!sale) return;
+
+  /* -----------------------------------------------
+     REMOVE EXISTING PAYMENT FORM IF ANY
+  ----------------------------------------------- */
+
+  const existing =
+    document.getElementById(
+      "salePaymentModal"
+    );
+
+  if(existing)
+    existing.remove();
 
 
-  const amount =
-    prompt(
-      `Enter payment amount\nOutstanding: ${money(
-        sale.balance,
-        sale.currency
-      )}`
+  /* -----------------------------------------------
+     LOAD ACTIVE ACCOUNTS
+  ----------------------------------------------- */
+
+  let accounts = [];
+
+  const {
+    data: accountData,
+    error: accountError
+  } = await sb
+    .from("accounts")
+    .select(
+      "id,name,account_type,currency"
+    )
+    .eq(
+      "is_active",
+      true
+    )
+    .order("name");
+
+
+  if(accountError){
+
+    console.error(
+      "Payment accounts error:",
+      accountError
+    );
+
+    toast(
+      "Unable to load accounts",
+      "error"
+    );
+
+    return;
+  }
+
+
+  accounts =
+    accountData || [];
+
+
+  /* -----------------------------------------------
+     CALCULATE OUTSTANDING
+  ----------------------------------------------- */
+
+  const sellingPrice =
+    Number(
+      sale.selling_price || 0
+    );
+
+  const totalPaid =
+    (sale.payments || [])
+      .reduce(
+        (sum,payment) =>
+          sum +
+          Number(
+            payment.amount || 0
+          ),
+        0
+      );
+
+  const outstanding =
+    Math.max(
+      sellingPrice - totalPaid,
+      0
     );
 
 
-  if(amount === null)
+  if(outstanding <= 0){
+
+    toast(
+      "This sale is already fully paid.",
+      "ok"
+    );
+
     return;
+  }
+
+
+  /* -----------------------------------------------
+     NEXT PAYMENT NUMBER
+  ----------------------------------------------- */
+
+  const nextPaymentNumber =
+    (sale.payments || []).length + 1;
+
+
+  /* -----------------------------------------------
+     CREATE MODAL
+  ----------------------------------------------- */
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.className =
+    "modal-bg show";
+
+  modal.id =
+    "salePaymentModal";
+
+
+  modal.innerHTML = `
+
+    <div class="modal">
+
+      <div class="modal-head">
+
+        <div>
+
+          <h3>
+            Add Payment
+          </h3>
+
+          <span>
+            Payment #${nextPaymentNumber}
+          </span>
+
+        </div>
+
+        <button
+          class="close"
+          onclick="closeSalePaymentModal()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="form">
+
+        <!-- SALE SUMMARY -->
+
+        <div class="section-title">
+          Sale Summary
+        </div>
+
+        <div class="mini-grid">
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                sellingPrice,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Selling Price
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                totalPaid,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Total Paid
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                outstanding,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Outstanding
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- PAYMENT INFORMATION -->
+
+        <div class="section-title">
+          Payment Information
+        </div>
+
+
+        <div class="mini-grid">
+
+
+          <div class="field">
+
+            <label>
+              PAYMENT AMOUNT *
+            </label>
+
+            <input
+              id="salePaymentAmount"
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder="e.g. 15,000,000"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              PAYMENT TYPE *
+            </label>
+
+            <select
+              id="salePaymentType"
+            >
+
+              <option value="INSTALLMENT">
+                Installment
+              </option>
+
+              <option value="FINAL PAYMENT">
+                Final Payment
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              PAYMENT DATE *
+            </label>
+
+            <input
+              id="salePaymentDate"
+              type="date"
+              value="${new Date()
+                .toISOString()
+                .slice(0,10)}"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              RECEIVING ACCOUNT *
+            </label>
+
+            <select
+              id="salePaymentAccount"
+            >
+
+              <option value="">
+                Select account
+              </option>
+
+              ${accounts
+                .map(
+                  account => `
+                    <option
+                      value="${account.id}"
+                    >
+                      ${esc(account.name)}
+                      —
+                      ${esc(account.currency)}
+                    </option>
+                  `
+                )
+                .join("")}
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              PAYMENT METHOD *
+            </label>
+
+            <select
+              id="salePaymentMethod"
+            >
+
+              <option value="">
+                Select method
+              </option>
+
+              <option value="Bank Transfer">
+                Bank Transfer
+              </option>
+
+              <option value="Cash">
+                Cash
+              </option>
+
+              <option value="Mobile Money">
+                Mobile Money
+              </option>
+
+              <option value="Cheque">
+                Cheque
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              REFERENCE NUMBER
+            </label>
+
+            <input
+              id="salePaymentReference"
+              placeholder="e.g. NMB-TRX-001"
+            >
+
+          </div>
+
+
+          <div class="field full">
+
+            <label>
+              NOTES
+            </label>
+
+            <input
+              id="salePaymentNotes"
+              placeholder="Payment notes..."
+            >
+
+          </div>
+
+        </div>
+
+
+        <!-- BALANCE PREVIEW -->
+
+        <div
+          class="mini-grid"
+          style="
+            margin-top:18px;
+            padding:16px;
+            border:1px solid #e5e7eb;
+            border-radius:12px;
+            background:#f8fafc;
+          "
+        >
+
+          <div class="mini">
+
+            <b id="salePaymentBalanceBefore">
+              ${money(
+                outstanding,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Outstanding Before
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b id="salePaymentBalanceAfter">
+              ${money(
+                outstanding,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Balance After Payment
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-foot">
+
+        <button
+          class="secondary"
+          onclick="closeSalePaymentModal()"
+        >
+          Cancel
+        </button>
+
+
+        <button
+          class="primary"
+          onclick="saveSalePayment(
+            '${saleId}',
+            '${customerId}'
+          )"
+        >
+          Save Payment
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(
+    modal
+  );
+
+
+  /* -----------------------------------------------
+     LIVE BALANCE CALCULATION
+  ----------------------------------------------- */
+
+  const amountInput =
+    document.getElementById(
+      "salePaymentAmount"
+    );
+
+  const balanceAfter =
+    document.getElementById(
+      "salePaymentBalanceAfter"
+    );
+
+
+  if(amountInput && balanceAfter){
+
+    amountInput.addEventListener(
+      "input",
+      () => {
+
+        const amount =
+          Number(
+            amountInput.value || 0
+          );
+
+        const remaining =
+          Math.max(
+            outstanding - amount,
+            0
+          );
+
+        balanceAfter.textContent =
+          money(
+            remaining,
+            sale.currency
+          );
+
+      }
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CLOSE PAYMENT MODAL
+========================================================= */
+
+function closeSalePaymentModal(){
+
+  const modal =
+    document.getElementById(
+      "salePaymentModal"
+    );
+
+  if(modal)
+    modal.remove();
+
+}
+
+
+/* =========================================================
+   SAVE PAYMENT
+========================================================= */
+
+async function saveSalePayment(
+  saleId,
+  customerId
+){
+
+  const sale =
+    salesRecords.find(
+      item =>
+        item.id === saleId
+    );
+
+  if(!sale){
+
+    toast(
+      "Sale not found",
+      "error"
+    );
+
+    return;
+  }
 
 
   const paymentAmount =
-    Number(amount);
+    Number(
+      document.getElementById(
+        "salePaymentAmount"
+      ).value || 0
+    );
 
+
+  const paymentType =
+    document.getElementById(
+      "salePaymentType"
+    ).value;
+
+
+  const paymentDate =
+    document.getElementById(
+      "salePaymentDate"
+    ).value;
+
+
+  const paymentAccount =
+    document.getElementById(
+      "salePaymentAccount"
+    ).value;
+
+
+  const paymentMethod =
+    document.getElementById(
+      "salePaymentMethod"
+    ).value;
+
+
+  const referenceNumber =
+    document.getElementById(
+      "salePaymentReference"
+    ).value.trim();
+
+
+  const notes =
+    document.getElementById(
+      "salePaymentNotes"
+    ).value.trim();
+
+
+  /* -----------------------------------------------
+     VALIDATION
+  ----------------------------------------------- */
 
   if(
     !paymentAmount ||
@@ -3914,14 +4493,32 @@ async function openSalePaymentModal(
     );
 
     return;
-
   }
 
 
-  if(
-    paymentAmount >
-    Number(sale.balance || 0)
-  ){
+  const totalPaid =
+    (sale.payments || [])
+      .reduce(
+        (sum,payment) =>
+          sum +
+          Number(
+            payment.amount || 0
+          ),
+        0
+      );
+
+
+  const outstanding =
+    Math.max(
+      Number(
+        sale.selling_price || 0
+      ) -
+      totalPaid,
+      0
+    );
+
+
+  if(paymentAmount > outstanding){
 
     toast(
       "Payment cannot exceed outstanding balance",
@@ -3929,24 +4526,58 @@ async function openSalePaymentModal(
     );
 
     return;
-
   }
 
 
-  const payments =
-    sale.payments || [];
+  if(!paymentDate){
 
+    toast(
+      "Select payment date",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(!paymentAccount){
+
+    toast(
+      "Select receiving account",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(!paymentMethod){
+
+    toast(
+      "Select payment method",
+      "error"
+    );
+
+    return;
+  }
+
+
+  /* -----------------------------------------------
+     PAYMENT NUMBER
+  ----------------------------------------------- */
 
   const nextPaymentNumber =
-    payments.length + 1;
+    (sale.payments || []).length + 1;
 
+
+  /* -----------------------------------------------
+     INSERT PAYMENT
+  ----------------------------------------------- */
 
   const {
     error
   } = await sb
-
     .from("customer_payments")
-
     .insert({
 
       sale_id:
@@ -3955,6 +4586,9 @@ async function openSalePaymentModal(
       customer_id:
         customerId,
 
+      account_id:
+        paymentAccount,
+
       amount:
         paymentAmount,
 
@@ -3962,29 +4596,91 @@ async function openSalePaymentModal(
         sale.currency,
 
       payment_date:
-        new Date()
-          .toISOString()
-          .slice(0,10),
+        paymentDate,
+
+      payment_method:
+        paymentMethod,
+
+      reference_number:
+        referenceNumber || null,
+
+      notes:
+        notes || null,
 
       payment_number:
         nextPaymentNumber,
 
       payment_type:
-        "INSTALLMENT"
+        paymentType
 
     });
 
 
   if(error){
 
-    console.error(error);
+    console.error(
+      "Payment save error:",
+      error
+    );
 
     toast(
-      error.message,
+      error.message ||
+      "Unable to save payment",
       "error"
     );
 
     return;
+  }
+
+
+  /* -----------------------------------------------
+     UPDATE SALE STATUS
+  ----------------------------------------------- */
+
+  const newTotalPaid =
+    totalPaid +
+    paymentAmount;
+
+
+  let newStatus =
+    "PARTIAL";
+
+
+  if(
+    newTotalPaid >=
+    Number(
+      sale.selling_price || 0
+    )
+  ){
+
+    newStatus =
+      "PAID";
+
+  }
+
+
+  const {
+    error: statusError
+  } = await sb
+    .from("sales")
+    .update({
+
+      status:
+        newStatus
+
+    })
+    .eq(
+      "id",
+      saleId
+    );
+
+
+  if(statusError){
+
+    console.error(
+      "Sale status update error:",
+      statusError
+    );
 
   }
 
@@ -3995,12 +4691,11 @@ async function openSalePaymentModal(
   );
 
 
-  closeSaleDetails();
+  closeSalePaymentModal();
 
   await loadSales();
 
 }
-
 
 /* =========================================================
    ADD VEHICLE EXPENSE
