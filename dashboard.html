@@ -122,6 +122,103 @@ tr:hover td{background:#fbfcfd}
 .field input,.field select{height:42px;border:1px solid #dfe4e8;border-radius:9px;padding:0 11px;outline:none;background:#fff}
 .field input:focus,.field select:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(245,130,32,.08)}
 .modal-foot{padding:15px 21px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+
+/* =========================================================
+   GENERAL EXPENSE FORM — FULL PAGE MODE
+========================================================= */
+
+.expense-page{
+  max-width:900px;
+  margin:0 auto;
+}
+
+.expense-page-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.expense-page-head{
+  padding:22px 24px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.expense-page-head h3{
+  margin:0;
+  font-size:18px;
+}
+
+.expense-page-head span{
+  display:block;
+  margin-top:5px;
+  font-size:11px;
+  color:var(--muted);
+}
+
+.expense-page-body{
+  padding:24px;
+}
+
+.expense-page-actions{
+  padding:17px 24px;
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+/* =========================================================
+   GENERAL EXPENSE FORM — FULL PAGE MODE
+========================================================= */
+
+.expense-page{
+  max-width:900px;
+  margin:0 auto;
+}
+
+.expense-page-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.expense-page-head{
+  padding:22px 24px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.expense-page-head h3{
+  margin:0;
+  font-size:18px;
+}
+
+.expense-page-head span{
+  display:block;
+  margin-top:5px;
+  font-size:11px;
+  color:var(--muted);
+}
+
+.expense-page-body{
+  padding:24px;
+}
+
+.expense-page-actions{
+  padding:17px 24px;
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
 .toast{position:fixed;right:22px;bottom:22px;z-index:200;background:#17202a;color:#fff;border-radius:10px;padding:13px 17px;font-size:11px;box-shadow:0 15px 45px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.25s}
 .toast.show{transform:none;opacity:1}.toast.ok{border-left:4px solid var(--green)}.toast.err{border-left:4px solid var(--red)}
 .notice{padding:13px 15px;border-radius:11px;background:#fff8f1;border:1px solid #ffe4cc;color:#8a4b18;font-size:10px;margin-bottom:16px}
@@ -1481,121 +1578,343 @@ function buildExpensesModule(){
 
 /* ---------- OPEN MODAL ---------- */
 
+/* ---------- OPEN EXPENSE PAGE ---------- */
+
 async function openExpenseModal(id=null){
-
-  const modal =
-    document.getElementById(
-      "generalExpenseModal"
-    );
-
-  const form =
-    document.getElementById(
-      "generalExpenseForm"
-    );
-
-  if(!modal) return;
-
 
   editingExpenseId = id;
 
+  const view =
+    document.getElementById("view-expenses");
 
-  if(form){
-    form.reset();
-  }
+  if(!view) return;
 
-
-  document.getElementById(
-    "expenseModalTitle"
-  ).textContent =
+  const record =
     id
-      ? "Edit Expense"
-      : "Add Expense";
+      ? expenseRecords.find(
+          e => e.id === id
+        )
+      : null;
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+        <div class="crumb">
+          MATTEX FINANCE OS / EXPENSES
+        </div>
+
+        <h2>
+          ${id ? "Edit Expense" : "New Expense"}
+        </h2>
+
+        <p>
+          ${id
+            ? "Update this company expense record."
+            : "Record a general company expense."
+          }
+        </p>
+      </div>
+
+      <button
+        class="secondary"
+        type="button"
+        onclick="cancelExpensePage()"
+      >
+        ← Back to Expenses
+      </button>
+
+    </div>
 
 
-  document.getElementById(
-    "generalExpenseDate"
-  ).value =
-    new Date()
-      .toISOString()
-      .split("T")[0];
+    <div class="expense-page">
+
+      <div class="expense-page-card">
+
+        <div class="expense-page-head">
+
+          <div>
+
+            <h3>
+              ${id ? "Edit Expense" : "Add Expense"}
+            </h3>
+
+            <span>
+              Office and general company operating expense
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <form
+          class="form"
+          id="generalExpenseForm"
+          onsubmit="saveGeneralExpense(event)"
+        >
+
+          <div class="form-grid">
+
+
+            <!-- DESCRIPTION -->
+
+            <div class="field full">
+
+              <label>
+                DESCRIPTION *
+              </label>
+
+              <input
+                id="generalExpenseDescription"
+                placeholder="e.g. Electricity bill"
+                value="${esc(record?.description || "")}"
+                required
+              >
+
+            </div>
+
+
+            <!-- CATEGORY -->
+
+            <div class="field">
+
+              <label>
+                CATEGORY *
+              </label>
+
+              <input
+                id="generalExpenseCategory"
+                placeholder="e.g. Electricity, Water, Rent"
+                value="${esc(record?.category || "")}"
+                required
+              >
+
+            </div>
+
+
+            <!-- AMOUNT -->
+
+            <div class="field">
+
+              <label>
+                AMOUNT *
+              </label>
+
+              <input
+                id="generalExpenseAmount"
+                type="number"
+                min="0.01"
+                step="0.01"
+                placeholder="e.g. 250000"
+                value="${record?.amount || ""}"
+                required
+              >
+
+            </div>
+
+
+            <!-- CURRENCY -->
+
+            <div class="field">
+
+              <label>
+                CURRENCY *
+              </label>
+
+              <select
+                id="generalExpenseCurrency"
+                required
+              >
+
+                <option
+                  value="TZS"
+                  ${(record?.currency || "TZS") === "TZS" ? "selected" : ""}
+                >
+                  TZS — Tanzanian Shilling
+                </option>
+
+                <option
+                  value="USD"
+                  ${record?.currency === "USD" ? "selected" : ""}
+                >
+                  USD — US Dollar
+                </option>
+
+                <option
+                  value="JPY"
+                  ${record?.currency === "JPY" ? "selected" : ""}
+                >
+                  JPY — Japanese Yen
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- DATE -->
+
+            <div class="field">
+
+              <label>
+                EXPENSE DATE *
+              </label>
+
+              <input
+                id="generalExpenseDate"
+                type="date"
+                value="${
+                  record?.expense_date ||
+                  new Date().toISOString().split("T")[0]
+                }"
+                required
+              >
+
+            </div>
+
+
+            <!-- STATUS -->
+
+            <div class="field">
+
+              <label>
+                PAYMENT STATUS *
+              </label>
+
+              <select
+                id="generalExpenseStatus"
+                onchange="toggleGeneralExpenseAccount()"
+                required
+              >
+
+                <option
+                  value="Paid"
+                  ${(record?.payment_status || "Paid") === "Paid" ? "selected" : ""}
+                >
+                  Paid
+                </option>
+
+                <option
+                  value="Pending"
+                  ${record?.payment_status === "Pending" ? "selected" : ""}
+                >
+                  Pending
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- ACCOUNT -->
+
+            <div class="field">
+
+              <label>
+                PAYMENT ACCOUNT
+              </label>
+
+              <select
+                id="generalExpenseAccount"
+              >
+
+                <option value="">
+                  Select account
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- REFERENCE -->
+
+            <div class="field">
+
+              <label>
+                REFERENCE NUMBER
+              </label>
+
+              <input
+                id="generalExpenseReference"
+                placeholder="e.g. NMB-12345"
+                value="${esc(record?.reference_number || "")}"
+              >
+
+            </div>
+
+
+            <!-- NOTES -->
+
+            <div class="field full">
+
+              <label>
+                NOTES
+              </label>
+
+              <textarea
+                id="generalExpenseNotes"
+                placeholder="Additional notes..."
+                rows="4"
+              >${esc(record?.notes || "")}</textarea>
+
+            </div>
+
+          </div>
+
+        </form>
+
+
+        <div class="expense-page-actions">
+
+          <button
+            class="secondary"
+            type="button"
+            onclick="cancelExpensePage()"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="primary"
+            type="button"
+            onclick="saveGeneralExpense(event)"
+          >
+            ${id ? "Update Expense" : "Save Expense"}
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
 
 
   await loadGeneralExpenseAccounts();
 
 
-  if(id){
+  if(record){
 
-    const record =
-      expenseRecords.find(
-        e => e.id === id
+    const account =
+      document.getElementById(
+        "generalExpenseAccount"
       );
 
-    if(!record) return;
-
-
-    document.getElementById(
-      "generalExpenseDescription"
-    ).value =
-      record.description || "";
-
-
-    document.getElementById(
-      "generalExpenseCategory"
-    ).value =
-      record.category || "";
-
-
-    document.getElementById(
-      "generalExpenseAmount"
-    ).value =
-      record.amount || "";
-
-
-    document.getElementById(
-      "generalExpenseCurrency"
-    ).value =
-      record.currency || "TZS";
-
-
-    document.getElementById(
-      "generalExpenseDate"
-    ).value =
-      record.expense_date || "";
-
-
-    document.getElementById(
-      "generalExpenseStatus"
-    ).value =
-      record.payment_status || "Paid";
-
-
-    document.getElementById(
-      "generalExpenseAccount"
-    ).value =
-      record.account_id || "";
-
-
-    document.getElementById(
-      "generalExpenseReference"
-    ).value =
-      record.reference_number || "";
-
-
-    document.getElementById(
-      "generalExpenseNotes"
-    ).value =
-      record.notes || "";
+    if(account){
+      account.value =
+        record.account_id || "";
+    }
 
   }
 
 
   toggleGeneralExpenseAccount();
 
-
-  modal.classList.add("show");
-
 }
-
 
 /* ---------- CLOSE MODAL ---------- */
 
@@ -1614,6 +1933,15 @@ function closeExpenseModal(){
 
 }
 
+function cancelExpensePage(){
+
+  editingExpenseId = null;
+
+  buildExpensesModule();
+
+  loadExpenses();
+
+}
 
 /* ---------- LOAD ACCOUNTS ---------- */
 
