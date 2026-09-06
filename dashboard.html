@@ -3392,6 +3392,10 @@ async function saveNewSale(){
    SALE DETAILS
 ========================================================= */
 
+/* =========================================================
+   SALE DETAILS — FULL PAGE
+========================================================= */
+
 async function openSaleDetails(
   saleId
 ){
@@ -3411,8 +3415,17 @@ async function openSaleDetails(
     );
 
     return;
-
   }
+
+
+  const view =
+    document.getElementById(
+      "view-sales"
+    );
+
+
+  if(!view)
+    return;
 
 
   const vehicle =
@@ -3443,82 +3456,135 @@ async function openSaleDetails(
   const grossProfit =
     Number(
       sale.selling_price || 0
-    )
-    -
+    ) -
     totalVehicleCost;
 
 
-  const modal =
-    document.createElement(
-      "div"
+  const totalPaid =
+    Number(
+      sale.total_paid || 0
     );
 
 
-  modal.className =
-    "modal-bg show";
+  const balance =
+    Math.max(
+      Number(
+        sale.selling_price || 0
+      ) -
+      totalPaid,
+      0
+    );
 
 
-  modal.id =
-    "saleDetailsModal";
+  /* ---------------------------------------------------------
+     CHANGE TOP BAR TITLE
+  --------------------------------------------------------- */
+
+  const pageTitle =
+    document.getElementById(
+      "pageTitle"
+    );
+
+  const crumb =
+    document.getElementById(
+      "crumb"
+    );
 
 
-  modal.innerHTML = `
+  if(pageTitle)
+    pageTitle.textContent =
+      "Sale Details";
 
-    <div class="modal">
 
-      <div class="modal-head">
+  if(crumb)
+    crumb.textContent =
+      "SALES / SALE DETAILS";
 
-        <div>
 
-          <h3>
-            ${esc(
-              sale.sale_number ||
-              "Vehicle Sale"
-            )}
-          </h3>
+  /* ---------------------------------------------------------
+     BUILD FULL PAGE
+  --------------------------------------------------------- */
 
-          <span>
-            ${formatDate(
-              sale.sale_date
-            )}
-          </span>
+  view.innerHTML = `
 
+    <!-- PAGE HEADER -->
+
+    <div
+      class="hero"
+      style="
+        align-items:center;
+        margin-bottom:25px;
+      "
+    >
+
+      <div>
+
+        <div
+          style="
+            font-size:10px;
+            color:#9aa3ad;
+            margin-bottom:5px;
+          "
+        >
+          SALES / SALE DETAILS
         </div>
 
+        <h2>
+          ${esc(
+            customer.full_name ||
+            "Customer"
+          )}
+        </h2>
 
-        <button
-          class="close"
-          onclick="closeSaleDetails()"
-        >
-          ×
-        </button>
+        <p>
+          ${esc(
+            vehicle.vehicle_name ||
+            "Vehicle"
+          )}
+          ${vehicle.year || ""}
+          ·
+          Sale Date:
+          ${formatDate(
+            sale.sale_date
+          )}
+        </p>
 
       </div>
 
 
-      <div class="form">
+      <button
+        class="secondary"
+        onclick="closeSaleDetails()"
+      >
+        ← Back to Sales
+      </button>
+
+    </div>
 
 
-        <div class="section-title">
-          Customer
-        </div>
+    <!-- CUSTOMER + VEHICLE -->
 
-        <div class="mini-grid">
+    <div
+      class="grid2"
+      style="
+        margin-bottom:18px;
+      "
+    >
 
-          <div class="mini">
+      <!-- CUSTOMER -->
 
-            <b>
-              ${esc(
-                customer.full_name ||
-                "Unknown"
-              )}
-            </b>
+      <div class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <h3>
+              Customer Information
+            </h3>
 
             <span>
-              ${esc(
-                customer.phone ||
-                "No phone"
-              )}
+              Customer purchasing this vehicle
             </span>
 
           </div>
@@ -3526,23 +3592,113 @@ async function openSaleDetails(
         </div>
 
 
-        <div class="section-title">
-          Vehicle
+        <div class="panel-body">
+
+          <div class="mini-grid">
+
+            <div class="mini">
+
+              <b>
+                ${esc(
+                  customer.full_name ||
+                  "Unknown"
+                )}
+              </b>
+
+              <span>
+                Full Name
+              </span>
+
+            </div>
+
+
+            <div class="mini">
+
+              <b>
+                ${esc(
+                  customer.phone ||
+                  "-"
+                )}
+              </b>
+
+              <span>
+                Phone
+              </span>
+
+            </div>
+
+
+            <div class="mini">
+
+              <b>
+                ${esc(
+                  customer.email ||
+                  "-"
+                )}
+              </b>
+
+              <span>
+                Email
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="
+              margin-top:12px;
+              padding:14px;
+              border:1px solid var(--line);
+              border-radius:12px;
+            "
+          >
+
+            <div
+              style="
+                font-size:9px;
+                color:#8a949f;
+                font-weight:800;
+                margin-bottom:5px;
+              "
+            >
+              ADDRESS
+            </div>
+
+            <div
+              style="
+                font-size:12px;
+                font-weight:700;
+              "
+            >
+              ${esc(
+                customer.address ||
+                "-"
+              )}
+            </div>
+
+          </div>
+
         </div>
 
-        <div class="mini-grid">
+      </div>
 
-          <div class="mini">
 
-            <b>
-              ${esc(
-                vehicle.vehicle_name ||
-                "Vehicle"
-              )}
-            </b>
+      <!-- VEHICLE -->
+
+      <div class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <h3>
+              Vehicle Information
+            </h3>
 
             <span>
-              ${vehicle.year || ""}
+              Vehicle attached to this sale
             </span>
 
           </div>
@@ -3550,12 +3706,93 @@ async function openSaleDetails(
         </div>
 
 
-        <div class="section-title">
-          Financial Summary
+        <div class="panel-body">
+
+          <div class="mini-grid">
+
+            <div class="mini">
+
+              <b>
+                ${esc(
+                  vehicle.vehicle_name ||
+                  "Vehicle"
+                )}
+              </b>
+
+              <span>
+                Vehicle
+              </span>
+
+            </div>
+
+
+            <div class="mini">
+
+              <b>
+                ${vehicle.year || "-"}
+              </b>
+
+              <span>
+                Year
+              </span>
+
+            </div>
+
+
+            <div class="mini">
+
+              <b>
+                ${money(
+                  purchaseCost,
+                  sale.currency
+                )}
+              </b>
+
+              <span>
+                Purchase Cost
+              </span>
+
+            </div>
+
+          </div>
+
         </div>
 
+      </div>
 
-        <div class="mini-grid">
+    </div>
+
+
+    <!-- FINANCIAL SUMMARY -->
+
+    <div class="panel">
+
+      <div class="panel-head">
+
+        <div>
+
+          <h3>
+            Financial Summary
+          </h3>
+
+          <span>
+            Complete financial position of this sale
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="panel-body">
+
+        <div
+          class="mini-grid"
+          style="
+            grid-template-columns:
+              repeat(6,1fr);
+          "
+        >
 
           <div class="mini">
 
@@ -3577,7 +3814,7 @@ async function openSaleDetails(
 
             <b>
               ${money(
-                sale.total_paid || 0,
+                totalPaid,
                 sale.currency
               )}
             </b>
@@ -3593,13 +3830,13 @@ async function openSaleDetails(
 
             <b>
               ${money(
-                sale.balance || 0,
+                balance,
                 sale.currency
               )}
             </b>
 
             <span>
-              Balance
+              Outstanding
             </span>
 
           </div>
@@ -3654,190 +3891,400 @@ async function openSaleDetails(
 
         </div>
 
+      </div>
 
-        <div class="section-title">
-          Payments
-        </div>
-
-
-        <div class="table-wrap">
-
-          <table>
-
-            <thead>
-
-              <tr>
-
-                <th>#</th>
-                <th>DATE</th>
-                <th>TYPE</th>
-                <th>AMOUNT</th>
-                <th>METHOD</th>
-
-              </tr>
-
-            </thead>
+    </div>
 
 
-            <tbody>
+    <!-- PAYMENTS -->
 
-              ${
-                (sale.payments || [])
-                  .map(
-                    (payment,index) => `
+    <div
+      class="panel"
+      style="
+        margin-top:18px;
+      "
+    >
 
-                      <tr>
+      <div class="panel-head">
 
-                        <td>
-                          ${
-                            payment.payment_number
-                            ||
-                            index + 1
-                          }
-                        </td>
+        <div>
 
-                        <td>
-                          ${formatDate(
-                            payment.payment_date
-                          )}
-                        </td>
+          <h3>
+            Customer Payments
+          </h3>
 
-                        <td>
-                          ${esc(
-                            payment.payment_type
-                            ||
-                            "Payment"
-                          )}
-                        </td>
-
-                        <td class="amount">
-
-                          ${money(
-                            payment.amount,
-                            payment.currency
-                          )}
-
-                        </td>
-
-                        <td>
-                          ${esc(
-                            payment.payment_method
-                            ||
-                            "-"
-                          )}
-                        </td>
-
-                      </tr>
-
-                    `
-                  )
-                  .join("")
-              }
-
-            </tbody>
-
-          </table>
+          <span>
+            All payments received for this sale
+          </span>
 
         </div>
 
 
-        <div class="section-title">
+        <button
+          class="primary"
+          onclick="
+            openSalePaymentModal(
+              '${sale.id}',
+              '${sale.customer_id}'
+            )
+          "
+        >
+          + Add Payment
+        </button>
 
-          Vehicle Expenses
+      </div>
 
-          <button
-            class="secondary"
-            onclick="openVehicleExpenseModal('${sale.id}','${sale.vehicle_id}')"
-          >
-            + Add Expense
-          </button>
+
+      <div class="panel-body">
+
+        ${
+          (sale.payments || []).length
+
+          ?
+
+          `
+          <div class="table-wrap">
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>#</th>
+                  <th>DATE</th>
+                  <th>TYPE</th>
+                  <th>AMOUNT</th>
+                  <th>METHOD</th>
+                  <th>REFERENCE</th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                ${
+                  (sale.payments || [])
+                    .map(
+                      (payment,index) => `
+
+                        <tr>
+
+                          <td>
+                            ${
+                              payment.payment_number ||
+                              index + 1
+                            }
+                          </td>
+
+                          <td>
+                            ${formatDate(
+                              payment.payment_date
+                            )}
+                          </td>
+
+                          <td>
+                            ${esc(
+                              payment.payment_type ||
+                              "Payment"
+                            )}
+                          </td>
+
+                          <td class="amount">
+
+                            ${money(
+                              payment.amount,
+                              payment.currency
+                            )}
+
+                          </td>
+
+                          <td>
+                            ${esc(
+                              payment.payment_method ||
+                              "-"
+                            )}
+                          </td>
+
+                          <td>
+                            ${esc(
+                              payment.reference_number ||
+                              "-"
+                            )}
+                          </td>
+
+                        </tr>
+
+                      `
+                    )
+                    .join("")
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+          `
+
+          :
+
+          `
+          <div class="empty">
+
+            <strong>
+              No payments recorded
+            </strong>
+
+            <p>
+              Click <b>+ Add Payment</b>
+              to record the customer's next payment.
+            </p>
+
+          </div>
+          `
+        }
+
+      </div>
+
+    </div>
+
+
+    <!-- VEHICLE EXPENSES -->
+
+    <div
+      class="panel"
+      style="
+        margin-top:18px;
+      "
+    >
+
+      <div class="panel-head">
+
+        <div>
+
+          <h3>
+            Vehicle Expenses
+          </h3>
+
+          <span>
+            Expenses directly related to this vehicle
+          </span>
 
         </div>
 
 
-        <div class="table-wrap">
+        <button
+          class="primary"
+          onclick="
+            openVehicleExpenseModal(
+              '${sale.id}',
+              '${sale.vehicle_id}'
+            )
+          "
+        >
+          + Add Expense
+        </button>
 
-          <table>
-
-            <thead>
-
-              <tr>
-
-                <th>DATE</th>
-                <th>CATEGORY</th>
-                <th>DESCRIPTION</th>
-                <th>AMOUNT</th>
-
-              </tr>
-
-            </thead>
+      </div>
 
 
-            <tbody>
+      <div class="panel-body">
 
-              ${
-                (sale.expenses || [])
-                  .map(
-                    expense => `
+        ${
+          (sale.expenses || []).length
 
-                      <tr>
+          ?
 
-                        <td>
-                          ${formatDate(
-                            expense.cost_date
-                          )}
-                        </td>
+          `
+          <div class="table-wrap">
 
-                        <td>
-                          ${esc(
-                            expense.category
-                          )}
-                        </td>
+            <table>
 
-                        <td>
-                          ${esc(
-                            expense.description
-                            ||
-                            "-"
-                          )}
-                        </td>
+              <thead>
 
-                        <td class="amount">
+                <tr>
 
-                          ${money(
-                            expense.amount,
-                            expense.currency
-                          )}
+                  <th>DATE</th>
+                  <th>CATEGORY</th>
+                  <th>DESCRIPTION</th>
+                  <th>AMOUNT</th>
+                  <th>STATUS</th>
 
-                        </td>
+                </tr>
 
-                      </tr>
+              </thead>
 
-                    `
-                  )
-                  .join("")
-              }
 
-            </tbody>
+              <tbody>
 
-          </table>
+                ${
+                  (sale.expenses || [])
+                    .map(
+                      expense => `
+
+                        <tr>
+
+                          <td>
+                            ${formatDate(
+                              expense.cost_date
+                            )}
+                          </td>
+
+                          <td>
+                            ${esc(
+                              expense.category
+                            )}
+                          </td>
+
+                          <td>
+                            ${esc(
+                              expense.description ||
+                              "-"
+                            )}
+                          </td>
+
+                          <td class="amount">
+
+                            ${money(
+                              expense.amount,
+                              expense.currency
+                            )}
+
+                          </td>
+
+                          <td>
+                            ${esc(
+                              expense.payment_status ||
+                              "-"
+                            )}
+                          </td>
+
+                        </tr>
+
+                      `
+                    )
+                    .join("")
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+          `
+
+          :
+
+          `
+          <div class="empty">
+
+            <strong>
+              No vehicle expenses recorded
+            </strong>
+
+            <p>
+              Add expenses such as
+              Wharfage, Clearing, Transport,
+              Car Wash and other vehicle costs.
+            </p>
+
+          </div>
+          `
+        }
+
+      </div>
+
+    </div>
+
+
+    <!-- PROFITABILITY -->
+
+    <div
+      class="panel"
+      style="
+        margin-top:18px;
+      "
+    >
+
+      <div class="panel-head">
+
+        <div>
+
+          <h3>
+            Vehicle Profitability
+          </h3>
+
+          <span>
+            Actual performance of this vehicle sale
+          </span>
 
         </div>
 
+      </div>
 
-        <div class="section-title">
 
-          Add Payment
+      <div class="panel-body">
 
-          <button
-            class="secondary"
-            onclick="openSalePaymentModal('${sale.id}','${sale.customer_id}')"
-          >
-            + Add Payment
-          </button>
+        <div
+          style="
+            display:grid;
+            grid-template-columns:
+              repeat(3,1fr);
+            gap:15px;
+          "
+        >
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                purchaseCost,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Purchase Cost
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                vehicleExpenses,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Vehicle Expenses
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                grossProfit,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Gross Profit
+            </span>
+
+          </div>
 
         </div>
-
 
       </div>
 
@@ -3846,27 +4293,50 @@ async function openSaleDetails(
   `;
 
 
-  document.body.appendChild(
-    modal
-  );
+  /* ---------------------------------------------------------
+     SCROLL TO TOP
+  --------------------------------------------------------- */
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
 
 }
 
+
+/* =========================================================
+   BACK TO SALES
+========================================================= */
 
 function closeSaleDetails(){
 
-  const modal =
+  buildSalesModule();
+
+  loadSales();
+
+
+  const pageTitle =
     document.getElementById(
-      "saleDetailsModal"
+      "pageTitle"
+    );
+
+  const crumb =
+    document.getElementById(
+      "crumb"
     );
 
 
-  if(modal)
-    modal.remove();
+  if(pageTitle)
+    pageTitle.textContent =
+      "Sales";
+
+
+  if(crumb)
+    crumb.textContent =
+      "SALES";
 
 }
-
-
 /* =========================================================
    ADD PAYMENT
 ========================================================= */
