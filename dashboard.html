@@ -4598,13 +4598,34 @@ async function openSalePaymentModal(
 
           <div class="field">
 
-            <label>
-              PAYMENT TYPE *
-            </label>
+  <label>
+    PAYMENT TYPE *
+  </label>
 
-           Final Payment
+  <select
+    id="salePaymentType"
+    required
+  >
 
-          </div>
+    <option value="Initial Deposit">
+      Initial Deposit
+    </option>
+
+    <option value="Installment">
+      Installment
+    </option>
+
+    <option value="Final Payment">
+      Final Payment
+    </option>
+
+    <option value="Payment">
+      Payment
+    </option>
+
+  </select>
+
+</div>
 
 
           <div class="field">
