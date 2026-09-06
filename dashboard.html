@@ -5204,10 +5204,138 @@ async function saveSalePayment(
     "ok"
   );
 
-
   closeSalePaymentModal();
 
-  await loadSales();
+  /* ---------------------------------------------------------
+     REFRESH SALE DATA AFTER PAYMENT
+  --------------------------------------------------------- */
+
+  const {
+    data: refreshedPayments,
+    error: refreshError
+  } = await sb
+    .from("customer_payments")
+    .select(`
+      id,
+      sale_id,
+      customer_id,
+      amount,
+      currency,
+      payment_date,
+      payment_method,
+      reference_number,
+      payment_number,
+      payment_type,
+      due_date,
+      notes
+    `)
+    .eq(
+      "sale_id",
+      saleId
+    )
+    .order(
+      "payment_date",
+      {
+        ascending: true
+      }
+    );
+
+
+  if(refreshError){
+
+    console.error(
+      "Payment refresh error:",
+      refreshError
+    );
+
+    toast(
+      "Payment was saved, but could not refresh the sale.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  /* ---------------------------------------------------------
+     RECALCULATE TOTAL PAID
+  --------------------------------------------------------- */
+
+  const refreshedTotalPaid =
+    (refreshedPayments || [])
+      .reduce(
+        (sum, payment) =>
+          sum +
+          Number(
+            payment.amount || 0
+          ),
+        0
+      );
+
+
+  const refreshedBalance =
+    Math.max(
+      Number(
+        sale.selling_price || 0
+      ) -
+      refreshedTotalPaid,
+      0
+    );
+
+
+  /* ---------------------------------------------------------
+     UPDATE CURRENT SALE IN MEMORY
+  --------------------------------------------------------- */
+
+  salesRecords =
+    salesRecords.map(
+      item => {
+
+        if(
+          item.id !== saleId
+        ){
+
+          return item;
+
+        }
+
+
+        return {
+
+          ...item,
+
+          payments:
+            refreshedPayments || [],
+
+          total_paid:
+            refreshedTotalPaid,
+
+          balance:
+            refreshedBalance,
+
+          status:
+            refreshedTotalPaid >=
+            Number(
+              sale.selling_price || 0
+            )
+              ? "PAID"
+              : refreshedTotalPaid > 0
+                ? "PARTIAL"
+                : "UNPAID"
+
+        };
+
+      }
+    );
+
+
+  /* ---------------------------------------------------------
+     OPEN UPDATED SALE DETAILS
+  --------------------------------------------------------- */
+
+  openSaleDetails(
+    saleId
+  );
 
 }
 
