@@ -1324,21 +1324,6 @@ function buildSalesModule(){
 
             </div>
 
-
-            <div class="field">
-
-              <label>PURCHASE COST</label>
-
-              <input
-                id="newSalePurchaseCost"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="Optional"
-              >
-
-            </div>
-
           </div>
 
 
@@ -2443,21 +2428,6 @@ function openNewSaleModal(){
 
             </div>
 
-
-            <div class="field">
-
-              <label>PURCHASE COST</label>
-
-              <input
-                id="newSalePurchaseCost"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="Optional"
-              >
-
-            </div>
-
           </div>
 
         </div>
@@ -2899,15 +2869,6 @@ async function saveNewSale(){
       );
 
 
-    const purchaseCost =
-      Number(
-        document
-          .getElementById("newSalePurchaseCost")
-          .value
-          || 0
-      );
-
-
     /* =====================================================
        READ SALE
     ===================================================== */
@@ -3185,9 +3146,8 @@ async function saveNewSale(){
         model:
           "",
 
-        purchase_price:
-          purchaseCost,
-
+purchase_price:
+  0,
         purchase_currency:
           currency,
 
@@ -3436,29 +3396,17 @@ async function openSaleDetails(
     sale.customers || {};
 
 
-  const purchaseCost =
-    Number(
-      vehicle.purchase_price || 0
-    );
-
-
   const vehicleExpenses =
-    Number(
-      sale.total_vehicle_expenses || 0
-    );
+  Number(
+    sale.total_vehicle_expenses || 0
+  );
 
 
-  const totalVehicleCost =
-    purchaseCost +
-    vehicleExpenses;
-
-
-  const grossProfit =
-    Number(
-      sale.selling_price || 0
-    ) -
-    totalVehicleCost;
-
+const grossProfit =
+  Number(
+    sale.selling_price || 0
+  ) -
+  vehicleExpenses;
 
   const totalPaid =
     Number(
@@ -3738,22 +3686,6 @@ async function openSaleDetails(
 
             </div>
 
-
-            <div class="mini">
-
-              <b>
-                ${money(
-                  purchaseCost,
-                  sale.currency
-                )}
-              </b>
-
-              <span>
-                Purchase Cost
-              </span>
-
-            </div>
-
           </div>
 
         </div>
@@ -3853,22 +3785,6 @@ async function openSaleDetails(
 
             <span>
               Vehicle Expenses
-            </span>
-
-          </div>
-
-
-          <div class="mini">
-
-            <b>
-              ${money(
-                totalVehicleCost,
-                sale.currency
-              )}
-            </b>
-
-            <span>
-              Total Vehicle Cost
             </span>
 
           </div>
@@ -4237,20 +4153,7 @@ async function openSaleDetails(
           "
         >
 
-          <div class="mini">
-
-            <b>
-              ${money(
-                purchaseCost,
-                sale.currency
-              )}
-            </b>
-
-            <span>
-              Purchase Cost
-            </span>
-
-          </div>
+        
 
 
           <div class="mini">
