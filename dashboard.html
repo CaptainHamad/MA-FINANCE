@@ -5888,8 +5888,7 @@ async function saveVehicleExpense(
   const category =
     document.getElementById(
       "vehicleExpenseCategory"
-    )?.value
-    ?.trim();
+    )?.value?.trim();
 
 
   const amount =
@@ -5930,14 +5929,13 @@ async function saveVehicleExpense(
   const description =
     document.getElementById(
       "vehicleExpenseDescription"
-    )?.value
-    ?.trim() ||
+    )?.value?.trim() ||
     null;
 
 
-  /* -----------------------------------------
+  /* =======================================================
      VALIDATION
-  ----------------------------------------- */
+  ======================================================= */
 
   if(!category){
 
@@ -5975,12 +5973,12 @@ async function saveVehicleExpense(
   }
 
 
-  /* -----------------------------------------
-     SAVE TO DATABASE
-  ----------------------------------------- */
+  /* =======================================================
+     SAVE EXPENSE
+  ======================================================= */
 
   const {
-    data,
+    data: newExpense,
     error
   } = await sb
     .from("vehicle_costs")
@@ -6004,24 +6002,28 @@ async function saveVehicleExpense(
       currency:
         currency,
 
-      account_id:
-        accountId,
-
       cost_date:
         expenseDate,
 
       payment_status:
-        paymentStatus
+        paymentStatus,
+
+      account_id:
+        accountId
 
     })
     .select()
     .single();
 
 
+  /* =======================================================
+     DATABASE ERROR
+  ======================================================= */
+
   if(error){
 
     console.error(
-      "Vehicle expense error:",
+      "Vehicle expense save error:",
       error
     );
 
@@ -6035,9 +6037,76 @@ async function saveVehicleExpense(
   }
 
 
-  /* -----------------------------------------
+  /* =======================================================
+     UPDATE CURRENT SALE IMMEDIATELY
+  ======================================================= */
+
+  const saleIndex =
+    salesRecords.findIndex(
+      sale =>
+        sale.id === saleId
+    );
+
+
+  if(saleIndex !== -1){
+
+    const sale =
+      salesRecords[saleIndex];
+
+
+    const existingExpenses =
+      Array.isArray(
+        sale.expenses
+      )
+      ?
+        sale.expenses
+      :
+        [];
+
+
+    const updatedExpenses = [
+      ...existingExpenses,
+      newExpense
+    ];
+
+
+    const newTotalExpenses =
+      updatedExpenses.reduce(
+        (
+          total,
+          expense
+        ) => {
+
+          return (
+            total +
+            Number(
+              expense.amount || 0
+            )
+          );
+
+        },
+        0
+      );
+
+
+    salesRecords[saleIndex] = {
+
+      ...sale,
+
+      expenses:
+        updatedExpenses,
+
+      total_vehicle_expenses:
+        newTotalExpenses
+
+    };
+
+  }
+
+
+  /* =======================================================
      SUCCESS
-  ----------------------------------------- */
+  ======================================================= */
 
   toast(
     "Vehicle expense added successfully.",
@@ -6045,24 +6114,29 @@ async function saveVehicleExpense(
   );
 
 
+  /* Close expense modal */
+
   closeVehicleExpenseModal();
 
 
-  /* -----------------------------------------
-     REFRESH SALES DATA
-  ----------------------------------------- */
+  /* =======================================================
+     REFRESH SALES LIST
+  ======================================================= */
 
-  await loadSales();
+  renderSales();
+
+  calculateSalesSummary();
 
 
-  /* -----------------------------------------
-     REOPEN UPDATED SALE DETAILS
-  ----------------------------------------- */
+  /* =======================================================
+     OPEN UPDATED SALE DETAILS
+  ======================================================= */
 
   openSaleDetails(
     saleId
   );
 
+}
 }
 /* =========================================================
    INCOME MODULE
