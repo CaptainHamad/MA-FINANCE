@@ -6624,6 +6624,10 @@ async function loadSales(){
    SALES — RENDER
 ========================================================= */
 
+/* =========================================================
+   SALES — RENDER
+========================================================= */
+
 function renderSales(){
 
   const container =
@@ -6634,10 +6638,13 @@ function renderSales(){
   if(!container) return;
 
 
+  /* ---------------------------------------------------------
+     NO SALES
+  --------------------------------------------------------- */
+
   if(!salesRecords.length){
 
     container.innerHTML = `
-
       <div class="empty">
 
         <strong>
@@ -6645,19 +6652,20 @@ function renderSales(){
         </strong>
 
         <p>
-          Click
-          <b>+ New Sale</b>
-          to record the first vehicle sale.
+          Click <b>+ New Sale</b>
+          to record your first vehicle sale.
         </p>
 
       </div>
-
     `;
 
     return;
-
   }
 
+
+  /* ---------------------------------------------------------
+     SALES TABLE
+  --------------------------------------------------------- */
 
   container.innerHTML = `
 
@@ -6669,19 +6677,19 @@ function renderSales(){
 
           <tr>
 
-            <th>Date</th>
+            <th>DATE</th>
 
-            <th>Customer</th>
+            <th>CUSTOMER</th>
 
-            <th>Vehicle</th>
+            <th>VEHICLE</th>
 
-            <th>Sale Value</th>
+            <th>SALE PRICE</th>
 
-            <th>Paid</th>
+            <th>PAID</th>
 
-            <th>Balance</th>
+            <th>BALANCE</th>
 
-            <th>Status</th>
+            <th>STATUS</th>
 
           </tr>
 
@@ -6691,164 +6699,205 @@ function renderSales(){
         <tbody>
 
           ${
-            salesRecords.map(sale => {
+            salesRecords.map(
+              sale => {
 
-              const paid =
-                Number(
-                  sale.total_paid || 0
-                );
-
-              const balance =
-                Number(
-                  sale.balance ??
-                  sale.selling_price
-                );
+                const paid =
+                  Number(
+                    sale.total_paid || 0
+                  );
 
 
-              let status =
-                "UNPAID";
+                const balance =
+                  Number(
+                    sale.balance ??
+                    sale.selling_price
+                  );
 
 
-              if(balance <= 0){
+                let status =
+                  "UNPAID";
 
-                status =
-                  "PAID";
 
-              }else if(paid > 0){
+                if(balance <= 0){
 
-                status =
-                  "PARTIAL";
+                  status =
+                    "PAID";
+
+                }else if(paid > 0){
+
+                  status =
+                    "PARTIAL";
+
+                }
+
+
+                const customerName =
+                  sale.customers?.full_name ||
+                  "Unknown";
+
+
+                const customerPhone =
+                  sale.customers?.phone ||
+                  "";
+
+
+                const vehicleName =
+                  sale.vehicles?.vehicle_name ||
+                  `${sale.vehicles?.make || ""} ${sale.vehicles?.model || ""}`.trim() ||
+                  "Vehicle";
+
+
+                const vehicleYear =
+                  sale.vehicles?.year ||
+                  "";
+
+
+                return `
+
+                  <tr
+                    style="
+                      cursor:pointer;
+                    "
+                    onclick="openSaleDetails('${sale.id}')"
+                  >
+
+                    <!-- DATE -->
+
+                    <td>
+
+                      ${formatDate(
+                        sale.sale_date
+                      )}
+
+                    </td>
+
+
+                    <!-- CUSTOMER -->
+
+                    <td>
+
+                      <div
+                        class="name"
+                        style="
+                          color:#111827;
+                          font-weight:700;
+                        "
+                      >
+
+                        ${esc(
+                          customerName
+                        )}
+
+                      </div>
+
+
+                      <div class="sub">
+
+                        ${esc(
+                          customerPhone
+                        )}
+
+                      </div>
+
+                    </td>
+
+
+                    <!-- VEHICLE -->
+
+                    <td>
+
+                      <div
+                        class="name"
+                        style="
+                          font-weight:700;
+                        "
+                      >
+
+                        ${esc(
+                          vehicleName
+                        )}
+
+                      </div>
+
+
+                      <div class="sub">
+
+                        ${esc(
+                          String(
+                            vehicleYear
+                          )
+                        )}
+
+                      </div>
+
+                    </td>
+
+
+                    <!-- SALE PRICE -->
+
+                    <td class="amount">
+
+                      ${money(
+                        sale.selling_price,
+                        sale.currency
+                      )}
+
+                    </td>
+
+
+                    <!-- PAID -->
+
+                    <td class="amount">
+
+                      ${money(
+                        paid,
+                        sale.currency
+                      )}
+
+                    </td>
+
+
+                    <!-- BALANCE -->
+
+                    <td class="amount">
+
+                      ${money(
+                        balance,
+                        sale.currency
+                      )}
+
+                    </td>
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                      <span
+                        class="badge ${
+                          status === "PAID"
+                            ? "green"
+                            :
+                          status === "PARTIAL"
+                            ? "orange"
+                            :
+                              "gray"
+                        }"
+                      >
+
+                        ${status}
+
+                      </span>
+
+                    </td>
+
+                  </tr>
+
+                `;
 
               }
-
-
-              return `
-
-                <tr>
-
-                  <td>
-                    ${formatDate(
-                      sale.sale_date
-                    )}
-                  </td>
-
-
-                  <td>
-
-                    <div class="name">
-
-                      ${esc(
-                        sale.customers
-                          ?.full_name
-                        ||
-                        "Unknown"
-                      )}
-
-                    </div>
-
-                    <div class="sub">
-
-                      ${esc(
-                        sale.customers
-                          ?.phone
-                        ||
-                        ""
-                      )}
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="name">
-
-                      ${esc(
-                        sale.vehicles
-                          ?.stock_number
-                        ||
-                        ""
-                      )}
-
-                    </div>
-
-                    <div class="sub">
-
-                      ${esc(
-                        sale.vehicles
-                          ?.make
-                        ||
-                        ""
-                      )}
-
-                      ${esc(
-                        sale.vehicles
-                          ?.model
-                        ||
-                        ""
-                      )}
-
-                    </div>
-
-                  </td>
-
-
-                  <td class="amount">
-
-                    ${money(
-                      sale.selling_price,
-                      sale.currency
-                    )}
-
-                  </td>
-
-
-                  <td class="amount">
-
-                    ${money(
-                      paid,
-                      sale.currency
-                    )}
-
-                  </td>
-
-
-                  <td class="amount">
-
-                    ${money(
-                      balance,
-                      sale.currency
-                    )}
-
-                  </td>
-
-
-                  <td>
-
-                    <span
-                      class="badge ${
-                        status === "PAID"
-                          ? "green"
-                          :
-                        status === "PARTIAL"
-                          ? "orange"
-                          :
-                            "gray"
-                      }"
-                    >
-
-                      ${status}
-
-                    </span>
-
-                  </td>
-
-                </tr>
-
-              `;
-
-            }).join("")
+            ).join("")
           }
 
         </tbody>
