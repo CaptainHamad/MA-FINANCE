@@ -1019,18 +1019,20 @@ function buildPlaceholders(){
 }
 
 /* =========================================================
-   SALES MODULE
+   SALES MODULE — MATtex
+   CUSTOMER + VEHICLE + SALE + PAYMENTS + VEHICLE EXPENSES
 ========================================================= */
 
 let salesRecords = [];
-let saleCustomers = [];
-let saleVehicles = [];
-let saleAccounts = [];
+
+
+/* =========================================================
+   BUILD SALES PAGE
+========================================================= */
 
 function buildSalesModule(){
 
-  const view =
-    document.getElementById("view-sales");
+  const view = document.getElementById("view-sales");
 
   if(!view) return;
 
@@ -1042,14 +1044,14 @@ function buildSalesModule(){
         <h2>Vehicle Sales</h2>
 
         <p>
-          Manage vehicle sales, customer payments
-          and outstanding balances.
+          Manage vehicle sales, customer payments,
+          vehicle expenses and profitability.
         </p>
       </div>
 
       <button
         class="primary"
-        onclick="openSaleModal()"
+        onclick="openNewSaleModal()"
       >
         + New Sale
       </button>
@@ -1082,11 +1084,10 @@ function buildSalesModule(){
       <div class="panel-head">
 
         <div>
-          <h3>Vehicle Sales</h3>
+          <h3>Sales</h3>
 
           <span>
-            Sales, customer payments
-            and outstanding balances
+            Customers, vehicles, payments and balances
           </span>
         </div>
 
@@ -1113,21 +1114,437 @@ function buildSalesModule(){
 
     </div>
 
+
+    <!-- =====================================================
+         NEW SALE MODAL
+    ====================================================== -->
+
+    <div
+      class="modal-bg"
+      id="newSaleModal"
+    >
+
+      <div class="modal">
+
+        <div class="modal-head">
+
+          <div>
+            <h3>New Vehicle Sale</h3>
+
+            <span>
+              Create customer, vehicle and sale together
+            </span>
+          </div>
+
+          <button
+            class="close"
+            onclick="closeNewSaleModal()"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <form
+          class="form"
+          id="newSaleForm"
+        >
+
+          <!-- CUSTOMER -->
+
+          <div class="section-title">
+            Customer Information
+          </div>
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label>FULL NAME *</label>
+
+              <input
+                id="newSaleCustomerName"
+                placeholder="Customer full name"
+                required
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>PHONE</label>
+
+              <input
+                id="newSaleCustomerPhone"
+                placeholder="e.g. 0712 345 678"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>EMAIL</label>
+
+              <input
+                id="newSaleCustomerEmail"
+                type="email"
+                placeholder="customer@email.com"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>TIN</label>
+
+              <input
+                id="newSaleCustomerTin"
+                placeholder="Customer TIN"
+              >
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>ADDRESS</label>
+
+              <input
+                id="newSaleCustomerAddress"
+                placeholder="Customer address"
+              >
+
+            </div>
+
+          </div>
+
+
+          <!-- VEHICLE -->
+
+          <div class="section-title">
+            Vehicle Information
+          </div>
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label>VEHICLE NAME *</label>
+
+              <input
+                id="newSaleVehicleName"
+                placeholder="e.g. Toyota Harrier"
+                required
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>YEAR *</label>
+
+              <input
+                id="newSaleVehicleYear"
+                type="number"
+                min="1900"
+                max="2100"
+                placeholder="2020"
+                required
+              >
+
+            </div>
+
+          </div>
+
+
+          <!-- SALE -->
+
+          <div class="section-title">
+            Sale Information
+          </div>
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label>SELLING PRICE *</label>
+
+              <input
+                id="newSalePrice"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="65,000,000"
+                required
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>CURRENCY *</label>
+
+              <select
+                id="newSaleCurrency"
+                required
+              >
+
+                <option value="TZS">
+                  TZS — Tanzanian Shilling
+                </option>
+
+                <option value="USD">
+                  USD — US Dollar
+                </option>
+
+                <option value="JPY">
+                  JPY — Japanese Yen
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>SALE DATE *</label>
+
+              <input
+                id="newSaleDate"
+                type="date"
+                required
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>PURCHASE COST</label>
+
+              <input
+                id="newSalePurchaseCost"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Optional"
+              >
+
+            </div>
+
+          </div>
+
+
+          <!-- INITIAL PAYMENT -->
+
+          <div class="section-title">
+            Initial Payment
+          </div>
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label>PAYMENT AMOUNT</label>
+
+              <input
+                id="newSalePaymentAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="e.g. 20,000,000"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>PAYMENT TYPE</label>
+
+              <select
+                id="newSalePaymentType"
+              >
+
+                <option value="INITIAL DEPOSIT">
+                  Initial Deposit
+                </option>
+
+                <option value="INSTALLMENT">
+                  Installment
+                </option>
+
+                <option value="FULL PAYMENT">
+                  Full Payment
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>PAYMENT DATE</label>
+
+              <input
+                id="newSalePaymentDate"
+                type="date"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>RECEIVING ACCOUNT</label>
+
+              <select
+                id="newSalePaymentAccount"
+              >
+
+                <option value="">
+                  Select account
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>PAYMENT METHOD</label>
+
+              <select
+                id="newSalePaymentMethod"
+              >
+
+                <option value="">
+                  Select method
+                </option>
+
+                <option value="BANK">
+                  Bank
+                </option>
+
+                <option value="CASH">
+                  Cash
+                </option>
+
+                <option value="MOBILE MONEY">
+                  Mobile Money
+                </option>
+
+                <option value="CHEQUE">
+                  Cheque
+                </option>
+
+                <option value="OTHER">
+                  Other
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>REFERENCE NUMBER</label>
+
+              <input
+                id="newSalePaymentReference"
+                placeholder="e.g. NMB-12345"
+              >
+
+            </div>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>NOTES</label>
+
+            <input
+              id="newSaleNotes"
+              placeholder="Optional notes about this sale"
+            >
+
+          </div>
+
+        </form>
+
+
+        <div class="modal-foot">
+
+          <button
+            class="secondary"
+            onclick="closeNewSaleModal()"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="primary"
+            onclick="saveNewSale()"
+          >
+            Save Sale
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
   `;
+
+
+  const dateInput =
+    document.getElementById("newSaleDate");
+
+  const paymentDateInput =
+    document.getElementById("newSalePaymentDate");
+
+  const today =
+    new Date().toISOString().slice(0,10);
+
+  if(dateInput)
+    dateInput.value = today;
+
+  if(paymentDateInput)
+    paymentDateInput.value = today;
+
+
+  loadSalesAccounts();
 
   loadSales();
 
 }
+
+
 /* =========================================================
-   SALES — LOAD FROM SUPABASE
+   LOAD SALES
 ========================================================= */
 
 async function loadSales(){
 
   const container =
-    document.getElementById("salesTableContainer");
+    document.getElementById(
+      "salesTableContainer"
+    );
 
   if(!container) return;
+
 
   container.innerHTML = `
     <div class="empty">
@@ -1135,12 +1552,19 @@ async function loadSales(){
     </div>
   `;
 
+
   try{
 
-    const { data, error } = await sb
+    const {
+      data,
+      error
+    } = await sb
+
       .from("sales")
+
       .select(`
         id,
+        sale_number,
         customer_id,
         vehicle_id,
         selling_price,
@@ -1155,25 +1579,36 @@ async function loadSales(){
         ),
         vehicles(
           id,
-          stock_number,
+          vehicle_name,
           make,
           model,
-          year
+          year,
+          purchase_price,
+          purchase_currency
         )
       `)
-      .order("sale_date", {
-        ascending:false
-      });
+
+      .order(
+        "sale_date",
+        {ascending:false}
+      );
+
 
     if(error) throw error;
 
-    salesRecords = data || [];
 
-    await loadSalePayments();
+    salesRecords =
+      data || [];
+
+
+    await loadSalesPayments();
+
+    await loadSalesExpenses();
 
     renderSales();
 
     calculateSalesSummary();
+
 
   }catch(error){
 
@@ -1182,7 +1617,9 @@ async function loadSales(){
       error
     );
 
+
     container.innerHTML = `
+
       <div class="empty">
 
         <strong>
@@ -1194,28 +1631,37 @@ async function loadSales(){
         </p>
 
       </div>
+
     `;
 
   }
 
 }
 
+
 /* =========================================================
-   SALES — LOAD CUSTOMER PAYMENTS
+   LOAD PAYMENTS
 ========================================================= */
 
-async function loadSalePayments(){
+async function loadSalesPayments(){
 
   if(!salesRecords.length)
     return;
+
 
   const saleIds =
     salesRecords.map(
       sale => sale.id
     );
 
-  const { data, error } = await sb
+
+  const {
+    data,
+    error
+  } = await sb
+
     .from("customer_payments")
+
     .select(`
       id,
       sale_id,
@@ -1223,59 +1669,171 @@ async function loadSalePayments(){
       currency,
       payment_date,
       payment_method,
-      reference_number
+      reference_number,
+      payment_number,
+      payment_type,
+      due_date
     `)
-    .in("sale_id", saleIds);
 
-  if(error) throw error;
+    .in(
+      "sale_id",
+      saleIds
+    );
 
-  const payments = data || [];
+
+  if(error)
+    throw error;
+
+
+  const payments =
+    data || [];
+
 
   salesRecords =
-    salesRecords.map(sale => {
+    salesRecords.map(
+      sale => {
 
-      const salePayments =
-        payments.filter(
-          payment =>
-            payment.sale_id === sale.id
-        );
+        const salePayments =
+          payments.filter(
+            payment =>
+              payment.sale_id === sale.id
+          );
 
-      const totalPaid =
-        salePayments.reduce(
-          (sum,payment) =>
-            sum +
-            Number(payment.amount || 0),
-          0
-        );
 
-      const balance =
-        Math.max(
-          Number(sale.selling_price || 0)
-          - totalPaid,
-          0
-        );
+        const totalPaid =
+          salePayments.reduce(
+            (sum,payment) =>
+              sum +
+              Number(
+                payment.amount || 0
+              ),
+            0
+          );
 
-      return {
 
-        ...sale,
+        const balance =
+          Math.max(
+            Number(
+              sale.selling_price || 0
+            )
+            -
+            totalPaid,
+            0
+          );
 
-        payments:
-          salePayments,
 
-        total_paid:
-          totalPaid,
+        return {
 
-        balance:
-          balance
+          ...sale,
 
-      };
+          payments:
+            salePayments,
 
-    });
+          total_paid:
+            totalPaid,
+
+          balance:
+            balance
+
+        };
+
+      }
+    );
 
 }
 
+
 /* =========================================================
-   SALES — RENDER
+   LOAD VEHICLE EXPENSES
+========================================================= */
+
+async function loadSalesExpenses(){
+
+  if(!salesRecords.length)
+    return;
+
+
+  const saleIds =
+    salesRecords.map(
+      sale => sale.id
+    );
+
+
+  const {
+    data,
+    error
+  } = await sb
+
+    .from("vehicle_costs")
+
+    .select(`
+      id,
+      sale_id,
+      vehicle_id,
+      category,
+      description,
+      amount,
+      currency,
+      cost_date,
+      payment_status
+    `)
+
+    .in(
+      "sale_id",
+      saleIds
+    );
+
+
+  if(error)
+    throw error;
+
+
+  const expenses =
+    data || [];
+
+
+  salesRecords =
+    salesRecords.map(
+      sale => {
+
+        const saleExpenses =
+          expenses.filter(
+            expense =>
+              expense.sale_id === sale.id
+          );
+
+
+        const totalExpenses =
+          saleExpenses.reduce(
+            (sum,expense) =>
+              sum +
+              Number(
+                expense.amount || 0
+              ),
+            0
+          );
+
+
+        return {
+
+          ...sale,
+
+          expenses:
+            saleExpenses,
+
+          total_vehicle_expenses:
+            totalExpenses
+
+        };
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   RENDER SALES TABLE
 ========================================================= */
 
 function renderSales(){
@@ -1285,11 +1843,14 @@ function renderSales(){
       "salesTableContainer"
     );
 
+
   if(!container) return;
+
 
   if(!salesRecords.length){
 
     container.innerHTML = `
+
       <div class="empty">
 
         <strong>
@@ -1298,14 +1859,17 @@ function renderSales(){
 
         <p>
           Click <b>+ New Sale</b>
-          to record your first vehicle sale.
+          to create your first sale.
         </p>
 
       </div>
+
     `;
 
     return;
+
   }
+
 
   container.innerHTML = `
 
@@ -1318,127 +1882,176 @@ function renderSales(){
           <tr>
 
             <th>DATE</th>
+
             <th>CUSTOMER</th>
+
             <th>VEHICLE</th>
+
             <th>SALE PRICE</th>
+
             <th>PAID</th>
+
             <th>BALANCE</th>
+
+            <th>EXPENSES</th>
+
             <th>STATUS</th>
+
+            <th></th>
 
           </tr>
 
         </thead>
 
+
         <tbody>
 
           ${
-            salesRecords.map(sale => `
+            salesRecords
+              .map(
+                sale => `
 
-              <tr>
+                  <tr>
 
-                <td>
-                  ${formatDate(sale.sale_date)}
-                </td>
+                    <td>
+                      ${formatDate(
+                        sale.sale_date
+                      )}
+                    </td>
 
-                <td>
 
-                  <div class="name">
-                    ${esc(
-                      sale.customers?.full_name
-                      || "Unknown"
-                    )}
-                  </div>
+                    <td>
 
-                  <div class="sub">
-                    ${esc(
-                      sale.customers?.phone
-                      || ""
-                    )}
-                  </div>
+                      <div class="name">
 
-                </td>
+                        ${esc(
+                          sale.customers?.full_name
+                          ||
+                          "Unknown"
+                        )}
 
-                <td>
+                      </div>
 
-                  <div class="name">
-                    ${esc(
-                      sale.vehicles?.stock_number
-                      || ""
-                    )}
-                  </div>
+                      <div class="sub">
 
-                  <div class="sub">
+                        ${esc(
+                          sale.customers?.phone
+                          ||
+                          ""
+                        )}
 
-                    ${esc(
-                      sale.vehicles?.make
-                      || ""
-                    )}
+                      </div>
 
-                    ${esc(
-                      sale.vehicles?.model
-                      || ""
-                    )}
+                    </td>
 
-                    ${
-                      sale.vehicles?.year
-                      ?
-                      `(${sale.vehicles.year})`
-                      :
-                      ""
-                    }
 
-                  </div>
+                    <td>
 
-                </td>
+                      <div class="name">
 
-                <td class="amount">
+                        ${esc(
+                          sale.vehicles?.vehicle_name
+                          ||
+                          `${sale.vehicles?.make || ""} ${sale.vehicles?.model || ""}`.trim()
+                          ||
+                          "Vehicle"
+                        )}
 
-                  ${money(
-                    sale.selling_price,
-                    sale.currency
-                  )}
+                      </div>
 
-                </td>
 
-                <td class="amount">
+                      <div class="sub">
 
-                  ${money(
-                    sale.total_paid,
-                    sale.currency
-                  )}
+                        ${
+                          sale.vehicles?.year
+                          ?
+                          sale.vehicles.year
+                          :
+                          ""
+                        }
 
-                </td>
+                      </div>
 
-                <td class="amount">
+                    </td>
 
-                  ${money(
-                    sale.balance,
-                    sale.currency
-                  )}
 
-                </td>
+                    <td class="amount">
 
-                <td>
+                      ${money(
+                        sale.selling_price,
+                        sale.currency
+                      )}
 
-                  <span class="badge">
+                    </td>
 
-                    ${
-                      sale.balance <= 0
-                      ? "PAID"
-                      :
-                      sale.total_paid > 0
-                      ? "PARTIAL"
-                      :
-                      "UNPAID"
-                    }
 
-                  </span>
+                    <td class="amount">
 
-                </td>
+                      ${money(
+                        sale.total_paid || 0,
+                        sale.currency
+                      )}
 
-              </tr>
+                    </td>
 
-            `).join("")
+
+                    <td class="amount">
+
+                      ${money(
+                        sale.balance || 0,
+                        sale.currency
+                      )}
+
+                    </td>
+
+
+                    <td class="amount">
+
+                      ${money(
+                        sale.total_vehicle_expenses || 0,
+                        sale.currency
+                      )}
+
+                    </td>
+
+
+                    <td>
+
+                      <span class="badge">
+
+                        ${
+                          sale.balance <= 0
+                          ?
+                          "PAID"
+                          :
+                          sale.total_paid > 0
+                          ?
+                          "PARTIAL"
+                          :
+                          "UNPAID"
+                        }
+
+                      </span>
+
+                    </td>
+
+
+                    <td>
+
+                      <button
+                        class="secondary"
+                        onclick="openSaleDetails('${sale.id}')"
+                      >
+                        View
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                `
+              )
+              .join("")
           }
 
         </tbody>
@@ -1451,8 +2064,9 @@ function renderSales(){
 
 }
 
+
 /* =========================================================
-   SALES — SUMMARY
+   SALES SUMMARY
 ========================================================= */
 
 function calculateSalesSummary(){
@@ -1460,113 +2074,1462 @@ function calculateSalesSummary(){
   const total =
     salesRecords.length;
 
+
   let received = 0;
+
   let outstanding = 0;
 
-  salesRecords.forEach(sale => {
 
-    if(sale.currency !== "TZS"){
-      return;
+  salesRecords.forEach(
+    sale => {
+
+      if(
+        sale.currency !== "TZS"
+      ){
+        return;
+      }
+
+
+      received +=
+        Number(
+          sale.total_paid || 0
+        );
+
+
+      outstanding +=
+        Number(
+          sale.balance || 0
+        );
+
     }
+  );
 
-    received +=
-      Number(sale.total_paid || 0);
-
-    outstanding +=
-      Number(sale.balance || 0);
-
-  });
 
   const totalEl =
-    document.getElementById("salesTotal");
+    document.getElementById(
+      "salesTotal"
+    );
+
 
   const receivedEl =
-    document.getElementById("salesReceived");
+    document.getElementById(
+      "salesReceived"
+    );
+
 
   const outstandingEl =
-    document.getElementById("salesOutstanding");
+    document.getElementById(
+      "salesOutstanding"
+    );
+
 
   if(totalEl){
+
     totalEl.textContent =
       total.toLocaleString();
+
   }
+
 
   if(receivedEl){
+
     receivedEl.textContent =
-      money(received, "TZS");
+      money(
+        received,
+        "TZS"
+      );
+
   }
+
 
   if(outstandingEl){
+
     outstandingEl.textContent =
-      money(outstanding, "TZS");
+      money(
+        outstanding,
+        "TZS"
+      );
+
   }
 
 }
 
-async function checkAuth(){
-  const {data,error}=await sb.auth.getUser();
-  if(error){console.error(error);return}
-  if(!data.user){
-    // Keep the current behavior simple: index.html remains the login entry point.
-    return;
+
+/* =========================================================
+   LOAD ACCOUNTS FOR NEW SALE
+========================================================= */
+
+async function loadSalesAccounts(){
+
+  const select =
+    document.getElementById(
+      "newSalePaymentAccount"
+    );
+
+
+  if(!select) return;
+
+
+  try{
+
+    const {
+      data,
+      error
+    } = await sb
+
+      .from("accounts")
+
+      .select(
+        "id,name,currency,is_active"
+      )
+
+      .eq(
+        "is_active",
+        true
+      )
+
+      .order(
+        "name"
+      );
+
+
+    if(error)
+      throw error;
+
+
+    select.innerHTML = `
+
+      <option value="">
+        Select account
+      </option>
+
+      ${
+        (data || [])
+          .map(
+            account => `
+
+              <option
+                value="${account.id}"
+              >
+
+                ${esc(account.name)}
+                —
+                ${esc(account.currency)}
+
+              </option>
+
+            `
+          )
+          .join("")
+      }
+
+    `;
+
+
+  }catch(error){
+
+    console.error(
+      "Sales accounts error:",
+      error
+    );
+
+
+    select.innerHTML = `
+
+      <option value="">
+        Unable to load accounts
+      </option>
+
+    `;
+
   }
-  const email=data.user.email||"Authorized User";
-  document.getElementById("userEmail").textContent=email;
-  document.getElementById("avatar").textContent=email.charAt(0).toUpperCase();
+
 }
 
-async function refreshAll(){
-  await Promise.all([loadOverview(),loadAccounts()]);
-}
 
-async function refreshCurrent(){
+/* =========================================================
+   OPEN NEW SALE
+========================================================= */
 
-  if(currentView === "overview"){
+function openNewSaleModal(){
 
-    await loadOverview();
+  const modal =
+    document.getElementById(
+      "newSaleModal"
+    );
 
-  }
 
-  else if(currentView === "accounts"){
+  if(!modal) return;
 
-    await loadAccounts();
 
-  }
+  const form =
+    document.getElementById(
+      "newSaleForm"
+    );
 
-  else if(currentView === "income"){
 
-    await loadIncome();
+  if(form)
+    form.reset();
 
-  }
 
-  else{
+  const today =
+    new Date()
+      .toISOString()
+      .slice(0,10);
 
-    await refreshAll();
 
-  }
+  document.getElementById(
+    "newSaleDate"
+  ).value = today;
 
-  toast(
-    "Data refreshed",
-    "ok"
+
+  document.getElementById(
+    "newSalePaymentDate"
+  ).value = today;
+
+
+  loadSalesAccounts();
+
+
+  modal.classList.add(
+    "show"
   );
 
 }
 
-async function loadOverview(){
-  try{
-    const {data,error}=await sb.from("financial_overview").select("*").single();
-    if(error) throw error;
-    document.getElementById("ovCash").textContent=money(data.total_cash,"TZS");
-    document.getElementById("ovIncome").textContent=money(data.total_income,"TZS");
-    document.getElementById("ovExpenses").textContent=money(data.total_expenses,"TZS");
-    document.getElementById("ovProfit").textContent=money(data.net_profit,"TZS");
-    document.getElementById("ovVehicles").textContent=Number(data.total_vehicles||0).toLocaleString();
-    document.getElementById("ovSales").textContent=Number(data.total_sales||0).toLocaleString();
-    document.getElementById("ovCustomers").textContent=Number(data.total_customers||0).toLocaleString();
-    renderOverviewAccounts();
-  }catch(e){
-    console.error(e);
+
+/* =========================================================
+   CLOSE NEW SALE
+========================================================= */
+
+function closeNewSaleModal(){
+
+  const modal =
+    document.getElementById(
+      "newSaleModal"
+    );
+
+
+  if(modal){
+
+    modal.classList.remove(
+      "show"
+    );
+
   }
+
+}
+
+
+/* =========================================================
+   SAVE NEW SALE
+========================================================= */
+
+async function saveNewSale(){
+
+  const button =
+    document.querySelector(
+      '#newSaleModal .primary'
+    );
+
+
+  try{
+
+    const customerName =
+      document.getElementById(
+        "newSaleCustomerName"
+      ).value.trim();
+
+
+    const customerPhone =
+      document.getElementById(
+        "newSaleCustomerPhone"
+      ).value.trim();
+
+
+    const customerEmail =
+      document.getElementById(
+        "newSaleCustomerEmail"
+      ).value.trim();
+
+
+    const customerTin =
+      document.getElementById(
+        "newSaleCustomerTin"
+      ).value.trim();
+
+
+    const customerAddress =
+      document.getElementById(
+        "newSaleCustomerAddress"
+      ).value.trim();
+
+
+    const vehicleName =
+      document.getElementById(
+        "newSaleVehicleName"
+      ).value.trim();
+
+
+    const vehicleYear =
+      Number(
+        document.getElementById(
+          "newSaleVehicleYear"
+        ).value
+      );
+
+
+    const sellingPrice =
+      Number(
+        document.getElementById(
+          "newSalePrice"
+        ).value
+      );
+
+
+    const currency =
+      document.getElementById(
+        "newSaleCurrency"
+      ).value;
+
+
+    const saleDate =
+      document.getElementById(
+        "newSaleDate"
+      ).value;
+
+
+    const purchaseCost =
+      Number(
+        document.getElementById(
+          "newSalePurchaseCost"
+        ).value
+        || 0
+      );
+
+
+    const paymentAmount =
+      Number(
+        document.getElementById(
+          "newSalePaymentAmount"
+        ).value
+        || 0
+      );
+
+
+    const paymentType =
+      document.getElementById(
+        "newSalePaymentType"
+      ).value;
+
+
+    const paymentDate =
+      document.getElementById(
+        "newSalePaymentDate"
+      ).value;
+
+
+    const paymentAccount =
+      document.getElementById(
+        "newSalePaymentAccount"
+      ).value
+      || null;
+
+
+    const paymentMethod =
+      document.getElementById(
+        "newSalePaymentMethod"
+      ).value
+      || null;
+
+
+    const paymentReference =
+      document.getElementById(
+        "newSalePaymentReference"
+      ).value.trim();
+
+
+    const notes =
+      document.getElementById(
+        "newSaleNotes"
+      ).value.trim();
+
+
+    /* -----------------------------------------------
+       VALIDATION
+    ------------------------------------------------ */
+
+    if(!customerName){
+
+      toast(
+        "Customer name is required",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if(!vehicleName){
+
+      toast(
+        "Vehicle name is required",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if(!vehicleYear){
+
+      toast(
+        "Vehicle year is required",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if(!sellingPrice || sellingPrice <= 0){
+
+      toast(
+        "Selling price must be greater than zero",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if(paymentAmount > sellingPrice){
+
+      toast(
+        "Initial payment cannot exceed selling price",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if(button){
+
+      button.disabled = true;
+
+      button.textContent =
+        "Saving...";
+
+    }
+
+
+    /* -----------------------------------------------
+       1. CREATE CUSTOMER
+    ------------------------------------------------ */
+
+    const {
+      data: customer,
+      error: customerError
+    } = await sb
+
+      .from("customers")
+
+      .insert({
+
+        full_name:
+          customerName,
+
+        phone:
+          customerPhone || null,
+
+        email:
+          customerEmail || null,
+
+        address:
+          customerAddress || null,
+
+        tin:
+          customerTin || null
+
+      })
+
+      .select(
+        "id"
+      )
+
+      .single();
+
+
+    if(customerError)
+      throw customerError;
+
+
+    /* -----------------------------------------------
+       2. CREATE VEHICLE
+    ------------------------------------------------ */
+
+    const vehicleStock =
+      "VEH-" +
+      Date.now();
+
+
+    const {
+      data: vehicle,
+      error: vehicleError
+    } = await sb
+
+      .from("vehicles")
+
+      .insert({
+
+        stock_number:
+          vehicleStock,
+
+        vehicle_name:
+          vehicleName,
+
+        year:
+          vehicleYear,
+
+        make:
+          vehicleName,
+
+        model:
+          "",
+
+        purchase_price:
+          purchaseCost,
+
+        purchase_currency:
+          currency,
+
+        status:
+          "SOLD"
+
+      })
+
+      .select(
+        "id"
+      )
+
+      .single();
+
+
+    if(vehicleError)
+      throw vehicleError;
+
+
+    /* -----------------------------------------------
+       3. CREATE SALE
+    ------------------------------------------------ */
+
+    const saleNumber =
+      "SALE-" +
+      new Date()
+        .toISOString()
+        .slice(0,10)
+        .replaceAll("-","") +
+      "-" +
+      Math.random()
+        .toString(36)
+        .substring(2,8)
+        .toUpperCase();
+
+
+    const {
+      data: sale,
+      error: saleError
+    } = await sb
+
+      .from("sales")
+
+      .insert({
+
+        sale_number:
+          saleNumber,
+
+        customer_id:
+          customer.id,
+
+        vehicle_id:
+          vehicle.id,
+
+        selling_price:
+          sellingPrice,
+
+        currency:
+          currency,
+
+        sale_date:
+          saleDate,
+
+        status:
+          paymentAmount >= sellingPrice
+          ?
+          "PAID"
+          :
+          paymentAmount > 0
+          ?
+          "PARTIAL"
+          :
+          "UNPAID",
+
+        notes:
+          notes || null
+
+      })
+
+      .select(
+        "id"
+      )
+
+      .single();
+
+
+    if(saleError)
+      throw saleError;
+
+
+    /* -----------------------------------------------
+       4. CREATE INITIAL PAYMENT
+       ONLY IF USER ENTERED AN AMOUNT
+    ------------------------------------------------ */
+
+    if(paymentAmount > 0){
+
+      const {
+        error: paymentError
+      } = await sb
+
+        .from("customer_payments")
+
+        .insert({
+
+          sale_id:
+            sale.id,
+
+          customer_id:
+            customer.id,
+
+          account_id:
+            paymentAccount,
+
+          amount:
+            paymentAmount,
+
+          currency:
+            currency,
+
+          payment_date:
+            paymentDate || saleDate,
+
+          payment_method:
+            paymentMethod,
+
+          reference_number:
+            paymentReference || null,
+
+          payment_number:
+            1,
+
+          payment_type:
+            paymentType,
+
+          notes:
+            "Initial payment"
+
+        });
+
+
+      if(paymentError)
+        throw paymentError;
+
+    }
+
+
+    toast(
+      "Sale created successfully",
+      "ok"
+    );
+
+
+    closeNewSaleModal();
+
+
+    await loadSales();
+
+
+  }catch(error){
+
+    console.error(
+      "Save sale error:",
+      error
+    );
+
+
+    toast(
+      error.message ||
+      "Unable to save sale",
+      "error"
+    );
+
+
+  }finally{
+
+    if(button){
+
+      button.disabled = false;
+
+      button.textContent =
+        "Save Sale";
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   SALE DETAILS
+========================================================= */
+
+async function openSaleDetails(
+  saleId
+){
+
+  const sale =
+    salesRecords.find(
+      item =>
+        item.id === saleId
+    );
+
+
+  if(!sale){
+
+    toast(
+      "Sale not found",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const vehicle =
+    sale.vehicles || {};
+
+
+  const customer =
+    sale.customers || {};
+
+
+  const purchaseCost =
+    Number(
+      vehicle.purchase_price || 0
+    );
+
+
+  const vehicleExpenses =
+    Number(
+      sale.total_vehicle_expenses || 0
+    );
+
+
+  const totalVehicleCost =
+    purchaseCost +
+    vehicleExpenses;
+
+
+  const grossProfit =
+    Number(
+      sale.selling_price || 0
+    )
+    -
+    totalVehicleCost;
+
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+
+  modal.className =
+    "modal-bg show";
+
+
+  modal.id =
+    "saleDetailsModal";
+
+
+  modal.innerHTML = `
+
+    <div class="modal">
+
+      <div class="modal-head">
+
+        <div>
+
+          <h3>
+            ${esc(
+              sale.sale_number ||
+              "Vehicle Sale"
+            )}
+          </h3>
+
+          <span>
+            ${formatDate(
+              sale.sale_date
+            )}
+          </span>
+
+        </div>
+
+
+        <button
+          class="close"
+          onclick="closeSaleDetails()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="form">
+
+
+        <div class="section-title">
+          Customer
+        </div>
+
+        <div class="mini-grid">
+
+          <div class="mini">
+
+            <b>
+              ${esc(
+                customer.full_name ||
+                "Unknown"
+              )}
+            </b>
+
+            <span>
+              ${esc(
+                customer.phone ||
+                "No phone"
+              )}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="section-title">
+          Vehicle
+        </div>
+
+        <div class="mini-grid">
+
+          <div class="mini">
+
+            <b>
+              ${esc(
+                vehicle.vehicle_name ||
+                "Vehicle"
+              )}
+            </b>
+
+            <span>
+              ${vehicle.year || ""}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="section-title">
+          Financial Summary
+        </div>
+
+
+        <div class="mini-grid">
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                sale.selling_price,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Selling Price
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                sale.total_paid || 0,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Total Paid
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                sale.balance || 0,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Balance
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                vehicleExpenses,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Vehicle Expenses
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                totalVehicleCost,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Total Vehicle Cost
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b>
+              ${money(
+                grossProfit,
+                sale.currency
+              )}
+            </b>
+
+            <span>
+              Estimated Gross Profit
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="section-title">
+          Payments
+        </div>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>#</th>
+                <th>DATE</th>
+                <th>TYPE</th>
+                <th>AMOUNT</th>
+                <th>METHOD</th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${
+                (sale.payments || [])
+                  .map(
+                    (payment,index) => `
+
+                      <tr>
+
+                        <td>
+                          ${
+                            payment.payment_number
+                            ||
+                            index + 1
+                          }
+                        </td>
+
+                        <td>
+                          ${formatDate(
+                            payment.payment_date
+                          )}
+                        </td>
+
+                        <td>
+                          ${esc(
+                            payment.payment_type
+                            ||
+                            "Payment"
+                          )}
+                        </td>
+
+                        <td class="amount">
+
+                          ${money(
+                            payment.amount,
+                            payment.currency
+                          )}
+
+                        </td>
+
+                        <td>
+                          ${esc(
+                            payment.payment_method
+                            ||
+                            "-"
+                          )}
+                        </td>
+
+                      </tr>
+
+                    `
+                  )
+                  .join("")
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <div class="section-title">
+
+          Vehicle Expenses
+
+          <button
+            class="secondary"
+            onclick="openVehicleExpenseModal('${sale.id}','${sale.vehicle_id}')"
+          >
+            + Add Expense
+          </button>
+
+        </div>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>DATE</th>
+                <th>CATEGORY</th>
+                <th>DESCRIPTION</th>
+                <th>AMOUNT</th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${
+                (sale.expenses || [])
+                  .map(
+                    expense => `
+
+                      <tr>
+
+                        <td>
+                          ${formatDate(
+                            expense.cost_date
+                          )}
+                        </td>
+
+                        <td>
+                          ${esc(
+                            expense.category
+                          )}
+                        </td>
+
+                        <td>
+                          ${esc(
+                            expense.description
+                            ||
+                            "-"
+                          )}
+                        </td>
+
+                        <td class="amount">
+
+                          ${money(
+                            expense.amount,
+                            expense.currency
+                          )}
+
+                        </td>
+
+                      </tr>
+
+                    `
+                  )
+                  .join("")
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <div class="section-title">
+
+          Add Payment
+
+          <button
+            class="secondary"
+            onclick="openSalePaymentModal('${sale.id}','${sale.customer_id}')"
+          >
+            + Add Payment
+          </button>
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(
+    modal
+  );
+
+}
+
+
+function closeSaleDetails(){
+
+  const modal =
+    document.getElementById(
+      "saleDetailsModal"
+    );
+
+
+  if(modal)
+    modal.remove();
+
+}
+
+
+/* =========================================================
+   ADD PAYMENT
+========================================================= */
+
+async function openSalePaymentModal(
+  saleId,
+  customerId
+){
+
+  const sale =
+    salesRecords.find(
+      item =>
+        item.id === saleId
+    );
+
+
+  if(!sale) return;
+
+
+  const amount =
+    prompt(
+      `Enter payment amount\nOutstanding: ${money(
+        sale.balance,
+        sale.currency
+      )}`
+    );
+
+
+  if(amount === null)
+    return;
+
+
+  const paymentAmount =
+    Number(amount);
+
+
+  if(
+    !paymentAmount ||
+    paymentAmount <= 0
+  ){
+
+    toast(
+      "Enter a valid payment amount",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    paymentAmount >
+    Number(sale.balance || 0)
+  ){
+
+    toast(
+      "Payment cannot exceed outstanding balance",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const payments =
+    sale.payments || [];
+
+
+  const nextPaymentNumber =
+    payments.length + 1;
+
+
+  const {
+    error
+  } = await sb
+
+    .from("customer_payments")
+
+    .insert({
+
+      sale_id:
+        saleId,
+
+      customer_id:
+        customerId,
+
+      amount:
+        paymentAmount,
+
+      currency:
+        sale.currency,
+
+      payment_date:
+        new Date()
+          .toISOString()
+          .slice(0,10),
+
+      payment_number:
+        nextPaymentNumber,
+
+      payment_type:
+        "INSTALLMENT"
+
+    });
+
+
+  if(error){
+
+    console.error(error);
+
+    toast(
+      error.message,
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  toast(
+    "Payment added successfully",
+    "ok"
+  );
+
+
+  closeSaleDetails();
+
+  await loadSales();
+
+}
+
+
+/* =========================================================
+   ADD VEHICLE EXPENSE
+========================================================= */
+
+async function openVehicleExpenseModal(
+  saleId,
+  vehicleId
+){
+
+  const sale =
+    salesRecords.find(
+      item =>
+        item.id === saleId
+    );
+
+
+  if(!sale) return;
+
+
+  const category =
+    prompt(
+      "Expense category\nExample: Wharfage, Clearing, Transport, Car Wash"
+    );
+
+
+  if(!category)
+    return;
+
+
+  const amount =
+    Number(
+      prompt(
+        "Expense amount"
+      )
+    );
+
+
+  if(
+    !amount ||
+    amount <= 0
+  ){
+
+    toast(
+      "Enter a valid expense amount",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const description =
+    prompt(
+      "Description (optional)"
+    );
+
+
+  const {
+    error
+  } = await sb
+
+    .from("vehicle_costs")
+
+    .insert({
+
+      sale_id:
+        saleId,
+
+      vehicle_id:
+        vehicleId,
+
+      category:
+        category.trim(),
+
+      description:
+        description?.trim()
+        || null,
+
+      amount:
+        amount,
+
+      currency:
+        sale.currency,
+
+      cost_date:
+        new Date()
+          .toISOString()
+          .slice(0,10),
+
+      payment_status:
+        "PAID"
+
+    });
+
+
+  if(error){
+
+    console.error(error);
+
+    toast(
+      error.message,
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  toast(
+    "Vehicle expense added",
+    "ok"
+  );
+
+
+  closeSaleDetails();
+
+  await loadSales();
+
 }
 
 /* =========================================================
