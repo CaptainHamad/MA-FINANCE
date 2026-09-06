@@ -4913,50 +4913,85 @@ async function saveSalePayment(
   }
 
 
+   /* -----------------------------------------------
+     GET PAYMENT FORM VALUES
+  ----------------------------------------------- */
+
+  const paymentModal =
+    document.getElementById(
+      "salePaymentModal"
+    );
+
+
+  if(!paymentModal){
+
+    toast(
+      "Payment form not found. Please refresh the page.",
+      "error"
+    );
+
+    return;
+  }
+
+
   const paymentAmount =
     Number(
-      document.getElementById(
-        "salePaymentAmount"
-      ).value || 0
+      paymentModal
+        .querySelector(
+          "#salePaymentAmount"
+        )
+        .value || 0
     );
 
 
   const paymentType =
-    document.getElementById(
-      "salePaymentType"
-    ).value;
+    paymentModal
+      .querySelector(
+        "#salePaymentType"
+      )
+      .value;
 
 
   const paymentDate =
-    document.getElementById(
-      "salePaymentDate"
-    ).value;
+    paymentModal
+      .querySelector(
+        "#salePaymentDate"
+      )
+      .value;
 
 
   const paymentAccount =
-    document.getElementById(
-      "salePaymentAccount"
-    ).value;
+    paymentModal
+      .querySelector(
+        "#salePaymentAccount"
+      )
+      .value;
 
 
   const paymentMethod =
-    document.getElementById(
-      "salePaymentMethod"
-    ).value;
+    paymentModal
+      .querySelector(
+        "#salePaymentMethod"
+      )
+      .value;
 
 
   const referenceNumber =
-    document.getElementById(
-      "salePaymentReference"
-    ).value.trim();
+    paymentModal
+      .querySelector(
+        "#salePaymentReference"
+      )
+      .value
+      .trim();
 
 
   const notes =
-    document.getElementById(
-      "salePaymentNotes"
-    ).value.trim();
-
-
+    paymentModal
+      .querySelector(
+        "#salePaymentNotes"
+      )
+      .value
+      .trim();
   /* -----------------------------------------------
      VALIDATION
   ----------------------------------------------- */
