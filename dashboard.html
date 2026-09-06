@@ -2251,25 +2251,538 @@ async function loadSalesAccounts(){
    OPEN NEW SALE
 ========================================================= */
 
+/* =========================================================
+   OPEN NEW SALE PAGE
+========================================================= */
+
 function openNewSaleModal(){
 
-  const modal =
-    document.getElementById(
-      "newSaleModal"
-    );
+  const view =
+    document.getElementById("view-sales");
+
+  if(!view) return;
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+
+        <h2>New Vehicle Sale</h2>
+
+        <p>
+          Record a vehicle sale, customer information
+          and the first payment.
+        </p>
+
+      </div>
+
+      <button
+        class="secondary"
+        onclick="closeNewSaleModal()"
+      >
+        ← Back to Sales
+      </button>
+
+    </div>
 
 
-  if(!modal) return;
+    <form
+      class="form"
+      id="newSaleForm"
+      onsubmit="event.preventDefault(); saveNewSale();"
+    >
 
 
-  const form =
-    document.getElementById(
-      "newSaleForm"
-    );
+      <!-- =================================================
+           CUSTOMER
+      ================================================== -->
+
+      <div class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <h3>Customer Information</h3>
+
+            <span>
+              Information about the customer purchasing the vehicle
+            </span>
+
+          </div>
+
+        </div>
 
 
-  if(form)
-    form.reset();
+        <div class="panel-body">
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label>FULL NAME *</label>
+
+              <input
+                id="newSaleCustomerName"
+                placeholder="Customer full name"
+                required
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>PHONE</label>
+
+              <input
+                id="newSaleCustomerPhone"
+                placeholder="e.g. 0712 345 678"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>EMAIL</label>
+
+              <input
+                id="newSaleCustomerEmail"
+                type="email"
+                placeholder="customer@email.com"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>TIN</label>
+
+              <input
+                id="newSaleCustomerTin"
+                placeholder="Customer TIN"
+              >
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>ADDRESS</label>
+
+              <input
+                id="newSaleCustomerAddress"
+                placeholder="Customer address"
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <br>
+
+
+      <!-- =================================================
+           VEHICLE
+      ================================================== -->
+
+      <div class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <h3>Vehicle Information</h3>
+
+            <span>
+              Enter the vehicle being sold
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="panel-body">
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label>VEHICLE NAME *</label>
+
+              <input
+                id="newSaleVehicleName"
+                placeholder="e.g. Toyota Harrier"
+                required
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>YEAR *</label>
+
+              <input
+                id="newSaleVehicleYear"
+                type="number"
+                min="1900"
+                max="2100"
+                placeholder="2020"
+                required
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>PURCHASE COST</label>
+
+              <input
+                id="newSalePurchaseCost"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Optional"
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <br>
+
+
+      <!-- =================================================
+           SALE
+      ================================================== -->
+
+      <div class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <h3>Sale Information</h3>
+
+            <span>
+              Enter the agreed selling price
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="panel-body">
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label>SELLING PRICE *</label>
+
+              <input
+                id="newSalePrice"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="65,000,000"
+                required
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>CURRENCY *</label>
+
+              <select
+                id="newSaleCurrency"
+                required
+              >
+
+                <option value="TZS">
+                  TZS — Tanzanian Shilling
+                </option>
+
+                <option value="USD">
+                  USD — US Dollar
+                </option>
+
+                <option value="JPY">
+                  JPY — Japanese Yen
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>SALE DATE *</label>
+
+              <input
+                id="newSaleDate"
+                type="date"
+                required
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <br>
+
+
+      <!-- =================================================
+           FIRST PAYMENT
+      ================================================== -->
+
+      <div class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <h3>First Payment</h3>
+
+            <span>
+              Record only the money actually received today.
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="panel-body">
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label>PAYMENT AMOUNT</label>
+
+              <input
+                id="newSalePaymentAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="e.g. 20,000,000"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>PAYMENT TYPE</label>
+
+              <select
+                id="newSalePaymentType"
+              >
+
+                <option value="INITIAL DEPOSIT">
+                  Initial Deposit
+                </option>
+
+                <option value="INSTALLMENT">
+                  Installment
+                </option>
+
+                <option value="FULL PAYMENT">
+                  Full Payment
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>PAYMENT DATE</label>
+
+              <input
+                id="newSalePaymentDate"
+                type="date"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>RECEIVING ACCOUNT</label>
+
+              <select
+                id="newSalePaymentAccount"
+              >
+
+                <option value="">
+                  Select account
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>PAYMENT METHOD</label>
+
+              <select
+                id="newSalePaymentMethod"
+              >
+
+                <option value="">
+                  Select method
+                </option>
+
+                <option value="BANK">
+                  Bank Transfer
+                </option>
+
+                <option value="CASH">
+                  Cash
+                </option>
+
+                <option value="MOBILE MONEY">
+                  Mobile Money
+                </option>
+
+                <option value="CHEQUE">
+                  Cheque
+                </option>
+
+                <option value="OTHER">
+                  Other
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>REFERENCE NUMBER</label>
+
+              <input
+                id="newSalePaymentReference"
+                placeholder="e.g. NMB-12345"
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <br>
+
+
+      <!-- =================================================
+           NOTES
+      ================================================== -->
+
+      <div class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <h3>Notes</h3>
+
+          </div>
+
+        </div>
+
+
+        <div class="panel-body">
+
+          <div class="field">
+
+            <label>SALE NOTES</label>
+
+            <textarea
+              id="newSaleNotes"
+              placeholder="Any additional information about this sale..."
+              rows="4"
+            ></textarea>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <br>
+
+
+      <!-- =================================================
+           ACTIONS
+      ================================================== -->
+
+      <div
+        style="
+          display:flex;
+          justify-content:flex-end;
+          gap:12px;
+          padding-bottom:30px;
+        "
+      >
+
+        <button
+          type="button"
+          class="secondary"
+          onclick="closeNewSaleModal()"
+        >
+          Cancel
+        </button>
+
+
+        <button
+          type="submit"
+          class="primary"
+        >
+          Save Sale
+        </button>
+
+      </div>
+
+
+    </form>
+
+  `;
 
 
   const today =
@@ -2278,22 +2791,26 @@ function openNewSaleModal(){
       .slice(0,10);
 
 
-  document.getElementById(
-    "newSaleDate"
-  ).value = today;
+  const saleDate =
+    document.getElementById(
+      "newSaleDate"
+    );
+
+  const paymentDate =
+    document.getElementById(
+      "newSalePaymentDate"
+    );
 
 
-  document.getElementById(
-    "newSalePaymentDate"
-  ).value = today;
+  if(saleDate)
+    saleDate.value = today;
+
+
+  if(paymentDate)
+    paymentDate.value = today;
 
 
   loadSalesAccounts();
-
-
-  modal.classList.add(
-    "show"
-  );
 
 }
 
@@ -2302,24 +2819,15 @@ function openNewSaleModal(){
    CLOSE NEW SALE
 ========================================================= */
 
+/* =========================================================
+   CLOSE NEW SALE PAGE
+========================================================= */
+
 function closeNewSaleModal(){
 
-  const modal =
-    document.getElementById(
-      "newSaleModal"
-    );
-
-
-  if(modal){
-
-    modal.classList.remove(
-      "show"
-    );
-
-  }
+  buildSalesModule();
 
 }
-
 
 /* =========================================================
    SAVE NEW SALE
@@ -2327,10 +2835,10 @@ function closeNewSaleModal(){
 
 async function saveNewSale(){
 
-  const button =
-    document.querySelector(
-      '#newSaleModal .primary'
-    );
+ const button =
+  document.querySelector(
+    '#newSaleForm .primary'
+  );
 
 
   try{
