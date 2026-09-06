@@ -974,6 +974,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
   buildSalesModule();
 
+  buildExpensesModule();
+
   await checkAuth();
 
   await refreshAll();
@@ -995,6 +997,8 @@ function go(view){
   if(view==="accounts") loadAccounts();
 
 if(view==="income") loadIncome();
+
+if(view==="expenses") loadExpenses();
 
 if(view==="overview") loadOverview();
 }
@@ -1018,6 +1022,1450 @@ function buildPlaceholders(){
   });
 }
 
+
+/* =========================================================
+   GENERAL EXPENSES MODULE
+========================================================= */
+
+let expenseRecords = [];
+let editingExpenseId = null;
+
+
+/* ---------- BUILD EXPENSES PAGE ---------- */
+
+function buildExpensesModule(){
+
+  const view =
+    document.getElementById("view-expenses");
+
+  if(!view) return;
+
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+        <h2>Expenses</h2>
+
+        <p>
+          Manage office, operational and general company expenses.
+        </p>
+      </div>
+
+      <button
+        class="primary"
+        onclick="openExpenseModal()"
+      >
+        + Add Expense
+      </button>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <div class="mini-grid">
+
+      <div class="mini">
+        <b id="expenseTotal">
+          TZS 0
+        </b>
+
+        <span>
+          Total Expenses
+        </span>
+      </div>
+
+
+      <div class="mini">
+        <b id="expenseMonth">
+          TZS 0
+        </b>
+
+        <span>
+          This Month
+        </span>
+      </div>
+
+
+      <div class="mini">
+        <b id="expensePaid">
+          TZS 0
+        </b>
+
+        <span>
+          Paid
+        </span>
+      </div>
+
+
+      <div class="mini">
+        <b id="expensePending">
+          TZS 0
+        </b>
+
+        <span>
+          Pending
+        </span>
+      </div>
+
+    </div>
+
+
+    <!-- EXPENSE LIST -->
+
+    <div class="panel">
+
+      <div class="panel-head">
+
+        <div>
+
+          <h3>
+            General Expenses
+          </h3>
+
+          <span>
+            Office and company operating expenses
+          </span>
+
+        </div>
+
+
+        <button
+          class="secondary"
+          onclick="loadExpenses()"
+        >
+          Refresh
+        </button>
+
+      </div>
+
+
+      <div
+        style="
+          padding:16px;
+          border-bottom:1px solid #edf0f3;
+          display:flex;
+          gap:10px;
+          flex-wrap:wrap;
+        "
+      >
+
+        <input
+          id="expenseSearch"
+          placeholder="Search expenses..."
+          oninput="filterExpenses()"
+          style="
+            flex:1;
+            min-width:220px;
+            padding:11px 13px;
+            border:1px solid #dfe4e8;
+            border-radius:9px;
+            font-size:14px;
+          "
+        >
+
+
+        <select
+          id="expenseStatusFilter"
+          onchange="filterExpenses()"
+          style="
+            padding:11px 13px;
+            border:1px solid #dfe4e8;
+            border-radius:9px;
+            font-size:14px;
+          "
+        >
+
+          <option value="">
+            All Status
+          </option>
+
+          <option value="Paid">
+            Paid
+          </option>
+
+          <option value="Pending">
+            Pending
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div
+        class="panel-body"
+        id="expensesTableContainer"
+      >
+
+        <div class="empty">
+          Loading expenses...
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ADD / EDIT EXPENSE MODAL -->
+
+    <div
+      class="modal-bg"
+      id="generalExpenseModal"
+    >
+
+      <div class="modal">
+
+        <div class="modal-head">
+
+          <div>
+
+            <h3 id="expenseModalTitle">
+              Add Expense
+            </h3>
+
+            <span>
+              Record a general company expense
+            </span>
+
+          </div>
+
+
+          <button
+            class="close"
+            onclick="closeExpenseModal()"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <form
+          class="form"
+          id="generalExpenseForm"
+          onsubmit="saveGeneralExpense(event)"
+        >
+
+
+          <!-- DESCRIPTION -->
+
+          <div class="field full">
+
+            <label>
+              DESCRIPTION *
+            </label>
+
+            <input
+              id="generalExpenseDescription"
+              placeholder="e.g. Electricity bill"
+              required
+            >
+
+          </div>
+
+
+          <!-- CATEGORY -->
+
+          <div class="field">
+
+            <label>
+              CATEGORY *
+            </label>
+
+            <input
+              id="generalExpenseCategory"
+              placeholder="e.g. Electricity, Water, Rent"
+              required
+            >
+
+          </div>
+
+
+          <!-- AMOUNT -->
+
+          <div class="field">
+
+            <label>
+              AMOUNT *
+            </label>
+
+            <input
+              id="generalExpenseAmount"
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder="e.g. 250000"
+              required
+            >
+
+          </div>
+
+
+          <!-- CURRENCY -->
+
+          <div class="field">
+
+            <label>
+              CURRENCY *
+            </label>
+
+            <select
+              id="generalExpenseCurrency"
+              required
+            >
+
+              <option value="TZS">
+                TZS — Tanzanian Shilling
+              </option>
+
+              <option value="USD">
+                USD — US Dollar
+              </option>
+
+              <option value="JPY">
+                JPY — Japanese Yen
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- DATE -->
+
+          <div class="field">
+
+            <label>
+              EXPENSE DATE *
+            </label>
+
+            <input
+              id="generalExpenseDate"
+              type="date"
+              required
+            >
+
+          </div>
+
+
+          <!-- STATUS -->
+
+          <div class="field">
+
+            <label>
+              PAYMENT STATUS *
+            </label>
+
+            <select
+              id="generalExpenseStatus"
+              onchange="toggleGeneralExpenseAccount()"
+              required
+            >
+
+              <option value="Paid">
+                Paid
+              </option>
+
+              <option value="Pending">
+                Pending
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- ACCOUNT -->
+
+          <div class="field">
+
+            <label>
+              PAYMENT ACCOUNT
+            </label>
+
+            <select
+              id="generalExpenseAccount"
+            >
+
+              <option value="">
+                Select account
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- REFERENCE -->
+
+          <div class="field">
+
+            <label>
+              REFERENCE NUMBER
+            </label>
+
+            <input
+              id="generalExpenseReference"
+              placeholder="e.g. NMB-12345"
+            >
+
+          </div>
+
+
+          <!-- NOTES -->
+
+          <div class="field full">
+
+            <label>
+              NOTES
+            </label>
+
+            <textarea
+              id="generalExpenseNotes"
+              placeholder="Additional notes..."
+              rows="3"
+            ></textarea>
+
+          </div>
+
+
+        </form>
+
+
+        <div class="modal-foot">
+
+          <button
+            class="secondary"
+            onclick="closeExpenseModal()"
+          >
+            Cancel
+          </button>
+
+
+          <button
+            class="primary"
+            onclick="saveGeneralExpense(event)"
+            id="saveGeneralExpenseButton"
+          >
+            Save Expense
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  const dateInput =
+    document.getElementById(
+      "generalExpenseDate"
+    );
+
+  if(dateInput){
+
+    dateInput.value =
+      new Date()
+        .toISOString()
+        .split("T")[0];
+
+  }
+
+}
+
+
+/* ---------- OPEN MODAL ---------- */
+
+async function openExpenseModal(id=null){
+
+  const modal =
+    document.getElementById(
+      "generalExpenseModal"
+    );
+
+  const form =
+    document.getElementById(
+      "generalExpenseForm"
+    );
+
+  if(!modal) return;
+
+
+  editingExpenseId = id;
+
+
+  if(form){
+    form.reset();
+  }
+
+
+  document.getElementById(
+    "expenseModalTitle"
+  ).textContent =
+    id
+      ? "Edit Expense"
+      : "Add Expense";
+
+
+  document.getElementById(
+    "generalExpenseDate"
+  ).value =
+    new Date()
+      .toISOString()
+      .split("T")[0];
+
+
+  await loadGeneralExpenseAccounts();
+
+
+  if(id){
+
+    const record =
+      expenseRecords.find(
+        e => e.id === id
+      );
+
+    if(!record) return;
+
+
+    document.getElementById(
+      "generalExpenseDescription"
+    ).value =
+      record.description || "";
+
+
+    document.getElementById(
+      "generalExpenseCategory"
+    ).value =
+      record.category || "";
+
+
+    document.getElementById(
+      "generalExpenseAmount"
+    ).value =
+      record.amount || "";
+
+
+    document.getElementById(
+      "generalExpenseCurrency"
+    ).value =
+      record.currency || "TZS";
+
+
+    document.getElementById(
+      "generalExpenseDate"
+    ).value =
+      record.expense_date || "";
+
+
+    document.getElementById(
+      "generalExpenseStatus"
+    ).value =
+      record.payment_status || "Paid";
+
+
+    document.getElementById(
+      "generalExpenseAccount"
+    ).value =
+      record.account_id || "";
+
+
+    document.getElementById(
+      "generalExpenseReference"
+    ).value =
+      record.reference_number || "";
+
+
+    document.getElementById(
+      "generalExpenseNotes"
+    ).value =
+      record.notes || "";
+
+  }
+
+
+  toggleGeneralExpenseAccount();
+
+
+  modal.classList.add("show");
+
+}
+
+
+/* ---------- CLOSE MODAL ---------- */
+
+function closeExpenseModal(){
+
+  const modal =
+    document.getElementById(
+      "generalExpenseModal"
+    );
+
+  if(modal){
+    modal.classList.remove("show");
+  }
+
+  editingExpenseId = null;
+
+}
+
+
+/* ---------- LOAD ACCOUNTS ---------- */
+
+async function loadGeneralExpenseAccounts(){
+
+  const select =
+    document.getElementById(
+      "generalExpenseAccount"
+    );
+
+  if(!select) return;
+
+
+  select.innerHTML =
+    `<option value="">
+      Select account
+    </option>`;
+
+
+  try{
+
+    const {
+      data,
+      error
+    } =
+      await sb
+        .from("accounts")
+        .select(
+          "id,name,currency"
+        )
+        .eq(
+          "is_active",
+          true
+        )
+        .order("name");
+
+
+    if(error) throw error;
+
+
+    (data || []).forEach(account => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        account.id;
+
+      option.textContent =
+        `${account.name} — ${account.currency}`;
+
+      select.appendChild(option);
+
+    });
+
+  }
+
+  catch(error){
+
+    console.error(
+      "Expense accounts error:",
+      error
+    );
+
+  }
+
+}
+
+
+/* ---------- ACCOUNT ENABLE / DISABLE ---------- */
+
+function toggleGeneralExpenseAccount(){
+
+  const status =
+    document.getElementById(
+      "generalExpenseStatus"
+    );
+
+  const account =
+    document.getElementById(
+      "generalExpenseAccount"
+    );
+
+  if(!status || !account) return;
+
+
+  if(status.value === "Paid"){
+
+    account.disabled = false;
+    account.required = true;
+
+  }else{
+
+    account.disabled = true;
+    account.required = false;
+    account.value = "";
+
+  }
+
+}
+
+
+/* ---------- SAVE EXPENSE ---------- */
+
+async function saveGeneralExpense(event){
+
+  if(event){
+    event.preventDefault();
+  }
+
+
+  const description =
+    document.getElementById(
+      "generalExpenseDescription"
+    ).value.trim();
+
+
+  const category =
+    document.getElementById(
+      "generalExpenseCategory"
+    ).value.trim();
+
+
+  const amount =
+    Number(
+      document.getElementById(
+        "generalExpenseAmount"
+      ).value
+    );
+
+
+  const currency =
+    document.getElementById(
+      "generalExpenseCurrency"
+    ).value;
+
+
+  const expenseDate =
+    document.getElementById(
+      "generalExpenseDate"
+    ).value;
+
+
+  const paymentStatus =
+    document.getElementById(
+      "generalExpenseStatus"
+    ).value;
+
+
+  const accountId =
+    document.getElementById(
+      "generalExpenseAccount"
+    ).value || null;
+
+
+  const reference =
+    document.getElementById(
+      "generalExpenseReference"
+    ).value.trim() || null;
+
+
+  const notes =
+    document.getElementById(
+      "generalExpenseNotes"
+    ).value.trim() || null;
+
+
+  if(!description){
+
+    toast(
+      "Please enter expense description.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  if(!category){
+
+    toast(
+      "Please enter expense category.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  if(!amount || amount <= 0){
+
+    toast(
+      "Please enter a valid amount.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  if(!expenseDate){
+
+    toast(
+      "Please select expense date.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    paymentStatus === "Paid" &&
+    !accountId
+  ){
+
+    toast(
+      "Please select payment account.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  const {
+    data: {
+      user
+    }
+  } =
+    await sb.auth.getUser();
+
+
+  const payload = {
+
+    description,
+    category,
+    amount,
+    currency,
+    expense_date: expenseDate,
+    payment_status: paymentStatus,
+    account_id: accountId,
+    reference_number: reference,
+    notes
+
+  };
+
+
+  try{
+
+    let error;
+
+
+    if(editingExpenseId){
+
+      ({
+        error
+      } =
+        await sb
+          .from("expenses")
+          .update(payload)
+          .eq(
+            "id",
+            editingExpenseId
+          ));
+
+    }else{
+
+      ({
+        error
+      } =
+        await sb
+          .from("expenses")
+          .insert({
+
+            ...payload,
+
+            created_by:
+              user?.id || null
+
+          }));
+
+    }
+
+
+    if(error) throw error;
+
+
+    toast(
+      editingExpenseId
+        ? "Expense updated successfully."
+        : "Expense added successfully.",
+      "ok"
+    );
+
+
+    closeExpenseModal();
+
+
+    await loadExpenses();
+
+  }
+
+  catch(error){
+
+    console.error(
+      "Save general expense error:",
+      error
+    );
+
+
+    toast(
+      error.message ||
+      "Failed to save expense.",
+      "err"
+    );
+
+  }
+
+}
+
+
+/* ---------- LOAD EXPENSES ---------- */
+
+async function loadExpenses(){
+
+  const container =
+    document.getElementById(
+      "expensesTableContainer"
+    );
+
+  if(!container) return;
+
+
+  container.innerHTML =
+    `<div class="empty">
+      Loading expenses...
+    </div>`;
+
+
+  try{
+
+    const {
+      data,
+      error
+    } =
+      await sb
+        .from("expenses")
+        .select(`
+          *,
+          accounts(
+            name,
+            currency
+          )
+        `)
+        .order(
+          "expense_date",
+          {
+            ascending:false
+          }
+        );
+
+
+    if(error) throw error;
+
+
+    expenseRecords =
+      data || [];
+
+
+    calculateExpenseSummary(
+      expenseRecords
+    );
+
+
+    renderExpenses(
+      expenseRecords
+    );
+
+  }
+
+  catch(error){
+
+    console.error(
+      "Load expenses error:",
+      error
+    );
+
+
+    container.innerHTML = `
+      <div class="empty">
+
+        <strong>
+          Unable to load expenses
+        </strong>
+
+        <br>
+
+        ${esc(error.message)}
+
+      </div>
+    `;
+
+  }
+
+}
+
+
+/* ---------- RENDER EXPENSES ---------- */
+
+function renderExpenses(records){
+
+  const container =
+    document.getElementById(
+      "expensesTableContainer"
+    );
+
+  if(!container) return;
+
+
+  if(!records.length){
+
+    container.innerHTML = `
+      <div class="empty">
+
+        <strong>
+          No expenses recorded yet
+        </strong>
+
+        <p>
+          Click
+          <b>+ Add Expense</b>
+          to record your first expense.
+        </p>
+
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML = `
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>Date</th>
+
+            <th>Description</th>
+
+            <th>Category</th>
+
+            <th>Amount</th>
+
+            <th>Account</th>
+
+            <th>Status</th>
+
+            <th>Action</th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          ${
+            records.map(record => `
+
+              <tr>
+
+                <td>
+                  ${formatDate(
+                    record.expense_date
+                  )}
+                </td>
+
+
+                <td>
+
+                  <div class="name">
+                    ${esc(
+                      record.description
+                    )}
+                  </div>
+
+                  ${
+                    record.reference_number
+                      ? `
+                        <div class="sub">
+                          Ref:
+                          ${esc(
+                            record.reference_number
+                          )}
+                        </div>
+                      `
+                      : ""
+                  }
+
+                </td>
+
+
+                <td>
+
+                  <span class="badge orange">
+
+                    ${esc(
+                      record.category
+                    )}
+
+                  </span>
+
+                </td>
+
+
+                <td class="amount">
+
+                  ${money(
+                    record.amount,
+                    record.currency
+                  )}
+
+                </td>
+
+
+                <td>
+
+                  ${
+                    record.accounts
+                      ? esc(
+                          record.accounts.name
+                        )
+                      : '<span class="sub">—</span>'
+                  }
+
+                </td>
+
+
+                <td>
+
+                  ${
+                    record.payment_status === "Paid"
+
+                      ? `
+                        <span class="badge green">
+                          Paid
+                        </span>
+                      `
+
+                      : `
+                        <span class="badge orange">
+                          Pending
+                        </span>
+                      `
+                  }
+
+                </td>
+
+
+                <td>
+
+                  <div
+                    style="
+                      display:flex;
+                      gap:6px;
+                    "
+                  >
+
+                    <button
+                      class="secondary"
+                      onclick="openExpenseModal('${record.id}')"
+                    >
+                      Edit
+                    </button>
+
+
+                    <button
+                      class="secondary"
+                      onclick="deleteGeneralExpense('${record.id}')"
+                    >
+                      Delete
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            `).join("")
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  `;
+
+}
+
+
+/* ---------- SEARCH / FILTER ---------- */
+
+function filterExpenses(){
+
+  const search =
+    (
+      document.getElementById(
+        "expenseSearch"
+      )?.value || ""
+    )
+      .toLowerCase()
+      .trim();
+
+
+  const status =
+    document.getElementById(
+      "expenseStatusFilter"
+    )?.value || "";
+
+
+  const filtered =
+    expenseRecords.filter(record => {
+
+      const text =
+        `${record.description || ""} ${record.category || ""} ${record.reference_number || ""}`
+          .toLowerCase();
+
+
+      const matchesSearch =
+        !search ||
+        text.includes(search);
+
+
+      const matchesStatus =
+        !status ||
+        record.payment_status === status;
+
+
+      return (
+        matchesSearch &&
+        matchesStatus
+      );
+
+    });
+
+
+  renderExpenses(filtered);
+
+}
+
+
+/* ---------- SUMMARY ---------- */
+
+function calculateExpenseSummary(records){
+
+  let total = 0;
+  let month = 0;
+  let paid = 0;
+  let pending = 0;
+
+
+  const now =
+    new Date();
+
+
+  const currentMonth =
+    now.getMonth();
+
+
+  const currentYear =
+    now.getFullYear();
+
+
+  records.forEach(record => {
+
+    if(record.currency !== "TZS"){
+      return;
+    }
+
+
+    const amount =
+      Number(
+        record.amount || 0
+      );
+
+
+    total += amount;
+
+
+    if(
+      record.payment_status === "Paid"
+    ){
+
+      paid += amount;
+
+    }
+
+
+    if(
+      record.payment_status === "Pending"
+    ){
+
+      pending += amount;
+
+    }
+
+
+    const d =
+      new Date(
+        record.expense_date
+      );
+
+
+    if(
+      d.getMonth() === currentMonth &&
+      d.getFullYear() === currentYear
+    ){
+
+      month += amount;
+
+    }
+
+  });
+
+
+  const totalEl =
+    document.getElementById(
+      "expenseTotal"
+    );
+
+  const monthEl =
+    document.getElementById(
+      "expenseMonth"
+    );
+
+  const paidEl =
+    document.getElementById(
+      "expensePaid"
+    );
+
+  const pendingEl =
+    document.getElementById(
+      "expensePending"
+    );
+
+
+  if(totalEl)
+    totalEl.textContent =
+      money(total,"TZS");
+
+
+  if(monthEl)
+    monthEl.textContent =
+      money(month,"TZS");
+
+
+  if(paidEl)
+    paidEl.textContent =
+      money(paid,"TZS");
+
+
+  if(pendingEl)
+    pendingEl.textContent =
+      money(pending,"TZS");
+
+}
+
+
+/* ---------- DELETE ---------- */
+
+async function deleteGeneralExpense(id){
+
+  const record =
+    expenseRecords.find(
+      e => e.id === id
+    );
+
+
+  if(!record) return;
+
+
+  const confirmed =
+    confirm(
+      `Delete expense "${record.description}"?`
+    );
+
+
+  if(!confirmed) return;
+
+
+  try{
+
+    const {
+      error
+    } =
+      await sb
+        .from("expenses")
+        .delete()
+        .eq(
+          "id",
+          id
+        );
+
+
+    if(error) throw error;
+
+
+    toast(
+      "Expense deleted successfully.",
+      "ok"
+    );
+
+
+    await loadExpenses();
+
+  }
+
+  catch(error){
+
+    console.error(
+      "Delete expense error:",
+      error
+    );
+
+
+    toast(
+      error.message ||
+      "Failed to delete expense.",
+      "err"
+    );
+
+  }
+
+}
 /* =========================================================
    SALES MODULE — MATtex
    CUSTOMER + VEHICLE + SALE + PAYMENTS + VEHICLE EXPENSES
