@@ -2828,144 +2828,167 @@ function closeNewSaleModal(){
   buildSalesModule();
 
 }
-
 /* =========================================================
    SAVE NEW SALE
 ========================================================= */
 
+/* =========================================================
+   SAVE NEW SALE
+   CUSTOMER + VEHICLE + SALE + INITIAL PAYMENT
+========================================================= */
+
 async function saveNewSale(){
 
- const button =
-  document.querySelector(
-    '#newSaleForm .primary'
-  );
-
+  const button =
+    document.querySelector(
+      '#newSaleForm .primary'
+    );
 
   try{
 
-    const customerName =
-      document.getElementById(
-        "newSaleCustomerName"
-      ).value.trim();
+    /* =====================================================
+       READ CUSTOMER
+    ===================================================== */
 
+    const customerName =
+      document
+        .getElementById("newSaleCustomerName")
+        .value
+        .trim();
 
     const customerPhone =
-      document.getElementById(
-        "newSaleCustomerPhone"
-      ).value.trim();
-
+      document
+        .getElementById("newSaleCustomerPhone")
+        .value
+        .trim();
 
     const customerEmail =
-      document.getElementById(
-        "newSaleCustomerEmail"
-      ).value.trim();
-
+      document
+        .getElementById("newSaleCustomerEmail")
+        .value
+        .trim();
 
     const customerTin =
-      document.getElementById(
-        "newSaleCustomerTin"
-      ).value.trim();
-
+      document
+        .getElementById("newSaleCustomerTin")
+        .value
+        .trim();
 
     const customerAddress =
-      document.getElementById(
-        "newSaleCustomerAddress"
-      ).value.trim();
+      document
+        .getElementById("newSaleCustomerAddress")
+        .value
+        .trim();
 
+
+    /* =====================================================
+       READ VEHICLE
+    ===================================================== */
 
     const vehicleName =
-      document.getElementById(
-        "newSaleVehicleName"
-      ).value.trim();
-
+      document
+        .getElementById("newSaleVehicleName")
+        .value
+        .trim();
 
     const vehicleYear =
       Number(
-        document.getElementById(
-          "newSaleVehicleYear"
-        ).value
+        document
+          .getElementById("newSaleVehicleYear")
+          .value
       );
-
-
-    const sellingPrice =
-      Number(
-        document.getElementById(
-          "newSalePrice"
-        ).value
-      );
-
-
-    const currency =
-      document.getElementById(
-        "newSaleCurrency"
-      ).value;
-
-
-    const saleDate =
-      document.getElementById(
-        "newSaleDate"
-      ).value;
 
 
     const purchaseCost =
       Number(
-        document.getElementById(
-          "newSalePurchaseCost"
-        ).value
-        || 0
+        document
+          .getElementById("newSalePurchaseCost")
+          .value
+          || 0
       );
 
 
+    /* =====================================================
+       READ SALE
+    ===================================================== */
+
+    const sellingPrice =
+      Number(
+        document
+          .getElementById("newSalePrice")
+          .value
+      );
+
+
+    const currency =
+      document
+        .getElementById("newSaleCurrency")
+        .value;
+
+
+    const saleDate =
+      document
+        .getElementById("newSaleDate")
+        .value;
+
+
+    /* =====================================================
+       READ FIRST PAYMENT
+    ===================================================== */
+
     const paymentAmount =
       Number(
-        document.getElementById(
-          "newSalePaymentAmount"
-        ).value
-        || 0
+        document
+          .getElementById("newSalePaymentAmount")
+          .value
+          || 0
       );
 
 
     const paymentType =
-      document.getElementById(
-        "newSalePaymentType"
-      ).value;
+      document
+        .getElementById("newSalePaymentType")
+        .value;
 
 
     const paymentDate =
-      document.getElementById(
-        "newSalePaymentDate"
-      ).value;
+      document
+        .getElementById("newSalePaymentDate")
+        .value
+        || saleDate;
 
 
     const paymentAccount =
-      document.getElementById(
-        "newSalePaymentAccount"
-      ).value
-      || null;
+      document
+        .getElementById("newSalePaymentAccount")
+        .value
+        || null;
 
 
     const paymentMethod =
-      document.getElementById(
-        "newSalePaymentMethod"
-      ).value
-      || null;
+      document
+        .getElementById("newSalePaymentMethod")
+        .value
+        || null;
 
 
     const paymentReference =
-      document.getElementById(
-        "newSalePaymentReference"
-      ).value.trim();
+      document
+        .getElementById("newSalePaymentReference")
+        .value
+        .trim();
 
 
     const notes =
-      document.getElementById(
-        "newSaleNotes"
-      ).value.trim();
+      document
+        .getElementById("newSaleNotes")
+        .value
+        .trim();
 
 
-    /* -----------------------------------------------
+    /* =====================================================
        VALIDATION
-    ------------------------------------------------ */
+    ===================================================== */
 
     if(!customerName){
 
@@ -2975,7 +2998,6 @@ async function saveNewSale(){
       );
 
       return;
-
     }
 
 
@@ -2987,7 +3009,6 @@ async function saveNewSale(){
       );
 
       return;
-
     }
 
 
@@ -2999,11 +3020,13 @@ async function saveNewSale(){
       );
 
       return;
-
     }
 
 
-    if(!sellingPrice || sellingPrice <= 0){
+    if(
+      !sellingPrice ||
+      sellingPrice <= 0
+    ){
 
       toast(
         "Selling price must be greater than zero",
@@ -3011,11 +3034,25 @@ async function saveNewSale(){
       );
 
       return;
-
     }
 
 
-    if(paymentAmount > sellingPrice){
+    if(
+      paymentAmount < 0
+    ){
+
+      toast(
+        "Payment amount cannot be negative",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if(
+      paymentAmount > sellingPrice
+    ){
 
       toast(
         "Initial payment cannot exceed selling price",
@@ -3023,7 +3060,6 @@ async function saveNewSale(){
       );
 
       return;
-
     }
 
 
@@ -3033,54 +3069,87 @@ async function saveNewSale(){
 
       button.textContent =
         "Saving...";
-
     }
 
 
-    /* -----------------------------------------------
-       1. CREATE CUSTOMER
-    ------------------------------------------------ */
+    /* =====================================================
+       1. FIND OR CREATE CUSTOMER
+    ===================================================== */
 
-    const {
-      data: customer,
-      error: customerError
-    } = await sb
-
-      .from("customers")
-
-      .insert({
-
-        full_name:
-          customerName,
-
-        phone:
-          customerPhone || null,
-
-        email:
-          customerEmail || null,
-
-        address:
-          customerAddress || null,
-
-        tin:
-          customerTin || null
-
-      })
-
-      .select(
-        "id"
-      )
-
-      .single();
+    let customer = null;
 
 
-    if(customerError)
-      throw customerError;
+    /*
+      If phone exists, first try to find the customer.
+      This prevents creating the same customer repeatedly.
+    */
+
+    if(customerPhone){
+
+      const {
+        data: existingCustomer,
+        error: customerLookupError
+      } = await sb
+        .from("customers")
+        .select("id,full_name,phone")
+        .eq("phone", customerPhone)
+        .maybeSingle();
 
 
-    /* -----------------------------------------------
+      if(customerLookupError)
+        throw customerLookupError;
+
+
+      customer =
+        existingCustomer || null;
+    }
+
+
+    /*
+      If customer does not exist, create one.
+    */
+
+    if(!customer){
+
+      const {
+        data: newCustomer,
+        error: customerError
+      } = await sb
+        .from("customers")
+        .insert({
+
+          full_name:
+            customerName,
+
+          phone:
+            customerPhone || null,
+
+          email:
+            customerEmail || null,
+
+          address:
+            customerAddress || null,
+
+          tin:
+            customerTin || null
+
+        })
+        .select("id")
+        .single();
+
+
+      if(customerError)
+        throw customerError;
+
+
+      customer =
+        newCustomer;
+    }
+
+
+    /* =====================================================
        2. CREATE VEHICLE
-    ------------------------------------------------ */
+    ===================================================== */
 
     const vehicleStock =
       "VEH-" +
@@ -3105,6 +3174,11 @@ async function saveNewSale(){
         year:
           vehicleYear,
 
+        /*
+          These columns are required
+          by the existing vehicles table.
+        */
+
         make:
           vehicleName,
 
@@ -3122,9 +3196,7 @@ async function saveNewSale(){
 
       })
 
-      .select(
-        "id"
-      )
+      .select("id")
 
       .single();
 
@@ -3133,9 +3205,9 @@ async function saveNewSale(){
       throw vehicleError;
 
 
-    /* -----------------------------------------------
+    /* =====================================================
        3. CREATE SALE
-    ------------------------------------------------ */
+    ===================================================== */
 
     const saleNumber =
       "SALE-" +
@@ -3178,14 +3250,17 @@ async function saveNewSale(){
           saleDate,
 
         status:
+
           paymentAmount >= sellingPrice
-          ?
-          "PAID"
-          :
+            ? "PAID"
+
+            :
+
           paymentAmount > 0
-          ?
-          "PARTIAL"
-          :
+            ? "PARTIAL"
+
+            :
+
           "UNPAID",
 
         notes:
@@ -3193,9 +3268,7 @@ async function saveNewSale(){
 
       })
 
-      .select(
-        "id"
-      )
+      .select("id")
 
       .single();
 
@@ -3204,10 +3277,19 @@ async function saveNewSale(){
       throw saleError;
 
 
-    /* -----------------------------------------------
-       4. CREATE INITIAL PAYMENT
-       ONLY IF USER ENTERED AN AMOUNT
-    ------------------------------------------------ */
+    /* =====================================================
+       4. CREATE FIRST PAYMENT
+       
+       IMPORTANT:
+       We record ONLY the amount actually received.
+
+       Example:
+       Selling price = 65,000,000
+       Payment = 20,000,000
+
+       Payment record = 20,000,000
+       NOT 65,000,000
+    ===================================================== */
 
     if(paymentAmount > 0){
 
@@ -3235,7 +3317,7 @@ async function saveNewSale(){
             currency,
 
           payment_date:
-            paymentDate || saleDate,
+            paymentDate,
 
           payment_method:
             paymentMethod,
@@ -3250,16 +3332,19 @@ async function saveNewSale(){
             paymentType,
 
           notes:
-            "Initial payment"
+            notes || "Initial payment"
 
         });
 
 
       if(paymentError)
         throw paymentError;
-
     }
 
+
+    /* =====================================================
+       SUCCESS
+    ===================================================== */
 
     toast(
       "Sale created successfully",
@@ -3267,10 +3352,12 @@ async function saveNewSale(){
     );
 
 
+    /*
+      Return to Sales page.
+      buildSalesModule() will reload the sales list.
+    */
+
     closeNewSaleModal();
-
-
-    await loadSales();
 
 
   }catch(error){
@@ -3296,14 +3383,11 @@ async function saveNewSale(){
 
       button.textContent =
         "Save Sale";
-
     }
 
   }
 
 }
-
-
 /* =========================================================
    SALE DETAILS
 ========================================================= */
