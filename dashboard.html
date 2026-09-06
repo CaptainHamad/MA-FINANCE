@@ -7805,10 +7805,12 @@ async function loadSales(){
     }
 
 
+  await loadSalesExpenses();
+
+
     renderSales();
 
     calculateSalesSummary();
-
 
   }catch(error){
 
