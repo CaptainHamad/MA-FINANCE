@@ -5340,7 +5340,7 @@ async function saveSalePayment(
 }
 
 /* =========================================================
-   ADD VEHICLE EXPENSE
+   VEHICLE EXPENSES
 ========================================================= */
 
 async function openVehicleExpenseModal(
@@ -5350,30 +5350,604 @@ async function openVehicleExpenseModal(
 
   const sale =
     salesRecords.find(
-      item =>
-        item.id === saleId
+      item => item.id === saleId
+    );
+
+  if(!sale){
+
+    toast(
+      "Sale not found.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  /* Remove existing modal */
+
+  const existing =
+    document.getElementById(
+      "vehicleExpenseModal"
+    );
+
+  if(existing)
+    existing.remove();
+
+
+  /* Create modal */
+
+  const modal =
+    document.createElement("div");
+
+  modal.className =
+    "modal-bg show";
+
+  modal.id =
+    "vehicleExpenseModal";
+
+
+  const vehicleName =
+    sale.vehicles?.vehicle_name ||
+    "Vehicle";
+
+
+  const vehicleYear =
+    sale.vehicles?.year ||
+    "";
+
+
+  const customerName =
+    sale.customers?.full_name ||
+    "Customer";
+
+
+  modal.innerHTML = `
+
+    <div
+      class="modal"
+      style="
+        max-width:700px;
+        width:95%;
+      "
+    >
+
+      <div class="modal-head">
+
+        <div>
+
+          <h3>
+            Add Vehicle Expense
+          </h3>
+
+          <span>
+            ${esc(vehicleName)}
+            ${vehicleYear}
+            —
+            ${esc(customerName)}
+          </span>
+
+        </div>
+
+        <button
+          class="close"
+          type="button"
+          onclick="closeVehicleExpenseModal()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="form">
+
+
+        <!-- VEHICLE -->
+
+        <div
+          style="
+            padding:14px;
+            margin-bottom:18px;
+            border:1px solid #e5e7eb;
+            border-radius:12px;
+            background:#f8f9fb;
+          "
+        >
+
+          <div
+            style="
+              font-size:10px;
+              font-weight:700;
+              color:#7b8490;
+              text-transform:uppercase;
+              margin-bottom:5px;
+            "
+          >
+            Expense For
+          </div>
+
+          <div
+            style="
+              font-size:16px;
+              font-weight:700;
+            "
+          >
+            ${esc(vehicleName)}
+            ${vehicleYear}
+          </div>
+
+          <div
+            style="
+              font-size:12px;
+              color:#7b8490;
+              margin-top:4px;
+            "
+          >
+            Customer:
+            ${esc(customerName)}
+          </div>
+
+        </div>
+
+
+        <div class="mini-grid">
+
+
+          <!-- CATEGORY -->
+
+          <div class="field">
+
+            <label>
+              EXPENSE CATEGORY *
+            </label>
+
+            <select
+              id="vehicleExpenseCategory"
+              required
+            >
+
+              <option value="">
+                Select category
+              </option>
+
+              <option value="Wharfage">
+                Wharfage
+              </option>
+
+              <option value="Clearing">
+                Clearing
+              </option>
+
+              <option value="Transport">
+                Transport
+              </option>
+
+              <option value="Car Wash">
+                Car Wash
+              </option>
+
+              <option value="Repairs">
+                Repairs
+              </option>
+
+              <option value="Inspection">
+                Inspection
+              </option>
+
+              <option value="Storage">
+                Storage
+              </option>
+
+              <option value="Fuel">
+                Fuel
+              </option>
+
+              <option value="Documentation">
+                Documentation
+              </option>
+
+              <option value="Other">
+                Other
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- AMOUNT -->
+
+          <div class="field">
+
+            <label>
+              AMOUNT *
+            </label>
+
+            <input
+              id="vehicleExpenseAmount"
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder="e.g. 2500000"
+              required
+            >
+
+          </div>
+
+
+          <!-- CURRENCY -->
+
+          <div class="field">
+
+            <label>
+              CURRENCY *
+            </label>
+
+            <select
+              id="vehicleExpenseCurrency"
+            >
+
+              <option value="TZS">
+                TZS — Tanzanian Shilling
+              </option>
+
+              <option value="USD">
+                USD — US Dollar
+              </option>
+
+              <option value="JPY">
+                JPY — Japanese Yen
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- DATE -->
+
+          <div class="field">
+
+            <label>
+              EXPENSE DATE *
+            </label>
+
+            <input
+              id="vehicleExpenseDate"
+              type="date"
+              required
+            >
+
+          </div>
+
+
+          <!-- STATUS -->
+
+          <div class="field">
+
+            <label>
+              PAYMENT STATUS *
+            </label>
+
+            <select
+              id="vehicleExpensePaymentStatus"
+            >
+
+              <option value="PAID">
+                Paid
+              </option>
+
+              <option value="PENDING">
+                Pending
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- ACCOUNT -->
+
+          <div class="field">
+
+            <label>
+              PAYMENT ACCOUNT
+            </label>
+
+            <select
+              id="vehicleExpenseAccount"
+            >
+
+              <option value="">
+                Select account
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- DESCRIPTION -->
+
+          <div
+            class="field"
+            style="grid-column:1/-1;"
+          >
+
+            <label>
+              DESCRIPTION / NOTES
+            </label>
+
+            <textarea
+              id="vehicleExpenseDescription"
+              rows="3"
+              placeholder="e.g. Wharfage charges for this vehicle"
+            ></textarea>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-foot">
+
+        <button
+          class="secondary"
+          type="button"
+          onclick="closeVehicleExpenseModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="primary"
+          type="button"
+          onclick="
+            saveVehicleExpense(
+              '${saleId}',
+              '${vehicleId}'
+            )
+          "
+        >
+          Save Expense
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(
+    modal
+  );
+
+
+  /* Default date */
+
+  const dateInput =
+    document.getElementById(
+      "vehicleExpenseDate"
+    );
+
+  if(dateInput){
+
+    dateInput.value =
+      new Date()
+        .toISOString()
+        .slice(0,10);
+
+  }
+
+
+  /* Default currency */
+
+  const currencyInput =
+    document.getElementById(
+      "vehicleExpenseCurrency"
+    );
+
+  if(currencyInput){
+
+    currencyInput.value =
+      sale.currency ||
+      "TZS";
+
+  }
+
+
+  /* Load accounts */
+
+  await loadVehicleExpenseAccounts();
+
+}
+
+
+/* =========================================================
+   CLOSE VEHICLE EXPENSE MODAL
+========================================================= */
+
+function closeVehicleExpenseModal(){
+
+  const modal =
+    document.getElementById(
+      "vehicleExpenseModal"
+    );
+
+  if(modal)
+    modal.remove();
+
+}
+
+
+/* =========================================================
+   LOAD PAYMENT ACCOUNTS
+========================================================= */
+
+async function loadVehicleExpenseAccounts(){
+
+  const select =
+    document.getElementById(
+      "vehicleExpenseAccount"
+    );
+
+  if(!select)
+    return;
+
+
+  try{
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("accounts")
+      .select(`
+        id,
+        name,
+        account_type,
+        currency,
+        is_active
+      `)
+      .eq(
+        "is_active",
+        true
+      )
+      .order(
+        "name",
+        {
+          ascending:true
+        }
+      );
+
+
+    if(error)
+      throw error;
+
+
+    select.innerHTML = `
+      <option value="">
+        Select account
+      </option>
+    `;
+
+
+    (data || []).forEach(
+      account => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          account.id;
+
+        option.textContent =
+          `${account.name} — ${account.currency}`;
+
+        select.appendChild(
+          option
+        );
+
+      }
     );
 
 
-  if(!sale) return;
+  }catch(error){
 
+    console.error(
+      "Error loading accounts:",
+      error
+    );
+
+    toast(
+      "Unable to load payment accounts.",
+      "error"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SAVE VEHICLE EXPENSE
+========================================================= */
+
+async function saveVehicleExpense(
+  saleId,
+  vehicleId
+){
 
   const category =
-    prompt(
-      "Expense category\nExample: Wharfage, Clearing, Transport, Car Wash"
-    );
-
-
-  if(!category)
-    return;
+    document.getElementById(
+      "vehicleExpenseCategory"
+    )?.value
+    ?.trim();
 
 
   const amount =
     Number(
-      prompt(
-        "Expense amount"
-      )
+      document.getElementById(
+        "vehicleExpenseAmount"
+      )?.value || 0
     );
+
+
+  const currency =
+    document.getElementById(
+      "vehicleExpenseCurrency"
+    )?.value ||
+    "TZS";
+
+
+  const expenseDate =
+    document.getElementById(
+      "vehicleExpenseDate"
+    )?.value;
+
+
+  const paymentStatus =
+    document.getElementById(
+      "vehicleExpensePaymentStatus"
+    )?.value ||
+    "PAID";
+
+
+  const accountId =
+    document.getElementById(
+      "vehicleExpenseAccount"
+    )?.value ||
+    null;
+
+
+  const description =
+    document.getElementById(
+      "vehicleExpenseDescription"
+    )?.value
+    ?.trim() ||
+    null;
+
+
+  /* -----------------------------------------
+     VALIDATION
+  ----------------------------------------- */
+
+  if(!category){
+
+    toast(
+      "Please select an expense category.",
+      "error"
+    );
+
+    return;
+  }
 
 
   if(
@@ -5382,27 +5956,34 @@ async function openVehicleExpenseModal(
   ){
 
     toast(
-      "Enter a valid expense amount",
+      "Please enter a valid expense amount.",
       "error"
     );
 
     return;
-
   }
 
 
-  const description =
-    prompt(
-      "Description (optional)"
+  if(!expenseDate){
+
+    toast(
+      "Please select the expense date.",
+      "error"
     );
 
+    return;
+  }
+
+
+  /* -----------------------------------------
+     SAVE TO DATABASE
+  ----------------------------------------- */
 
   const {
+    data,
     error
   } = await sb
-
     .from("vehicle_costs")
-
     .insert({
 
       sale_id:
@@ -5412,55 +5993,77 @@ async function openVehicleExpenseModal(
         vehicleId,
 
       category:
-        category.trim(),
+        category,
 
       description:
-        description?.trim()
-        || null,
+        description,
 
       amount:
         amount,
 
       currency:
-        sale.currency,
+        currency,
+
+      account_id:
+        accountId,
 
       cost_date:
-        new Date()
-          .toISOString()
-          .slice(0,10),
+        expenseDate,
 
       payment_status:
-        "PAID"
+        paymentStatus
 
-    });
+    })
+    .select()
+    .single();
 
 
   if(error){
 
-    console.error(error);
+    console.error(
+      "Vehicle expense error:",
+      error
+    );
 
     toast(
-      error.message,
+      error.message ||
+      "Failed to save vehicle expense.",
       "error"
     );
 
     return;
-
   }
 
 
+  /* -----------------------------------------
+     SUCCESS
+  ----------------------------------------- */
+
   toast(
-    "Vehicle expense added",
+    "Vehicle expense added successfully.",
     "ok"
   );
 
 
-  closeSaleDetails();
+  closeVehicleExpenseModal();
+
+
+  /* -----------------------------------------
+     REFRESH SALES DATA
+  ----------------------------------------- */
 
   await loadSales();
 
-}
 
+  /* -----------------------------------------
+     REOPEN UPDATED SALE DETAILS
+  ----------------------------------------- */
+
+  openSaleDetails(
+    saleId
+  );
+
+}
 /* =========================================================
    INCOME MODULE
 ========================================================= */
