@@ -232,6 +232,220 @@ tr:hover td{background:#fbfcfd}
   .hero{align-items:flex-start;gap:14px;flex-direction:column}.cards{grid-template-columns:1fr}
   .toolbar{flex-direction:column}.search{width:100%}.filters{width:100%}.filters select{flex:1}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
 }
+
+
+/* =========================================================
+   EMPLOYEE FORM — PREMIUM UI
+========================================================= */
+
+.employee-form-page{
+  max-width:1100px;
+  margin:0 auto;
+}
+
+.employee-form-hero{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:20px;
+}
+
+.employee-form-title{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.employee-form-icon{
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  background:linear-gradient(135deg,#fff1e5,#ffe0c2);
+  color:#e87517;
+  display:grid;
+  place-items:center;
+  font-size:22px;
+  font-weight:900;
+  box-shadow:0 8px 22px rgba(245,130,32,.12);
+}
+
+.employee-form-title h2{
+  margin:0;
+  font-size:22px;
+  font-weight:850;
+  letter-spacing:-.5px;
+}
+
+.employee-form-title p{
+  margin:5px 0 0;
+  color:#8b949e;
+  font-size:11px;
+}
+
+.employee-form-card{
+  background:#fff;
+  border:1px solid #e7ebef;
+  border-radius:20px;
+  box-shadow:0 18px 55px rgba(24,39,55,.07);
+  overflow:hidden;
+}
+
+.employee-section{
+  padding:24px 26px;
+}
+
+.employee-section + .employee-section{
+  border-top:1px solid #edf0f2;
+}
+
+.employee-section-head{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  margin-bottom:20px;
+}
+
+.employee-section-head .section-icon{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  background:#f6f7f8;
+  display:grid;
+  place-items:center;
+  color:#68727d;
+  font-size:13px;
+  font-weight:900;
+}
+
+.employee-section-head h3{
+  margin:0;
+  font-size:13px;
+  font-weight:850;
+  color:#17212b;
+}
+
+.employee-section-head span{
+  display:block;
+  margin-top:3px;
+  font-size:10px;
+  color:#9aa3ad;
+}
+
+.employee-form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px 22px;
+}
+
+.employee-field{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.employee-field label{
+  font-size:10px;
+  font-weight:850;
+  color:#59636e;
+  letter-spacing:.25px;
+}
+
+.employee-field label .required{
+  color:#e87517;
+}
+
+.employee-field input,
+.employee-field select{
+  width:100%;
+  height:44px;
+  box-sizing:border-box;
+  border:1px solid #dfe4e8;
+  border-radius:10px;
+  padding:0 13px;
+  outline:none;
+  background:#fbfcfd;
+  color:#1c2732;
+  font-size:12px;
+  transition:.18s ease;
+}
+
+.employee-field input:hover,
+.employee-field select:hover{
+  border-color:#cbd2d8;
+  background:#fff;
+}
+
+.employee-field input:focus,
+.employee-field select:focus{
+  border-color:#f58220;
+  background:#fff;
+  box-shadow:0 0 0 4px rgba(245,130,32,.09);
+}
+
+.employee-field input::placeholder{
+  color:#b1b8bf;
+}
+
+.employee-salary-wrap{
+  position:relative;
+}
+
+.employee-salary-wrap span{
+  position:absolute;
+  left:13px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:10px;
+  font-weight:800;
+  color:#8c959e;
+  pointer-events:none;
+}
+
+.employee-salary-wrap input{
+  padding-left:42px;
+}
+
+.employee-form-footer{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:10px;
+  padding:18px 26px;
+  background:#fafbfc;
+  border-top:1px solid #edf0f2;
+}
+
+.employee-form-footer .secondary,
+.employee-form-footer .primary{
+  height:42px;
+  padding:0 19px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:850;
+}
+
+.employee-form-footer .primary{
+  box-shadow:0 8px 20px rgba(245,130,32,.18);
+}
+
+@media(max-width:760px){
+  .employee-form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .employee-section{
+    padding:20px;
+  }
+
+  .employee-form-footer{
+    padding:16px 20px;
+  }
+
+  .employee-form-hero{
+    align-items:flex-start;
+  }
+}
 </style>
 </head>
 
@@ -3497,219 +3711,198 @@ function openEmployeeForm(
   if(!view) return;
 
 
-  view.innerHTML = `
+ document.getElementById("view-employees").innerHTML = `
+  <div class="employee-form-page">
 
-    <div class="hero">
+    <div class="employee-form-hero">
+      <div class="employee-form-title">
 
-      <div>
+        <div class="employee-form-icon">
+          ♟
+        </div>
 
-        <h2>
-          ${
-            employee
-              ? "Edit Employee"
-              : "Add Employee"
-          }
-        </h2>
-
-        <p>
-          Employee profile and salary information.
-        </p>
+        <div>
+          <h2>${employee ? "Edit Employee" : "Add Employee"}</h2>
+          <p>
+            ${employee
+              ? "Update employee profile and salary information."
+              : "Create an employee profile and define their salary information."
+            }
+          </p>
+        </div>
 
       </div>
-
     </div>
 
 
-    <div
-      class="panel"
-      style="
-        max-width:850px;
-        margin-top:18px;
-      "
-    >
+    <div class="employee-form-card">
 
-      <div class="panel-body">
+      <!-- PERSONAL INFORMATION -->
+      <div class="employee-section">
 
-        <form
-          class="form"
-          onsubmit="saveEmployee(event)"
-        >
+        <div class="employee-section-head">
 
-          <div class="form-grid">
+          <div class="section-icon">01</div>
+
+          <div>
+            <h3>Personal Information</h3>
+            <span>Basic employee contact details</span>
+          </div>
+
+        </div>
 
 
+        <div class="employee-form-grid">
+
+          <div class="employee-field">
             <label>
-
-              Full Name
-
-              <input
-                id="employeeName"
-                required
-                value="${esc(
-                  employee?.full_name ||
-                  ""
-                )}"
-                placeholder="Full name"
-              >
-
+              Full Name <span class="required">*</span>
             </label>
 
+            <input
+              id="employeeName"
+              type="text"
+              placeholder="Enter full name"
+              value="${esc(employee?.full_name || "")}"
+            >
+          </div>
 
+
+          <div class="employee-field">
             <label>
-
-              Role
-
-              <select
-                id="employeeRole"
-              >
-
-                <option value="">
-                  Select role
-                </option>
-
-              </select>
-
+              Role <span class="required">*</span>
             </label>
 
+            <select id="employeeRole">
+              <option value="">Select employee role</option>
+            </select>
+          </div>
+
+
+          <div class="employee-field">
+            <label>Phone</label>
+
+            <input
+              id="employeePhone"
+              type="text"
+              placeholder="Phone number"
+              value="${esc(employee?.phone || "")}"
+            >
+          </div>
+
+
+          <div class="employee-field">
+            <label>Email</label>
+
+            <input
+              id="employeeEmail"
+              type="email"
+              placeholder="Email address"
+              value="${esc(employee?.email || "")}"
+            >
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- EMPLOYMENT & SALARY -->
+      <div class="employee-section">
+
+        <div class="employee-section-head">
+
+          <div class="section-icon">02</div>
+
+          <div>
+            <h3>Employment & Salary</h3>
+            <span>Salary and employee status</span>
+          </div>
+
+        </div>
+
+
+        <div class="employee-form-grid">
+
+          <div class="employee-field">
 
             <label>
-
-              Phone
-
-              <input
-                id="employeePhone"
-                value="${esc(
-                  employee?.phone ||
-                  ""
-                )}"
-                placeholder="Phone number"
-              >
-
+              Monthly Salary <span class="required">*</span>
             </label>
 
+            <div class="employee-salary-wrap">
 
-            <label>
-
-              Email
-
-              <input
-                id="employeeEmail"
-                type="email"
-                value="${esc(
-                  employee?.email ||
-                  ""
-                )}"
-                placeholder="Email address"
-              >
-
-            </label>
-
-
-            <label>
-
-              Monthly Salary
+              <span>TZS</span>
 
               <input
                 id="employeeSalary"
                 type="number"
                 min="0"
-                step="0.01"
-                required
-                value="${
-                  employee?.monthly_salary ||
-                  0
-                }"
+                step="1000"
                 placeholder="0"
+                value="${employee?.monthly_salary ?? 0}"
               >
 
-            </label>
-
-
-            <label>
-
-              Status
-
-              <select
-                id="employeeStatus"
-              >
-
-                <option
-                  value="true"
-                  ${
-                    employee?.is_active !== false
-                      ? "selected"
-                      : ""
-                  }
-                >
-                  Active
-                </option>
-
-
-                <option
-                  value="false"
-                  ${
-                    employee?.is_active === false
-                      ? "selected"
-                      : ""
-                  }
-                >
-                  Inactive
-                </option>
-
-              </select>
-
-            </label>
+            </div>
 
           </div>
 
 
-          <div
-            style="
-              display:flex;
-              justify-content:flex-end;
-              gap:10px;
-              margin-top:20px;
-            "
-          >
+          <div class="employee-field">
 
-            <button
-              type="button"
-              class="secondary"
-              onclick="cancelEmployeeForm()"
-            >
-              Cancel
-            </button>
+            <label>Status</label>
 
+            <select id="employeeStatus">
 
-            <button
-              type="submit"
-              class="primary"
-            >
-              ${
-                employee
-                  ? "Update Employee"
-                  : "Save Employee"
-              }
-            </button>
+              <option value="true"
+                ${employee?.is_active !== false ? "selected" : ""}>
+                Active
+              </option>
+
+              <option value="false"
+                ${employee?.is_active === false ? "selected" : ""}>
+                Inactive
+              </option>
+
+            </select>
 
           </div>
 
-        </form>
+        </div>
+
+      </div>
+
+
+      <!-- FOOTER -->
+      <div class="employee-form-footer">
+
+        <button
+          class="secondary"
+          onclick="cancelEmployeeForm()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="primary"
+          onclick="saveEmployee()"
+        >
+          ${employee ? "Update Employee" : "Save Employee"}
+        </button>
 
       </div>
 
     </div>
 
-  `;
+  </div>
+`;
 
-
-  loadEmployeeRoles(
-    employee?.role_id ||
-    ""
-  );
+loadEmployeeRoles(
+  employee?.role_id ||
+  ""
+);
 
 }
-
 
 /* =========================================================
    LOAD ROLES
