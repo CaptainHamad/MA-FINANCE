@@ -1073,6 +1073,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
   buildExpensesModule();
 
+  buildEmployeesModule();
+
 });
 function bindNavigation(){
   document.querySelectorAll(".nav-btn").forEach(btn=>{
@@ -1092,6 +1094,8 @@ function go(view){
 if(view==="income") loadIncome();
 
 if(view==="expenses") loadExpenses();
+
+if(view==="employees") loadEmployees();
 
 if(view==="overview") loadOverview();
 }
@@ -2789,6 +2793,2398 @@ async function deleteGeneralExpense(id){
     );
 
   }
+
+}
+
+
+  /* =========================================================
+   EMPLOYEES MODULE
+========================================================= */
+
+let employeeRecords = [];
+let employeePaymentRecords = [];
+let selectedEmployeeId = null;
+let editingEmployeeId = null;
+let editingEmployeePaymentId = null;
+
+
+/* ---------- MONEY FORMAT ---------- */
+
+function employeeMoney(amount, currency="TZS"){
+
+  return new Intl.NumberFormat(
+    "en-TZ",
+    {
+      style:"currency",
+      currency:currency || "TZS",
+      maximumFractionDigits:0
+    }
+  ).format(
+    Number(amount || 0)
+  );
+
+}
+
+
+/* =========================================================
+   BUILD EMPLOYEES MODULE
+========================================================= */
+
+function buildEmployeesModule(){
+
+  const view =
+    document.getElementById(
+      "view-employees"
+    );
+
+  if(!view) return;
+
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+
+        <h2>
+          Employees
+        </h2>
+
+        <p>
+          Manage employees, salaries,
+          commissions and payment history.
+        </p>
+
+      </div>
+
+
+      <button
+        class="primary"
+        onclick="openEmployeeForm()"
+      >
+        + Add Employee
+      </button>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <div class="mini-grid">
+
+      <div class="mini">
+
+        <b id="employeesTotal">
+          0
+        </b>
+
+        <span>
+          Active Employees
+        </span>
+
+      </div>
+
+
+      <div class="mini">
+
+        <b id="employeesSalaryMonth">
+          TZS 0
+        </b>
+
+        <span>
+          Salary This Month
+        </span>
+
+      </div>
+
+
+      <div class="mini">
+
+        <b id="employeesCommissionMonth">
+          TZS 0
+        </b>
+
+        <span>
+          Commission This Month
+        </span>
+
+      </div>
+
+
+      <div class="mini">
+
+        <b id="employeesCostMonth">
+          TZS 0
+        </b>
+
+        <span>
+          Total Employee Cost
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- EMPLOYEE LIST -->
+
+    <div
+      class="panel"
+      style="margin-top:18px;"
+    >
+
+      <div class="panel-head">
+
+        <div>
+
+          <h3>
+            Employee Records
+          </h3>
+
+          <span>
+            Employees and their monthly salary
+          </span>
+
+        </div>
+
+
+        <button
+          class="secondary"
+          onclick="loadEmployees()"
+        >
+          Refresh
+        </button>
+
+      </div>
+
+
+      <div
+        class="panel-body"
+        id="employeesContainer"
+      >
+
+        <div class="empty">
+          Loading employees...
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   LOAD EMPLOYEES
+========================================================= */
+
+async function loadEmployees(){
+
+  const container =
+    document.getElementById(
+      "employeesContainer"
+    );
+
+  if(!container) return;
+
+
+  container.innerHTML = `
+    <div class="empty">
+      Loading employees...
+    </div>
+  `;
+
+
+  try{
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("employees")
+      .select(`
+        *,
+        roles(
+          id,
+          name
+        )
+      `)
+      .order(
+        "full_name",
+        {
+          ascending:true
+        }
+      );
+
+
+    if(error) throw error;
+
+
+    employeeRecords =
+      data || [];
+
+
+    renderEmployees(
+      employeeRecords
+    );
+
+
+    await loadEmployeeSummary();
+
+  }
+  catch(error){
+
+    console.error(
+      "Load employees error:",
+      error
+    );
+
+
+    container.innerHTML = `
+
+      <div class="empty">
+
+        Failed to load employees.
+
+        <br>
+
+        ${esc(
+          error.message ||
+          ""
+        )}
+
+      </div>
+
+    `;
+
+
+    toast(
+      error.message ||
+      "Failed to load employees.",
+      "err"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   RENDER EMPLOYEES
+========================================================= */
+
+function renderEmployees(records){
+
+  const container =
+    document.getElementById(
+      "employeesContainer"
+    );
+
+  if(!container) return;
+
+
+  if(!records.length){
+
+    container.innerHTML = `
+
+      <div class="empty">
+
+        <div
+          style="
+            font-size:40px;
+            margin-bottom:10px;
+          "
+        >
+          ♟
+        </div>
+
+
+        <b>
+          No employees recorded yet
+        </b>
+
+
+        <p>
+          Add your first employee
+          using the button above.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML = `
+
+    <div
+      style="
+        display:grid;
+        grid-template-columns:
+          repeat(auto-fit,minmax(280px,1fr));
+        gap:16px;
+      "
+    >
+
+      ${records.map(employee => `
+
+        <div
+          class="panel"
+          style="
+            margin:0;
+            padding:0;
+            overflow:hidden;
+          "
+        >
+
+          <div
+            style="
+              padding:20px;
+              border-bottom:1px solid #edf0f3;
+            "
+          >
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                align-items:flex-start;
+                gap:12px;
+              "
+            >
+
+              <div>
+
+                <h3
+                  style="
+                    margin:0 0 6px;
+                  "
+                >
+                  ${esc(
+                    employee.full_name
+                  )}
+                </h3>
+
+
+                <div
+                  style="
+                    color:#718096;
+                    font-size:13px;
+                  "
+                >
+                  ${esc(
+                    employee.roles?.name ||
+                    "Employee"
+                  )}
+                </div>
+
+              </div>
+
+
+              <span
+                style="
+                  font-size:11px;
+                  font-weight:700;
+                  padding:5px 9px;
+                  border-radius:20px;
+                  background:
+                    ${
+                      employee.is_active
+                        ? "#e8f7ee"
+                        : "#f1f5f9"
+                    };
+                  color:
+                    ${
+                      employee.is_active
+                        ? "#16803c"
+                        : "#64748b"
+                    };
+                "
+              >
+                ${
+                  employee.is_active
+                    ? "ACTIVE"
+                    : "INACTIVE"
+                }
+              </span>
+
+            </div>
+
+
+            <div
+              style="
+                margin-top:15px;
+                font-size:13px;
+                color:#64748b;
+              "
+            >
+
+              ${
+                employee.phone
+                  ? esc(employee.phone)
+                  : "No phone number"
+              }
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="
+              padding:18px 20px;
+            "
+          >
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:15px;
+              "
+            >
+
+              <span>
+                Monthly Salary
+              </span>
+
+
+              <b>
+                ${employeeMoney(
+                  employee.monthly_salary,
+                  "TZS"
+                )}
+              </b>
+
+            </div>
+
+
+            <button
+              class="primary"
+              style="width:100%;"
+              onclick="
+                openEmployeeDetails(
+                  '${employee.id}'
+                )
+              "
+            >
+              View Employee
+            </button>
+
+          </div>
+
+        </div>
+
+      `).join("")}
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   MONTHLY SUMMARY
+========================================================= */
+
+async function loadEmployeeSummary(){
+
+  const totalEl =
+    document.getElementById(
+      "employeesTotal"
+    );
+
+  const salaryEl =
+    document.getElementById(
+      "employeesSalaryMonth"
+    );
+
+  const commissionEl =
+    document.getElementById(
+      "employeesCommissionMonth"
+    );
+
+  const costEl =
+    document.getElementById(
+      "employeesCostMonth"
+    );
+
+
+  if(totalEl){
+
+    totalEl.textContent =
+      employeeRecords.filter(
+        e => e.is_active
+      ).length;
+
+  }
+
+
+  const now =
+    new Date();
+
+
+  const year =
+    now.getFullYear();
+
+  const month =
+    now.getMonth();
+
+
+  const firstDay =
+    new Date(
+      year,
+      month,
+      1
+    )
+      .toISOString()
+      .slice(0,10);
+
+
+  const lastDay =
+    new Date(
+      year,
+      month + 1,
+      0
+    )
+      .toISOString()
+      .slice(0,10);
+
+
+  try{
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("employee_payments")
+      .select(
+        "payment_type,amount,currency"
+      )
+      .gte(
+        "payment_date",
+        firstDay
+      )
+      .lte(
+        "payment_date",
+        lastDay
+      );
+
+
+    if(error) throw error;
+
+
+    const payments =
+      data || [];
+
+
+    const salary =
+      payments
+        .filter(
+          p =>
+            p.payment_type ===
+            "SALARY"
+        )
+        .reduce(
+          (sum,p) =>
+            sum +
+            Number(
+              p.amount || 0
+            ),
+          0
+        );
+
+
+    const commission =
+      payments
+        .filter(
+          p =>
+            p.payment_type ===
+            "COMMISSION"
+        )
+        .reduce(
+          (sum,p) =>
+            sum +
+            Number(
+              p.amount || 0
+            ),
+          0
+        );
+
+
+    const total =
+      salary +
+      commission;
+
+
+    if(salaryEl){
+
+      salaryEl.textContent =
+        employeeMoney(
+          salary,
+          "TZS"
+        );
+
+    }
+
+
+    if(commissionEl){
+
+      commissionEl.textContent =
+        employeeMoney(
+          commission,
+          "TZS"
+        );
+
+    }
+
+
+    if(costEl){
+
+      costEl.textContent =
+        employeeMoney(
+          total,
+          "TZS"
+        );
+
+    }
+
+  }
+  catch(error){
+
+    console.error(
+      "Employee summary error:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   ADD / EDIT EMPLOYEE
+========================================================= */
+
+function openEmployeeForm(
+  id=null
+){
+
+  editingEmployeeId =
+    id;
+
+
+  const employee =
+    id
+      ? employeeRecords.find(
+          e => e.id === id
+        )
+      : null;
+
+
+  const view =
+    document.getElementById(
+      "view-employees"
+    );
+
+  if(!view) return;
+
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+
+        <h2>
+          ${
+            employee
+              ? "Edit Employee"
+              : "Add Employee"
+          }
+        </h2>
+
+        <p>
+          Employee profile and salary information.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="panel"
+      style="
+        max-width:850px;
+        margin-top:18px;
+      "
+    >
+
+      <div class="panel-body">
+
+        <form
+          class="form"
+          onsubmit="saveEmployee(event)"
+        >
+
+          <div class="form-grid">
+
+
+            <label>
+
+              Full Name
+
+              <input
+                id="employeeName"
+                required
+                value="${esc(
+                  employee?.full_name ||
+                  ""
+                )}"
+                placeholder="Full name"
+              >
+
+            </label>
+
+
+            <label>
+
+              Role
+
+              <select
+                id="employeeRole"
+              >
+
+                <option value="">
+                  Select role
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <label>
+
+              Phone
+
+              <input
+                id="employeePhone"
+                value="${esc(
+                  employee?.phone ||
+                  ""
+                )}"
+                placeholder="Phone number"
+              >
+
+            </label>
+
+
+            <label>
+
+              Email
+
+              <input
+                id="employeeEmail"
+                type="email"
+                value="${esc(
+                  employee?.email ||
+                  ""
+                )}"
+                placeholder="Email address"
+              >
+
+            </label>
+
+
+            <label>
+
+              Monthly Salary
+
+              <input
+                id="employeeSalary"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+                value="${
+                  employee?.monthly_salary ||
+                  0
+                }"
+                placeholder="0"
+              >
+
+            </label>
+
+
+            <label>
+
+              Status
+
+              <select
+                id="employeeStatus"
+              >
+
+                <option
+                  value="true"
+                  ${
+                    employee?.is_active !== false
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Active
+                </option>
+
+
+                <option
+                  value="false"
+                  ${
+                    employee?.is_active === false
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Inactive
+                </option>
+
+              </select>
+
+            </label>
+
+          </div>
+
+
+          <div
+            style="
+              display:flex;
+              justify-content:flex-end;
+              gap:10px;
+              margin-top:20px;
+            "
+          >
+
+            <button
+              type="button"
+              class="secondary"
+              onclick="cancelEmployeeForm()"
+            >
+              Cancel
+            </button>
+
+
+            <button
+              type="submit"
+              class="primary"
+            >
+              ${
+                employee
+                  ? "Update Employee"
+                  : "Save Employee"
+              }
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  loadEmployeeRoles(
+    employee?.role_id ||
+    ""
+  );
+
+}
+
+
+/* =========================================================
+   LOAD ROLES
+========================================================= */
+
+async function loadEmployeeRoles(
+  selectedId=""
+){
+
+  const select =
+    document.getElementById(
+      "employeeRole"
+    );
+
+  if(!select) return;
+
+
+  try{
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("roles")
+      .select(
+        "id,name"
+      )
+      .order(
+        "name"
+      );
+
+
+    if(error) throw error;
+
+
+    select.innerHTML = `
+
+      <option value="">
+        Select role
+      </option>
+
+      ${
+        (data || [])
+          .map(role => `
+
+            <option
+              value="${role.id}"
+              ${
+                role.id === selectedId
+                  ? "selected"
+                  : ""
+              }
+            >
+              ${esc(role.name)}
+            </option>
+
+          `)
+          .join("")
+      }
+
+    `;
+
+  }
+  catch(error){
+
+    console.error(
+      "Load employee roles error:",
+      error
+    );
+
+    toast(
+      error.message ||
+      "Failed to load roles.",
+      "err"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SAVE EMPLOYEE
+========================================================= */
+
+async function saveEmployee(
+  event
+){
+
+  event.preventDefault();
+
+
+  const fullName =
+    document.getElementById(
+      "employeeName"
+    ).value.trim();
+
+
+  const roleId =
+    document.getElementById(
+      "employeeRole"
+    ).value ||
+    null;
+
+
+  const phone =
+    document.getElementById(
+      "employeePhone"
+    ).value.trim();
+
+
+  const email =
+    document.getElementById(
+      "employeeEmail"
+    ).value.trim();
+
+
+  const salary =
+    Number(
+      document.getElementById(
+        "employeeSalary"
+      ).value
+    );
+
+
+  const isActive =
+    document.getElementById(
+      "employeeStatus"
+    ).value === "true";
+
+
+  if(!fullName){
+
+    toast(
+      "Employee name is required.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  if(salary < 0){
+
+    toast(
+      "Salary cannot be negative.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    const payload = {
+
+      full_name:
+        fullName,
+
+      role_id:
+        roleId,
+
+      phone:
+        phone ||
+        null,
+
+      email:
+        email ||
+        null,
+
+      monthly_salary:
+        salary,
+
+      is_active:
+        isActive
+
+    };
+
+
+    let error;
+
+
+    if(editingEmployeeId){
+
+      ({
+        error
+      } =
+        await sb
+          .from("employees")
+          .update(payload)
+          .eq(
+            "id",
+            editingEmployeeId
+          ));
+
+    }
+    else{
+
+      ({
+        error
+      } =
+        await sb
+          .from("employees")
+          .insert(
+            payload
+          ));
+
+    }
+
+
+    if(error) throw error;
+
+
+    toast(
+      editingEmployeeId
+        ? "Employee updated successfully."
+        : "Employee added successfully.",
+      "ok"
+    );
+
+
+    editingEmployeeId =
+      null;
+
+
+    buildEmployeesModule();
+
+    await loadEmployees();
+
+  }
+  catch(error){
+
+    console.error(
+      "Save employee error:",
+      error
+    );
+
+
+    toast(
+      error.message ||
+      "Failed to save employee.",
+      "err"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CANCEL EMPLOYEE FORM
+========================================================= */
+
+function cancelEmployeeForm(){
+
+  editingEmployeeId =
+    null;
+
+  buildEmployeesModule();
+
+  loadEmployees();
+
+}
+
+
+/* =========================================================
+   EMPLOYEE DETAILS
+========================================================= */
+
+async function openEmployeeDetails(
+  employeeId
+){
+
+  selectedEmployeeId =
+    employeeId;
+
+
+  const employee =
+    employeeRecords.find(
+      e => e.id === employeeId
+    );
+
+
+  if(!employee) return;
+
+
+  const view =
+    document.getElementById(
+      "view-employees"
+    );
+
+  if(!view) return;
+
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+
+        <h2>
+          ${esc(
+            employee.full_name
+          )}
+        </h2>
+
+        <p>
+          ${esc(
+            employee.roles?.name ||
+            "Employee"
+          )}
+        </p>
+
+      </div>
+
+
+      <div
+        style="
+          display:flex;
+          gap:8px;
+        "
+      >
+
+        <button
+          class="secondary"
+          onclick="
+            openEmployeeForm(
+              '${employee.id}'
+            )
+          "
+        >
+          Edit
+        </button>
+
+
+        <button
+          class="secondary"
+          onclick="
+            cancelEmployeeDetails()
+          "
+        >
+          Back
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="mini-grid">
+
+      <div class="mini">
+
+        <b>
+          ${employeeMoney(
+            employee.monthly_salary,
+            "TZS"
+          )}
+        </b>
+
+        <span>
+          Monthly Salary
+        </span>
+
+      </div>
+
+
+      <div class="mini">
+
+        <b id="employeeDetailSalary">
+          TZS 0
+        </b>
+
+        <span>
+          Salary This Month
+        </span>
+
+      </div>
+
+
+      <div class="mini">
+
+        <b id="employeeDetailCommission">
+          TZS 0
+        </b>
+
+        <span>
+          Commission This Month
+        </span>
+
+      </div>
+
+
+      <div class="mini">
+
+        <b id="employeeDetailTotal">
+          TZS 0
+        </b>
+
+        <span>
+          Total This Month
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="panel"
+      style="
+        margin-top:18px;
+      "
+    >
+
+      <div class="panel-head">
+
+        <div>
+
+          <h3>
+            Payment History
+          </h3>
+
+          <span>
+            Salary and commission payments
+          </span>
+
+        </div>
+
+
+        <div
+          style="
+            display:flex;
+            gap:8px;
+          "
+        >
+
+          <button
+            class="secondary"
+            onclick="
+              openEmployeePaymentForm(
+                '${employee.id}',
+                'SALARY'
+              )
+            "
+          >
+            + Salary
+          </button>
+
+
+          <button
+            class="primary"
+            onclick="
+              openEmployeePaymentForm(
+                '${employee.id}',
+                'COMMISSION'
+              )
+            "
+          >
+            + Commission
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="panel-body"
+        id="employeePaymentsContainer"
+      >
+
+        <div class="empty">
+          Loading payments...
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  await loadEmployeePayments(
+    employeeId
+  );
+
+}
+
+
+/* =========================================================
+   LOAD EMPLOYEE PAYMENTS
+========================================================= */
+
+async function loadEmployeePayments(
+  employeeId
+){
+
+  const container =
+    document.getElementById(
+      "employeePaymentsContainer"
+    );
+
+  if(!container) return;
+
+
+  try{
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("employee_payments")
+      .select(`
+        *,
+        accounts(
+          name,
+          currency
+        )
+      `)
+      .eq(
+        "employee_id",
+        employeeId
+      )
+      .order(
+        "payment_date",
+        {
+          ascending:false
+        }
+      );
+
+
+    if(error) throw error;
+
+
+    employeePaymentRecords =
+      data || [];
+
+
+    renderEmployeePayments(
+      employeePaymentRecords
+    );
+
+
+    calculateEmployeeDetailSummary(
+      employeePaymentRecords
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      "Load employee payments error:",
+      error
+    );
+
+
+    container.innerHTML = `
+
+      <div class="empty">
+
+        Failed to load payments.
+
+        <br>
+
+        ${esc(
+          error.message ||
+          ""
+        )}
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* =========================================================
+   RENDER PAYMENTS
+========================================================= */
+
+function renderEmployeePayments(
+  records
+){
+
+  const container =
+    document.getElementById(
+      "employeePaymentsContainer"
+    );
+
+  if(!container) return;
+
+
+  if(!records.length){
+
+    container.innerHTML = `
+
+      <div class="empty">
+
+        <b>
+          No payments recorded yet.
+        </b>
+
+        <p>
+          Add salary or commission
+          using the buttons above.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML = `
+
+    <div
+      style="
+        overflow-x:auto;
+      "
+    >
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Date
+            </th>
+
+            <th>
+              Type
+            </th>
+
+            <th>
+              Amount
+            </th>
+
+            <th>
+              Account
+            </th>
+
+            <th>
+              Reference
+            </th>
+
+            <th>
+              Notes
+            </th>
+
+            <th>
+              Action
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          ${
+            records
+              .map(payment => `
+
+                <tr>
+
+                  <td>
+                    ${esc(
+                      payment.payment_date
+                    )}
+                  </td>
+
+
+                  <td>
+
+                    <b>
+                      ${
+                        payment.payment_type ===
+                        "SALARY"
+                          ? "Salary"
+                          : "Commission"
+                      }
+                    </b>
+
+                  </td>
+
+
+                  <td>
+
+                    <b>
+                      ${employeeMoney(
+                        payment.amount,
+                        payment.currency
+                      )}
+                    </b>
+
+                  </td>
+
+
+                  <td>
+                    ${esc(
+                      payment.accounts?.name ||
+                      "-"
+                    )}
+                  </td>
+
+
+                  <td>
+                    ${esc(
+                      payment.reference_number ||
+                      "-"
+                    )}
+                  </td>
+
+
+                  <td>
+                    ${esc(
+                      payment.notes ||
+                      "-"
+                    )}
+                  </td>
+
+
+                  <td>
+
+                    <button
+                      class="secondary"
+                      onclick="
+                        openEmployeePaymentForm(
+                          '${payment.employee_id}',
+                          '${payment.payment_type}',
+                          '${payment.id}'
+                        )
+                      "
+                    >
+                      Edit
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              `)
+              .join("")
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   EMPLOYEE DETAIL SUMMARY
+========================================================= */
+
+function calculateEmployeeDetailSummary(
+  records
+){
+
+  const now =
+    new Date();
+
+
+  const year =
+    now.getFullYear();
+
+  const month =
+    now.getMonth();
+
+
+  const thisMonth =
+    records.filter(payment => {
+
+      const d =
+        new Date(
+          payment.payment_date
+        );
+
+
+      return (
+        d.getFullYear() === year &&
+        d.getMonth() === month
+      );
+
+    });
+
+
+  const salary =
+    thisMonth
+      .filter(
+        p =>
+          p.payment_type ===
+          "SALARY"
+      )
+      .reduce(
+        (sum,p) =>
+          sum +
+          Number(
+            p.amount || 0
+          ),
+        0
+      );
+
+
+  const commission =
+    thisMonth
+      .filter(
+        p =>
+          p.payment_type ===
+          "COMMISSION"
+      )
+      .reduce(
+        (sum,p) =>
+          sum +
+          Number(
+            p.amount || 0
+          ),
+        0
+      );
+
+
+  const total =
+    salary +
+    commission;
+
+
+  const salaryEl =
+    document.getElementById(
+      "employeeDetailSalary"
+    );
+
+
+  const commissionEl =
+    document.getElementById(
+      "employeeDetailCommission"
+    );
+
+
+  const totalEl =
+    document.getElementById(
+      "employeeDetailTotal"
+    );
+
+
+  if(salaryEl){
+
+    salaryEl.textContent =
+      employeeMoney(
+        salary,
+        "TZS"
+      );
+
+  }
+
+
+  if(commissionEl){
+
+    commissionEl.textContent =
+      employeeMoney(
+        commission,
+        "TZS"
+      );
+
+  }
+
+
+  if(totalEl){
+
+    totalEl.textContent =
+      employeeMoney(
+        total,
+        "TZS"
+      );
+
+  }
+
+}
+
+
+/* =========================================================
+   ADD / EDIT EMPLOYEE PAYMENT
+========================================================= */
+
+async function openEmployeePaymentForm(
+  employeeId,
+  paymentType="SALARY",
+  paymentId=null
+){
+
+  const employee =
+    employeeRecords.find(
+      e => e.id === employeeId
+    );
+
+
+  if(!employee) return;
+
+
+  editingEmployeePaymentId =
+    paymentId;
+
+
+  let payment =
+    null;
+
+
+  if(paymentId){
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("employee_payments")
+      .select("*")
+      .eq(
+        "id",
+        paymentId
+      )
+      .single();
+
+
+    if(error){
+
+      toast(
+        error.message ||
+        "Failed to load payment.",
+        "err"
+      );
+
+      return;
+
+    }
+
+
+    payment =
+      data;
+
+  }
+
+
+  const view =
+    document.getElementById(
+      "view-employees"
+    );
+
+  if(!view) return;
+
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+
+        <h2>
+          ${
+            payment
+              ? "Edit Payment"
+              : "Record Payment"
+          }
+        </h2>
+
+        <p>
+          ${esc(
+            employee.full_name
+          )}
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="panel"
+      style="
+        max-width:850px;
+        margin-top:18px;
+      "
+    >
+
+      <div class="panel-body">
+
+        <form
+          class="form"
+          onsubmit="
+            saveEmployeePayment(
+              event,
+              '${employeeId}'
+            )
+          "
+        >
+
+          <div class="form-grid">
+
+
+            <label>
+
+              Payment Type
+
+              <select
+                id="employeePaymentType"
+                required
+              >
+
+                <option
+                  value="SALARY"
+                  ${
+                    (
+                      payment?.payment_type ||
+                      paymentType
+                    ) === "SALARY"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Salary
+                </option>
+
+
+                <option
+                  value="COMMISSION"
+                  ${
+                    (
+                      payment?.payment_type ||
+                      paymentType
+                    ) === "COMMISSION"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Commission
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <label>
+
+              Amount
+
+              <input
+                id="employeePaymentAmount"
+                type="number"
+                min="0.01"
+                step="0.01"
+                required
+                value="${
+                  payment?.amount ||
+                  ""
+                }"
+                placeholder="0"
+              >
+
+            </label>
+
+
+            <label>
+
+              Payment Date
+
+              <input
+                id="employeePaymentDate"
+                type="date"
+                required
+                value="${
+                  payment?.payment_date ||
+                  new Date()
+                    .toISOString()
+                    .slice(0,10)
+                }"
+              >
+
+            </label>
+
+
+            <label>
+
+              Account
+
+              <select
+                id="employeePaymentAccount"
+              >
+
+                <option value="">
+                  Select account
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <label>
+
+              Reference Number
+
+              <input
+                id="employeePaymentReference"
+                value="${esc(
+                  payment?.reference_number ||
+                  ""
+                )}"
+                placeholder="Optional"
+              >
+
+            </label>
+
+          </div>
+
+
+          <label>
+
+            Notes
+
+            <textarea
+              id="employeePaymentNotes"
+              rows="4"
+              placeholder="Optional notes"
+            >${esc(
+              payment?.notes ||
+              ""
+            )}</textarea>
+
+          </label>
+
+
+          <div
+            style="
+              display:flex;
+              justify-content:flex-end;
+              gap:10px;
+              margin-top:20px;
+            "
+          >
+
+            <button
+              type="button"
+              class="secondary"
+              onclick="
+                openEmployeeDetails(
+                  '${employeeId}'
+                )
+              "
+            >
+              Cancel
+            </button>
+
+
+            <button
+              type="submit"
+              class="primary"
+            >
+              ${
+                payment
+                  ? "Update Payment"
+                  : "Save Payment"
+              }
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  await loadEmployeePaymentAccounts(
+    payment?.account_id ||
+    ""
+  );
+
+}
+
+
+/* =========================================================
+   LOAD ACCOUNTS FOR EMPLOYEE PAYMENT
+========================================================= */
+
+async function loadEmployeePaymentAccounts(
+  selectedId=""
+){
+
+  const select =
+    document.getElementById(
+      "employeePaymentAccount"
+    );
+
+  if(!select) return;
+
+
+  try{
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("accounts")
+      .select(
+        "id,name,currency"
+      )
+      .eq(
+        "is_active",
+        true
+      )
+      .order(
+        "name"
+      );
+
+
+    if(error) throw error;
+
+
+    select.innerHTML = `
+
+      <option value="">
+        Select account
+      </option>
+
+      ${
+        (data || [])
+          .map(account => `
+
+            <option
+              value="${account.id}"
+              ${
+                account.id === selectedId
+                  ? "selected"
+                  : ""
+              }
+            >
+              ${esc(
+                account.name
+              )}
+              ${
+                account.currency
+                  ? ` (${esc(
+                      account.currency
+                    )})`
+                  : ""
+              }
+            </option>
+
+          `)
+          .join("")
+      }
+
+    `;
+
+  }
+  catch(error){
+
+    console.error(
+      "Load employee payment accounts error:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SAVE EMPLOYEE PAYMENT
+========================================================= */
+
+async function saveEmployeePayment(
+  event,
+  employeeId
+){
+
+  event.preventDefault();
+
+
+  const paymentType =
+    document.getElementById(
+      "employeePaymentType"
+    ).value;
+
+
+  const amount =
+    Number(
+      document.getElementById(
+        "employeePaymentAmount"
+      ).value
+    );
+
+
+  const paymentDate =
+    document.getElementById(
+      "employeePaymentDate"
+    ).value;
+
+
+  const accountId =
+    document.getElementById(
+      "employeePaymentAccount"
+    ).value ||
+    null;
+
+
+  const reference =
+    document.getElementById(
+      "employeePaymentReference"
+    ).value.trim();
+
+
+  const notes =
+    document.getElementById(
+      "employeePaymentNotes"
+    ).value.trim();
+
+
+  if(!amount || amount <= 0){
+
+    toast(
+      "Payment amount must be greater than zero.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  if(!paymentDate){
+
+    toast(
+      "Payment date is required.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    const payload = {
+
+      employee_id:
+        employeeId,
+
+      payment_type:
+        paymentType,
+
+      amount:
+        amount,
+
+      currency:
+        "TZS",
+
+      payment_date:
+        paymentDate,
+
+      account_id:
+        accountId,
+
+      reference_number:
+        reference ||
+        null,
+
+      notes:
+        notes ||
+        null
+
+    };
+
+
+    let error;
+
+
+    if(editingEmployeePaymentId){
+
+      ({
+        error
+      } =
+        await sb
+          .from("employee_payments")
+          .update(payload)
+          .eq(
+            "id",
+            editingEmployeePaymentId
+          ));
+
+    }
+    else{
+
+      ({
+        error
+      } =
+        await sb
+          .from("employee_payments")
+          .insert(
+            payload
+          ));
+
+    }
+
+
+    if(error) throw error;
+
+
+    toast(
+      editingEmployeePaymentId
+        ? "Payment updated successfully."
+        : "Payment recorded successfully.",
+      "ok"
+    );
+
+
+    editingEmployeePaymentId =
+      null;
+
+
+    await openEmployeeDetails(
+      employeeId
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      "Save employee payment error:",
+      error
+    );
+
+
+    toast(
+      error.message ||
+      "Failed to save payment.",
+      "err"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   BACK TO EMPLOYEES
+========================================================= */
+
+function cancelEmployeeDetails(){
+
+  selectedEmployeeId =
+    null;
+
+  buildEmployeesModule();
+
+  loadEmployees();
 
 }
 /* =========================================================
