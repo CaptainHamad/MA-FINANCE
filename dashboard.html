@@ -2211,24 +2211,28 @@ async function saveGeneralExpense(event){
             editingExpenseId
           ));
 
-    }else{
+}else{
 
-      ({
-        error
-      } =
-        await sb
-          .from("expenses")
-          .insert({
+  const {
+    data: insertedExpense,
+    error: insertError
+  } = await sb
+    .from("expenses")
+    .insert({
+      ...payload,
+      created_by: user?.id || null
+    })
+    .select()
+    .single();
 
-            ...payload,
+  if(insertError) throw insertError;
 
-            created_by:
-              user?.id || null
+  console.log(
+    "EXPENSE INSERT RESULT:",
+    insertedExpense
+  );
 
-          }));
-
-    }
-
+}
 
     if(error) throw error;
 
