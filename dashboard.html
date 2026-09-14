@@ -15226,135 +15226,148 @@ async function loadSystemAlerts(){
 
     /*
       -------------------------------------------------------
-      1. PARTIAL SALES / OUTSTANDING CUSTOMER BALANCES
-      -------------------------------------------------------
-    */
+     /*
+  -------------------------------------------------------
+  1. CUSTOMER OUTSTANDING BALANCES
+  -------------------------------------------------------
+*/
 
-    const {
-      data: sales,
-      error: salesError
-    } = await sb
-      .from("sales")
-      .select(`
-        id,
-        sale_number,
-        selling_price,
-        currency,
-        status,
-        customers(
-          full_name
+const {
+  data: sales,
+  error: salesError
+} = await sb
+  .from("sales")
+  .select(`
+    id,
+    sale_number,
+    selling_price,
+    currency,
+    status,
+    customers(
+      full_name
+    )
+  `)
+  .in(
+    "status",
+    [
+      "partial",
+      "PARTIAL",
+      "unpaid",
+      "UNPAID"
+    ]
+  );
+
+
+if(salesError)
+  throw salesError;
+
+
+if(sales && sales.length){
+
+  const saleIds =
+    sales.map(
+      sale => sale.id
+    );
+
+
+  const {
+    data: payments,
+    error: paymentError
+  } = await sb
+    .from("customer_payments")
+    .select(`
+      sale_id,
+      amount,
+      currency
+    `)
+    .in(
+      "sale_id",
+      saleIds
+    );
+
+
+  if(paymentError)
+    throw paymentError;
+
+
+  const paymentRows =
+    payments || [];
+
+
+  sales.forEach(sale => {
+
+    const totalPaid =
+      paymentRows
+        .filter(
+          payment =>
+            payment.sale_id === sale.id &&
+            (
+              !payment.currency ||
+              payment.currency === sale.currency
+            )
         )
-      `)
-      .in(
-        "status",
-        [
-          "partial",
-          "PARTIAL"
-        ]
+        .reduce(
+          (sum,payment) =>
+            sum +
+            Number(
+              payment.amount || 0
+            ),
+          0
+        );
+
+
+    const balance =
+      Math.max(
+        Number(
+          sale.selling_price || 0
+        ) -
+        totalPaid,
+        0
       );
 
 
-    if(salesError)
-      throw salesError;
+    if(balance <= 0)
+      return;
 
 
-    if(sales && sales.length){
-
-      const saleIds =
-        sales.map(
-          sale => sale.id
-        );
+    const customerName =
+      sale.customers?.full_name ||
+      "Customer";
 
 
-      const {
-        data: payments,
-        error: paymentError
-      } = await sb
-        .from("customer_payments")
-        .select(`
-          sale_id,
-          amount,
-          currency
-        `)
-        .in(
-          "sale_id",
-          saleIds
-        );
+    addSystemAlert(
+      balance >= 10000000
+        ? "danger"
+        : "warning",
 
+      "Customer Payment Outstanding",
 
-      if(paymentError)
-        throw paymentError;
+      `${sale.sale_number || "Sale"} • ${customerName} — ${money(
+        balance,
+        sale.currency
+      )} remaining.`,
 
+      "Open Sale",
 
-      const paymentRows =
-        payments || [];
+      async () => {
 
+        /*
+          Sales records need to exist before
+          openSaleDetails can find the sale.
+        */
 
-      let outstandingTotal = 0;
-      let outstandingCount = 0;
+        await loadSales();
 
-
-      sales.forEach(sale => {
-
-        const totalPaid =
-          paymentRows
-            .filter(
-              payment =>
-                payment.sale_id === sale.id &&
-                (
-                  !payment.currency ||
-                  payment.currency === sale.currency
-                )
-            )
-            .reduce(
-              (sum,payment) =>
-                sum +
-                Number(
-                  payment.amount || 0
-                ),
-              0
-            );
-
-
-        const balance =
-          Math.max(
-            Number(
-              sale.selling_price || 0
-            ) -
-            totalPaid,
-            0
-          );
-
-
-        if(
-          balance > 0 &&
-          sale.currency === "TZS"
-        ){
-
-          outstandingTotal +=
-            balance;
-
-          outstandingCount++;
-
-        }
-
-      });
-
-
-      if(outstandingCount > 0){
-
-        addSystemAlert(
-          "warning",
-          `${outstandingCount} Outstanding Customer Balance${outstandingCount === 1 ? "" : "s"}`,
-          `${money(outstandingTotal,"TZS")} still to be collected from partial sales.`,
-          "View Sales",
-          () => go("sales")
+        openSaleDetails(
+          sale.id
         );
 
       }
+    );
 
-    }
+  });
 
+}
 
     /*
       -------------------------------------------------------
