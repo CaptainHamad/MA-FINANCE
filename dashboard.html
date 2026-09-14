@@ -126,7 +126,179 @@ tr:hover td{background:#fbfcfd}
 /* =========================================================
    GENERAL EXPENSE FORM — FULL PAGE MODE
 ========================================================= */
+.notification-btn{
+  position:relative;
+  width:38px;
+  height:38px;
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
+.notification-btn:hover{
+  background:#f7f8fa;
+}
+
+.notification-count{
+  position:absolute;
+  top:-5px;
+  right:-5px;
+  min-width:17px;
+  height:17px;
+  padding:0 4px;
+  border-radius:20px;
+  background:#ef4444;
+  color:#fff;
+  font-size:9px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid #fff;
+}
+
+.notification-count.hidden{
+  display:none;
+}
+
+.notification-dropdown{
+  position:fixed;
+  top:70px;
+  right:32px;
+  width:390px;
+  max-height:520px;
+  background:#fff;
+  border:1px solid #e3e7eb;
+  border-radius:14px;
+  box-shadow:0 18px 45px rgba(15,31,51,.15);
+  z-index:100;
+  display:none;
+  overflow:hidden;
+}
+
+.notification-dropdown.open{
+  display:block;
+}
+
+.notification-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 18px;
+  border-bottom:1px solid #edf0f2;
+}
+
+.notification-head strong{
+  display:block;
+  font-size:13px;
+}
+
+.notification-head span{
+  display:block;
+  margin-top:3px;
+  font-size:10px;
+  color:#8b95a1;
+}
+
+.notification-close{
+  width:28px;
+  height:28px;
+  border:0;
+  background:#f5f6f7;
+  border-radius:7px;
+  cursor:pointer;
+  font-size:17px;
+}
+
+.notification-list{
+  max-height:440px;
+  overflow-y:auto;
+}
+
+.notification-item{
+  display:flex;
+  gap:12px;
+  padding:14px 18px;
+  border-bottom:1px solid #f0f2f4;
+  cursor:pointer;
+}
+
+.notification-item:hover{
+  background:#fafbfc;
+}
+
+.notification-icon{
+  width:34px;
+  height:34px;
+  min-width:34px;
+  border-radius:9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:900;
+}
+
+.notification-icon.warning{
+  background:#fff4e8;
+  color:#f58220;
+}
+
+.notification-icon.danger{
+  background:#fff0f0;
+  color:#dc2626;
+}
+
+.notification-icon.info{
+  background:#eef5ff;
+  color:#2563eb;
+}
+
+.notification-content{
+  min-width:0;
+}
+
+.notification-title{
+  font-size:11px;
+  font-weight:850;
+  color:#142033;
+}
+
+.notification-text{
+  margin-top:4px;
+  font-size:10px;
+  line-height:1.45;
+  color:#737e8b;
+}
+
+.notification-action{
+  margin-top:7px;
+  font-size:9px;
+  font-weight:850;
+  color:#f58220;
+}
+
+.notification-empty{
+  padding:35px 20px;
+  text-align:center;
+  font-size:11px;
+  color:#89929d;
+}
+
+@media(max-width:600px){
+
+  .notification-dropdown{
+    right:12px;
+    left:12px;
+    width:auto;
+  }
+
+}
 .expense-page{
   max-width:900px;
   margin:0 auto;
@@ -1096,9 +1268,62 @@ tr:hover td{background:#fbfcfd}
       <div class="crumb">MATTEX FINANCE OS / <span id="crumb">OVERVIEW</span></div>
       <h1 id="pageTitle">Financial Overview</h1>
     </div>
-    <div class="top-actions">
-      <button class="iconbtn" title="Refresh" onclick="refreshCurrent()">↻</button>
+   <div class="top-actions">
+
+  <button
+    class="notification-btn"
+    id="notificationBtn"
+    title="Notifications"
+    onclick="toggleNotifications()"
+  >
+    🔔
+    <span
+      class="notification-count"
+      id="notificationCount"
+    >
+      0
+    </span>
+  </button>
+
+  <button
+    class="iconbtn"
+    title="Refresh"
+    onclick="refreshCurrent()"
+  >
+    ↻
+  </button>
+
+</div>
+
+<div
+  class="notification-dropdown"
+  id="notificationDropdown"
+>
+  <div class="notification-head">
+    <div>
+      <strong>Notifications</strong>
+      <span id="notificationSummary">
+        No alerts
+      </span>
     </div>
+
+    <button
+      class="notification-close"
+      onclick="toggleNotifications()"
+    >
+      ×
+    </button>
+  </div>
+
+  <div
+    id="notificationList"
+    class="notification-list"
+  >
+    <div class="notification-empty">
+      No notifications
+    </div>
+  </div>
+</div>
   </header>
 
   <section class="content">
@@ -1886,6 +2111,8 @@ if(view==="employees") loadEmployees();
 
 if(view==="overview") loadOverview();
 
+if(view==="overview") loadSystemAlerts();
+  
 if(view==="reports") loadReports();
 }
 
@@ -14778,6 +15005,619 @@ if(saleModal){
 
     }
   );
+
+}
+
+/* =========================================================
+   NOTIFICATIONS / ALERTS
+========================================================= */
+
+let systemAlerts = [];
+
+
+/* ---------------------------------------------------------
+   TOGGLE NOTIFICATION PANEL
+--------------------------------------------------------- */
+
+function toggleNotifications(){
+
+  const dropdown =
+    document.getElementById(
+      "notificationDropdown"
+    );
+
+  if(!dropdown) return;
+
+  dropdown.classList.toggle("open");
+
+}
+
+
+/* ---------------------------------------------------------
+   ADD ALERT
+--------------------------------------------------------- */
+
+function addSystemAlert(
+  type,
+  title,
+  text,
+  action,
+  handler
+){
+
+  systemAlerts.push({
+
+    type:
+      type || "warning",
+
+    title:
+      title || "",
+
+    text:
+      text || "",
+
+    action:
+      action || "",
+
+    handler:
+      handler || null
+
+  });
+
+}
+
+
+/* ---------------------------------------------------------
+   RENDER NOTIFICATIONS
+--------------------------------------------------------- */
+
+function renderSystemAlerts(){
+
+  const count =
+    document.getElementById(
+      "notificationCount"
+    );
+
+  const list =
+    document.getElementById(
+      "notificationList"
+    );
+
+  const summary =
+    document.getElementById(
+      "notificationSummary"
+    );
+
+  if(!count || !list || !summary)
+    return;
+
+
+  const total =
+    systemAlerts.length;
+
+
+  count.textContent =
+    total;
+
+
+  if(total === 0){
+
+    count.classList.add("hidden");
+
+    summary.textContent =
+      "Everything looks good";
+
+    list.innerHTML = `
+      <div class="notification-empty">
+        ✓ No actions required right now.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  count.classList.remove("hidden");
+
+  summary.textContent =
+    `${total} item${total === 1 ? "" : "s"} require attention`;
+
+
+  list.innerHTML =
+    systemAlerts
+      .map(
+        (alert,index) => `
+
+          <div
+            class="notification-item"
+            onclick="handleSystemAlert(${index})"
+          >
+
+            <div
+              class="notification-icon ${esc(alert.type)}"
+            >
+              ${
+                alert.type === "danger"
+                  ? "!"
+                  : alert.type === "info"
+                    ? "i"
+                    : "⚠"
+              }
+            </div>
+
+            <div class="notification-content">
+
+              <div class="notification-title">
+                ${esc(alert.title)}
+              </div>
+
+              <div class="notification-text">
+                ${esc(alert.text)}
+              </div>
+
+              ${
+                alert.action
+                  ? `
+                    <div class="notification-action">
+                      ${esc(alert.action)} →
+                    </div>
+                  `
+                  : ""
+              }
+
+            </div>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+}
+
+
+/* ---------------------------------------------------------
+   HANDLE ALERT
+--------------------------------------------------------- */
+
+function handleSystemAlert(index){
+
+  const alert =
+    systemAlerts[index];
+
+  if(!alert)
+    return;
+
+
+  if(typeof alert.handler === "function"){
+
+    alert.handler();
+
+  }
+
+
+  const dropdown =
+    document.getElementById(
+      "notificationDropdown"
+    );
+
+  if(dropdown){
+
+    dropdown.classList.remove(
+      "open"
+    );
+
+  }
+
+}
+
+
+/* ---------------------------------------------------------
+   LOAD SYSTEM ALERTS
+--------------------------------------------------------- */
+
+async function loadSystemAlerts(){
+
+  systemAlerts = [];
+
+
+  try{
+
+    /*
+      -------------------------------------------------------
+      1. PARTIAL SALES / OUTSTANDING CUSTOMER BALANCES
+      -------------------------------------------------------
+    */
+
+    const {
+      data: sales,
+      error: salesError
+    } = await sb
+      .from("sales")
+      .select(`
+        id,
+        sale_number,
+        selling_price,
+        currency,
+        status,
+        customers(
+          full_name
+        )
+      `)
+      .in(
+        "status",
+        [
+          "partial",
+          "PARTIAL"
+        ]
+      );
+
+
+    if(salesError)
+      throw salesError;
+
+
+    if(sales && sales.length){
+
+      const saleIds =
+        sales.map(
+          sale => sale.id
+        );
+
+
+      const {
+        data: payments,
+        error: paymentError
+      } = await sb
+        .from("customer_payments")
+        .select(`
+          sale_id,
+          amount,
+          currency
+        `)
+        .in(
+          "sale_id",
+          saleIds
+        );
+
+
+      if(paymentError)
+        throw paymentError;
+
+
+      const paymentRows =
+        payments || [];
+
+
+      let outstandingTotal = 0;
+      let outstandingCount = 0;
+
+
+      sales.forEach(sale => {
+
+        const totalPaid =
+          paymentRows
+            .filter(
+              payment =>
+                payment.sale_id === sale.id &&
+                (
+                  !payment.currency ||
+                  payment.currency === sale.currency
+                )
+            )
+            .reduce(
+              (sum,payment) =>
+                sum +
+                Number(
+                  payment.amount || 0
+                ),
+              0
+            );
+
+
+        const balance =
+          Math.max(
+            Number(
+              sale.selling_price || 0
+            ) -
+            totalPaid,
+            0
+          );
+
+
+        if(
+          balance > 0 &&
+          sale.currency === "TZS"
+        ){
+
+          outstandingTotal +=
+            balance;
+
+          outstandingCount++;
+
+        }
+
+      });
+
+
+      if(outstandingCount > 0){
+
+        addSystemAlert(
+          "warning",
+          `${outstandingCount} Outstanding Customer Balance${outstandingCount === 1 ? "" : "s"}`,
+          `${money(outstandingTotal,"TZS")} still to be collected from partial sales.`,
+          "View Sales",
+          () => go("sales")
+        );
+
+      }
+
+    }
+
+
+    /*
+      -------------------------------------------------------
+      2. PENDING VEHICLE / SALES EXPENSES
+      -------------------------------------------------------
+    */
+
+    const {
+      data: vehicleCosts,
+      error: vehicleCostError
+    } = await sb
+      .from("vehicle_costs")
+      .select(`
+        amount,
+        currency,
+        payment_status
+      `)
+      .eq(
+        "payment_status",
+        "Pending"
+      );
+
+
+    if(vehicleCostError)
+      throw vehicleCostError;
+
+
+    const pendingVehicleCosts =
+      vehicleCosts || [];
+
+
+    const pendingVehicleExpense =
+      pendingVehicleCosts
+        .filter(
+          cost =>
+            cost.currency === "TZS" ||
+            !cost.currency
+        )
+        .reduce(
+          (sum,cost) =>
+            sum +
+            Number(
+              cost.amount || 0
+            ),
+          0
+        );
+
+
+    if(pendingVehicleExpense > 0){
+
+      addSystemAlert(
+        "warning",
+        "Pending Vehicle Expenses",
+        `${money(pendingVehicleExpense,"TZS")} in vehicle-related expenses are still pending payment.`,
+        "View Sales",
+        () => go("sales")
+      );
+
+    }
+
+
+    /*
+      -------------------------------------------------------
+      3. PENDING OFFICE EXPENSES
+      -------------------------------------------------------
+    */
+
+    const {
+      data: officeExpenses,
+      error: officeExpenseError
+    } = await sb
+      .from("expenses")
+      .select(`
+        amount,
+        currency,
+        payment_status
+      `)
+      .eq(
+        "payment_status",
+        "Pending"
+      );
+
+
+    if(officeExpenseError)
+      throw officeExpenseError;
+
+
+    const pendingOfficeExpense =
+      (officeExpenses || [])
+        .filter(
+          expense =>
+            expense.currency === "TZS" ||
+            !expense.currency
+        )
+        .reduce(
+          (sum,expense) =>
+            sum +
+            Number(
+              expense.amount || 0
+            ),
+          0
+        );
+
+
+    if(pendingOfficeExpense > 0){
+
+      addSystemAlert(
+        "warning",
+        "Pending Office Expenses",
+        `${money(pendingOfficeExpense,"TZS")} in office expenses are awaiting payment.`,
+        "View Office Expenses",
+        () => go("expenses")
+      );
+
+    }
+
+
+    /*
+      -------------------------------------------------------
+      4. EMPLOYEE SALARY CHECK
+      -------------------------------------------------------
+    */
+
+    const {
+      data: employees,
+      error: employeeError
+    } = await sb
+      .from("employees")
+      .select(`
+        id,
+        full_name,
+        monthly_salary,
+        is_active
+      `)
+      .eq(
+        "is_active",
+        true
+      );
+
+
+    if(employeeError)
+      throw employeeError;
+
+
+    const activeEmployees =
+      employees || [];
+
+
+    if(activeEmployees.length){
+
+      const firstDay =
+        new Date();
+
+      firstDay.setDate(1);
+
+      const firstDayString =
+        firstDay
+          .toISOString()
+          .slice(0,10);
+
+
+      const {
+        data: salaryPayments,
+        error: salaryError
+      } = await sb
+        .from("employee_payments")
+        .select(`
+          employee_id,
+          amount,
+          payment_type,
+          currency
+        `)
+        .eq(
+          "payment_type",
+          "SALARY"
+        )
+        .gte(
+          "payment_date",
+          firstDayString
+        );
+
+
+      if(salaryError)
+        throw salaryError;
+
+
+      let salaryOutstanding = 0;
+
+
+      activeEmployees.forEach(
+        employee => {
+
+          const salary =
+            Number(
+              employee.monthly_salary || 0
+            );
+
+
+          if(salary <= 0)
+            return;
+
+
+          const paid =
+            (salaryPayments || [])
+              .filter(
+                payment =>
+                  payment.employee_id ===
+                    employee.id &&
+                  (
+                    payment.currency === "TZS" ||
+                    !payment.currency
+                  )
+              )
+              .reduce(
+                (sum,payment) =>
+                  sum +
+                  Number(
+                    payment.amount || 0
+                  ),
+                0
+              );
+
+
+          const balance =
+            Math.max(
+              salary - paid,
+              0
+            );
+
+
+          salaryOutstanding +=
+            balance;
+
+        }
+      );
+
+
+      if(salaryOutstanding > 0){
+
+        addSystemAlert(
+          "info",
+          "Salary Payments Outstanding",
+          `${money(salaryOutstanding,"TZS")} remains unpaid against active employee monthly salaries.`,
+          "View Employees",
+          () => go("employees")
+        );
+
+      }
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      "System alerts error:",
+      error
+    );
+
+  }
+
+
+  renderSystemAlerts();
 
 }
 </script>
