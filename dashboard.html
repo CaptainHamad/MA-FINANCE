@@ -446,6 +446,545 @@ tr:hover td{background:#fbfcfd}
     align-items:flex-start;
   }
 }
+
+/* =========================================================
+   FINANCIAL REPORTS
+========================================================= */
+
+.report-controls{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:20px;
+  margin-bottom:24px;
+  flex-wrap:wrap;
+}
+
+.report-controls h2{
+  margin:0 0 6px;
+}
+
+.report-controls p{
+  margin:0;
+  color:#718096;
+  font-size:13px;
+}
+
+.report-actions{
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.report-field{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.report-field label{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:1px;
+  color:#718096;
+}
+
+.report-field input{
+  height:42px;
+  padding:0 12px;
+  border:1px solid #dfe5eb;
+  border-radius:9px;
+  background:#fff;
+}
+
+
+.financial-report{
+  background:#fff;
+  border:1px solid #e3e8ee;
+  border-radius:16px;
+  padding:42px;
+  box-shadow:0 8px 30px rgba(15,23,42,.05);
+}
+
+
+/* REPORT HEADER */
+
+.report-header{
+  display:flex;
+  align-items:center;
+  gap:35px;
+  padding-bottom:30px;
+  border-bottom:3px solid #ff7a00;
+}
+
+.report-logo{
+  width:230px;
+  max-height:120px;
+  object-fit:contain;
+}
+
+.report-title{
+  flex:1;
+}
+
+.report-title h1{
+  margin:0 0 8px;
+  font-size:25px;
+  color:#0f1f33;
+  letter-spacing:.5px;
+}
+
+.report-title p{
+  margin:0 0 10px;
+  font-weight:700;
+  font-size:14px;
+}
+
+.report-period{
+  font-size:13px;
+  color:#4a5568;
+}
+
+.report-title small{
+  display:block;
+  margin-top:7px;
+  color:#718096;
+}
+
+
+/* SECTIONS */
+
+.report-section{
+  margin-top:38px;
+}
+
+.report-section-title{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.report-section-title > span{
+  width:34px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff1e5;
+  color:#f97316;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.report-section-title h2{
+  margin:0 0 4px;
+  font-size:18px;
+}
+
+.report-section-title p{
+  margin:0;
+  font-size:12px;
+  color:#718096;
+}
+
+
+/* KPI */
+
+.report-kpis{
+  display:grid;
+  grid-template-columns:
+    repeat(4,1fr);
+  gap:14px;
+}
+
+.report-kpi{
+  border:1px solid #e4e9ef;
+  border-radius:12px;
+  padding:18px;
+  background:#fafbfc;
+}
+
+.report-kpi span{
+  display:block;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1px;
+  color:#718096;
+}
+
+.report-kpi strong{
+  display:block;
+  margin-top:12px;
+  font-size:20px;
+  color:#101d2f;
+}
+
+.report-kpi small{
+  display:block;
+  margin-top:6px;
+  color:#718096;
+  font-size:11px;
+}
+
+
+/* STATEMENT */
+
+.statement{
+  border:1px solid #e1e6ec;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.statement-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:13px 18px;
+  border-bottom:1px solid #edf0f3;
+  font-size:13px;
+}
+
+.statement-heading{
+  padding:11px 18px;
+  background:#f7f8fa;
+  color:#718096;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.income-row{
+  background:#fffaf5;
+}
+
+.total-row{
+  background:#f7f8fa;
+}
+
+.profit-row{
+  border:0;
+  background:#fff1e5;
+  font-size:15px;
+}
+
+
+/* GRAPHS */
+
+.report-graphs{
+  display:grid;
+  grid-template-columns:
+    1fr 1fr;
+  gap:20px;
+}
+
+.report-chart-card{
+  border:1px solid #e3e8ee;
+  border-radius:12px;
+  padding:20px;
+}
+
+.report-chart-card h3{
+  margin:0 0 4px;
+  font-size:15px;
+}
+
+.report-chart-card p{
+  margin:0 0 22px;
+  font-size:11px;
+  color:#718096;
+}
+
+
+/* EXPENSE BAR GRAPH */
+
+.report-bar-row{
+  display:grid;
+  grid-template-columns:
+    110px 1fr 105px;
+  align-items:center;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.report-bar-label{
+  font-size:11px;
+  color:#4a5568;
+}
+
+.report-bar-track{
+  height:15px;
+  background:#edf0f3;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.report-bar-fill{
+  height:100%;
+  background:#ff7a00;
+  border-radius:20px;
+}
+
+.report-bar-value{
+  text-align:right;
+  font-size:11px;
+  font-weight:700;
+}
+
+
+/* COMPARISON GRAPH */
+
+.comparison-chart{
+  height:230px;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  gap:55px;
+  padding:10px 20px 0;
+  border-bottom:1px solid #dfe5eb;
+}
+
+.comparison-column{
+  height:210px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+.comparison-bar{
+  width:52px;
+  min-height:8px;
+  border-radius:8px 8px 0 0;
+  background:#ff7a00;
+}
+
+.comparison-bar.expenses{
+  background:#64748b;
+}
+
+.comparison-bar.profit{
+  background:#0f1f33;
+}
+
+.comparison-column span{
+  font-size:10px;
+  font-weight:700;
+  color:#64748b;
+}
+
+
+/* SALES SUMMARY */
+
+.report-mini-summary{
+  display:grid;
+  grid-template-columns:
+    repeat(3,1fr);
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.report-mini-summary > div{
+  padding:15px;
+  border:1px solid #e3e8ee;
+  border-radius:10px;
+}
+
+.report-mini-summary span{
+  display:block;
+  font-size:9px;
+  letter-spacing:1px;
+  font-weight:800;
+  color:#718096;
+}
+
+.report-mini-summary strong{
+  display:block;
+  margin-top:7px;
+  font-size:16px;
+}
+
+
+/* TABLE */
+
+.report-table-wrap{
+  overflow:hidden;
+  border:1px solid #e1e6ec;
+  border-radius:10px;
+}
+
+.report-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:10px;
+}
+
+.report-table th{
+  padding:10px 8px;
+  background:#f7f8fa;
+  color:#64748b;
+  font-size:8px;
+  letter-spacing:.7px;
+  text-align:left;
+  border-bottom:1px solid #dfe5eb;
+}
+
+.report-table td{
+  padding:11px 8px;
+  border-bottom:1px solid #edf0f3;
+  vertical-align:top;
+}
+
+.report-table .amount{
+  text-align:right;
+  white-space:nowrap;
+}
+
+
+/* MANAGEMENT */
+
+.management-grid{
+  display:grid;
+  grid-template-columns:
+    repeat(4,1fr);
+  gap:14px;
+}
+
+.management-card{
+  border:1px solid #e3e8ee;
+  border-radius:12px;
+  padding:18px;
+}
+
+.management-card span{
+  display:block;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:1px;
+  color:#718096;
+}
+
+.management-card strong{
+  display:block;
+  margin-top:10px;
+  font-size:17px;
+}
+
+
+/* CONCLUSION */
+
+.report-conclusion{
+  padding:24px;
+  border-left:4px solid #ff7a00;
+  background:#fafbfc;
+  border-radius:0 10px 10px 0;
+}
+
+.report-conclusion h2{
+  margin:0 0 12px;
+  font-size:17px;
+}
+
+.report-conclusion p{
+  margin:0;
+  line-height:1.8;
+  font-size:12px;
+  color:#4a5568;
+}
+
+
+/* FOOTER */
+
+.report-footer{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  margin-top:45px;
+  padding-top:15px;
+  border-top:1px solid #dfe5eb;
+  font-size:9px;
+  color:#718096;
+}
+
+
+/* LOADING */
+
+.report-loading{
+  padding:80px;
+  text-align:center;
+  color:#718096;
+}
+
+
+/* PRINT */
+
+@media print{
+
+  @page{
+    size:A4;
+    margin:12mm;
+  }
+
+
+  body{
+    background:#fff !important;
+  }
+
+
+  body *{
+    visibility:hidden;
+  }
+
+
+  #reportsPrintArea,
+  #reportsPrintArea *{
+    visibility:visible;
+  }
+
+
+  #reportsPrintArea{
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    border:0;
+    box-shadow:none;
+    border-radius:0;
+    padding:0;
+  }
+
+
+  .report-page-break{
+    break-before:page;
+    page-break-before:always;
+  }
+
+
+  .report-header{
+    break-inside:avoid;
+  }
+
+
+  .report-kpi,
+  .report-chart-card,
+  .management-card{
+    break-inside:avoid;
+  }
+
+
+  .report-table{
+    page-break-inside:auto;
+  }
+
+
+  .report-table tr{
+    page-break-inside:avoid;
+  }
+
+}
 </style>
 </head>
 
@@ -1287,6 +1826,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
   buildEmployeesModule();
 
+  buildReportsModule();
+
   loadOverview();
 
 });
@@ -1312,6 +1853,8 @@ if(view==="expenses") loadExpenses();
 if(view==="employees") loadEmployees();
 
 if(view==="overview") loadOverview();
+
+if(view==="reports") loadReports();
 }
 
 function buildPlaceholders(){
@@ -1324,7 +1867,6 @@ function buildPlaceholders(){
     sales:["◆","Sales","Vehicle sales, selling prices, customer payments and deal profitability."],
     suppliers:["◈","Suppliers","Suppliers, clearing agents, shipping providers and service providers."],
     employees:["♟","Employees","Staff records, salaries, commissions and finance-related activities."],
-    reports:["▥","Reports","Profit & Loss, cash flow, vehicle profitability and management reports."]
   };
   Object.entries(data).forEach(([key,v])=>{
     document.getElementById("view-"+key).innerHTML=`
@@ -11842,6 +12384,1669 @@ async function saveAccount(){
 
 document.getElementById("accountModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeAccountModal()});
 
+/* =========================================================
+   MATТEX MANAGEMENT REPORTS
+========================================================= */
+
+let reportData = null;
+
+
+/* =========================================================
+   BUILD REPORT PAGE
+========================================================= */
+
+function buildReportsModule(){
+
+  const view =
+    document.getElementById(
+      "view-reports"
+    );
+
+  if(!view) return;
+
+
+  const today =
+    new Date()
+      .toISOString()
+      .slice(0,10);
+
+
+  const firstDay =
+    new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      1
+    )
+      .toISOString()
+      .slice(0,10);
+
+
+  view.innerHTML = `
+
+    <div class="report-controls">
+
+      <div>
+
+        <h2>
+          Financial Reports
+        </h2>
+
+        <p>
+          Mattex Company Limited —
+          Financial & Management Reporting
+        </p>
+
+      </div>
+
+
+      <div class="report-actions">
+
+        <div class="report-field">
+
+          <label>
+            FROM
+          </label>
+
+          <input
+            type="date"
+            id="reportFrom"
+            value="${firstDay}"
+          >
+
+        </div>
+
+
+        <div class="report-field">
+
+          <label>
+            TO
+          </label>
+
+          <input
+            type="date"
+            id="reportTo"
+            value="${today}"
+          >
+
+        </div>
+
+
+        <button
+          class="primary"
+          onclick="loadReports()"
+        >
+          Generate Report
+        </button>
+
+
+        <button
+          class="secondary"
+          onclick="printFinancialReport()"
+        >
+          🖨 Print / Save PDF
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="reportsPrintArea"
+      class="financial-report"
+    >
+
+      <div class="report-loading">
+
+        Loading financial report...
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   LOAD REPORT DATA
+========================================================= */
+
+async function loadReports(){
+
+  const report =
+    document.getElementById(
+      "reportsPrintArea"
+    );
+
+  if(!report) return;
+
+
+  const from =
+    document.getElementById(
+      "reportFrom"
+    ).value;
+
+
+  const to =
+    document.getElementById(
+      "reportTo"
+    ).value;
+
+
+  if(!from || !to){
+
+    toast(
+      "Please select the report period.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  if(from > to){
+
+    toast(
+      "The start date cannot be after the end date.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  report.innerHTML = `
+
+    <div class="report-loading">
+
+      Loading financial data...
+
+    </div>
+
+  `;
+
+
+  try{
+
+    /* =====================================================
+       CUSTOMER PAYMENTS / INCOME
+    ===================================================== */
+
+    const {
+      data: payments,
+      error: paymentsError
+    } =
+      await sb
+        .from("customer_payments")
+        .select("*")
+        .gte(
+          "payment_date",
+          from
+        )
+        .lte(
+          "payment_date",
+          to
+        );
+
+
+    if(paymentsError)
+      throw paymentsError;
+
+
+    /* =====================================================
+       VEHICLE / SALES EXPENSES
+    ===================================================== */
+
+    const {
+      data: vehicleCosts,
+      error: vehicleCostsError
+    } =
+      await sb
+        .from("vehicle_costs")
+        .select("*")
+        .gte(
+          "cost_date",
+          from
+        )
+        .lte(
+          "cost_date",
+          to
+        );
+
+
+    if(vehicleCostsError)
+      throw vehicleCostsError;
+
+
+    /* =====================================================
+       OFFICE EXPENSES
+    ===================================================== */
+
+    const {
+      data: officeExpenses,
+      error: officeExpensesError
+    } =
+      await sb
+        .from("expenses")
+        .select("*")
+        .gte(
+          "expense_date",
+          from
+        )
+        .lte(
+          "expense_date",
+          to
+        );
+
+
+    if(officeExpensesError)
+      throw officeExpensesError;
+
+
+    /* =====================================================
+       EMPLOYEE PAYMENTS
+    ===================================================== */
+
+    const {
+      data: employeePayments,
+      error: employeePaymentsError
+    } =
+      await sb
+        .from("employee_payments")
+        .select("*")
+        .gte(
+          "payment_date",
+          from
+        )
+        .lte(
+          "payment_date",
+          to
+        );
+
+
+    if(employeePaymentsError)
+      throw employeePaymentsError;
+
+
+    /* =====================================================
+       SALES
+    ===================================================== */
+
+    const {
+      data: sales,
+      error: salesError
+    } =
+      await sb
+        .from("sales")
+        .select(`
+          *,
+          customers(
+            full_name,
+            phone
+          ),
+          vehicles(
+            vehicle_name,
+            make,
+            model,
+            year,
+            stock_number
+          )
+        `)
+        .gte(
+          "sale_date",
+          from
+        )
+        .lte(
+          "sale_date",
+          to
+        )
+        .order(
+          "sale_date",
+          {
+            ascending:false
+          }
+        );
+
+
+    if(salesError)
+      throw salesError;
+
+
+    /* =====================================================
+       TZS INCOME
+    ===================================================== */
+
+    const tzsPayments =
+      (payments || [])
+        .filter(
+          p =>
+            !p.currency ||
+            p.currency === "TZS"
+        );
+
+
+    const totalIncome =
+      tzsPayments.reduce(
+        (sum,p) =>
+          sum +
+          Number(
+            p.amount || 0
+          ),
+        0
+      );
+
+
+    /* =====================================================
+       TZS VEHICLE EXPENSES
+    ===================================================== */
+
+    const tzsVehicleCosts =
+      (vehicleCosts || [])
+        .filter(
+          c =>
+            !c.currency ||
+            c.currency === "TZS"
+        );
+
+
+    const totalVehicleExpenses =
+      tzsVehicleCosts.reduce(
+        (sum,c) =>
+          sum +
+          Number(
+            c.amount || 0
+          ),
+        0
+      );
+
+
+    /* =====================================================
+       OFFICE EXPENSES
+    ===================================================== */
+
+    const tzsOfficeExpenses =
+      (officeExpenses || [])
+        .filter(
+          e =>
+            !e.currency ||
+            e.currency === "TZS"
+        );
+
+
+    const totalOfficeExpenses =
+      tzsOfficeExpenses.reduce(
+        (sum,e) =>
+          sum +
+          Number(
+            e.amount || 0
+          ),
+        0
+      );
+
+
+    /* =====================================================
+       SALARIES
+    ===================================================== */
+
+    const salaries =
+      (employeePayments || [])
+        .filter(
+          p =>
+            p.payment_type === "SALARY" &&
+            (
+              !p.currency ||
+              p.currency === "TZS"
+            )
+        );
+
+
+    const totalSalaries =
+      salaries.reduce(
+        (sum,p) =>
+          sum +
+          Number(
+            p.amount || 0
+          ),
+        0
+      );
+
+
+    /* =====================================================
+       COMMISSIONS
+    ===================================================== */
+
+    const commissions =
+      (employeePayments || [])
+        .filter(
+          p =>
+            p.payment_type === "COMMISSION" &&
+            (
+              !p.currency ||
+              p.currency === "TZS"
+            )
+        );
+
+
+    const totalCommissions =
+      commissions.reduce(
+        (sum,p) =>
+          sum +
+          Number(
+            p.amount || 0
+          ),
+        0
+      );
+
+
+    /* =====================================================
+       TOTAL EXPENSES
+    ===================================================== */
+
+    const totalExpenses =
+      totalVehicleExpenses +
+      totalOfficeExpenses +
+      totalSalaries +
+      totalCommissions;
+
+
+    /* =====================================================
+       NET PROFIT
+    ===================================================== */
+
+    const netProfit =
+      totalIncome -
+      totalExpenses;
+
+
+    /* =====================================================
+       PROFIT MARGIN
+    ===================================================== */
+
+    const profitMargin =
+      totalIncome > 0
+        ? (
+            netProfit /
+            totalIncome
+          ) * 100
+        : 0;
+
+
+    reportData = {
+
+      from,
+      to,
+
+      payments:
+        tzsPayments,
+
+      vehicleCosts:
+        tzsVehicleCosts,
+
+      officeExpenses:
+        tzsOfficeExpenses,
+
+      salaries,
+
+      commissions,
+
+      sales:
+        sales || [],
+
+      totalIncome,
+
+      totalVehicleExpenses,
+
+      totalOfficeExpenses,
+
+      totalSalaries,
+
+      totalCommissions,
+
+      totalExpenses,
+
+      netProfit,
+
+      profitMargin
+
+    };
+
+
+    renderFinancialReport(
+      reportData
+    );
+
+
+  }
+
+  catch(error){
+
+    console.error(
+      "Financial report error:",
+      error
+    );
+
+
+    report.innerHTML = `
+
+      <div class="empty">
+
+        <strong>
+          Unable to generate report
+        </strong>
+
+        <p>
+          ${esc(
+            error.message ||
+            "Unknown error"
+          )}
+        </p>
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* =========================================================
+   RENDER FINANCIAL REPORT
+========================================================= */
+
+function renderFinancialReport(data){
+
+  const report =
+    document.getElementById(
+      "reportsPrintArea"
+    );
+
+  if(!report) return;
+
+
+  const formatDate =
+    date => {
+
+      if(!date)
+        return "-";
+
+      return new Date(
+        date + "T00:00:00"
+      ).toLocaleDateString(
+        "en-GB",
+        {
+          day:"2-digit",
+          month:"short",
+          year:"numeric"
+        }
+      );
+
+    };
+
+
+  const generated =
+    new Date()
+      .toLocaleString(
+        "en-GB",
+        {
+          day:"2-digit",
+          month:"short",
+          year:"numeric",
+          hour:"2-digit",
+          minute:"2-digit"
+        }
+      );
+
+
+  /* =====================================================
+     EXPENSE GRAPH
+  ===================================================== */
+
+  const expenseItems = [
+
+    {
+      label:"Vehicle / Sales",
+      value:data.totalVehicleExpenses
+    },
+
+    {
+      label:"Office",
+      value:data.totalOfficeExpenses
+    },
+
+    {
+      label:"Salaries",
+      value:data.totalSalaries
+    },
+
+    {
+      label:"Commissions",
+      value:data.totalCommissions
+    }
+
+  ];
+
+
+  const maxExpense =
+    Math.max(
+      ...expenseItems.map(
+        x => x.value
+      ),
+      1
+    );
+
+
+  const expenseBars =
+    expenseItems
+      .map(
+        item => {
+
+          const width =
+            (
+              item.value /
+              maxExpense
+            ) * 100;
+
+
+          return `
+
+            <div class="report-bar-row">
+
+              <div class="report-bar-label">
+                ${esc(item.label)}
+              </div>
+
+              <div class="report-bar-track">
+
+                <div
+                  class="report-bar-fill"
+                  style="width:${width}%"
+                ></div>
+
+              </div>
+
+              <div class="report-bar-value">
+                ${money(
+                  item.value,
+                  "TZS"
+                )}
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+
+  /* =====================================================
+     SALES TABLE
+  ===================================================== */
+
+  const salesRows =
+    data.sales.length
+
+      ? data.sales
+          .map(
+            sale => {
+
+              const salePayments =
+                data.payments.filter(
+                  payment =>
+                    payment.sale_id === sale.id
+                );
+
+
+              const paid =
+                salePayments.reduce(
+                  (
+                    sum,
+                    payment
+                  ) =>
+                    sum +
+                    Number(
+                      payment.amount || 0
+                    ),
+                  0
+                );
+
+
+              const saleCosts =
+                data.vehicleCosts
+                  .filter(
+                    cost =>
+                      cost.sale_id === sale.id
+                  )
+                  .reduce(
+                    (
+                      sum,
+                      cost
+                    ) =>
+                      sum +
+                      Number(
+                        cost.amount || 0
+                      ),
+                    0
+                  );
+
+
+              const net =
+                paid -
+                saleCosts;
+
+
+              const vehicle =
+                sale.vehicles;
+
+
+              return `
+
+                <tr>
+
+                  <td>
+                    ${formatDate(
+                      sale.sale_date
+                    )}
+                  </td>
+
+                  <td>
+                    <strong>
+                      ${esc(
+                        sale.sale_number ||
+                        "-"
+                      )}
+                    </strong>
+                  </td>
+
+                  <td>
+                    ${esc(
+                      sale.customers?.full_name ||
+                      "-"
+                    )}
+                  </td>
+
+                  <td>
+                    ${esc(
+                      vehicle?.vehicle_name ||
+                      (
+                        vehicle?.make +
+                        " " +
+                        vehicle?.model
+                      ) ||
+                      "-"
+                    )}
+                  </td>
+
+                  <td class="amount">
+                    ${money(
+                      sale.selling_price,
+                      sale.currency
+                    )}
+                  </td>
+
+                  <td class="amount">
+                    ${money(
+                      paid,
+                      sale.currency
+                    )}
+                  </td>
+
+                  <td class="amount">
+                    ${money(
+                      saleCosts,
+                      sale.currency
+                    )}
+                  </td>
+
+                  <td class="amount">
+                    <strong>
+                      ${money(
+                        net,
+                        sale.currency
+                      )}
+                    </strong>
+                  </td>
+
+                </tr>
+
+              `;
+
+            }
+          )
+          .join("")
+
+      : `
+
+        <tr>
+
+          <td
+            colspan="8"
+            style="text-align:center"
+          >
+            No sales recorded
+            during this period.
+          </td>
+
+        </tr>
+
+      `;
+
+
+  /* =====================================================
+     REPORT HTML
+  ===================================================== */
+
+  report.innerHTML = `
+
+    <!-- REPORT HEADER -->
+
+    <div class="report-header">
+
+      <div class="report-brand">
+
+        <img
+          src="mattex-logo.png"
+          alt="Mattex Company Limited"
+          class="report-logo"
+        >
+
+      </div>
+
+
+      <div class="report-title">
+
+        <h1>
+          FINANCIAL & MANAGEMENT REPORT
+        </h1>
+
+        <p>
+          MATТEX COMPANY LIMITED
+        </p>
+
+        <div class="report-period">
+
+          Reporting Period:
+          <strong>
+            ${formatDate(data.from)}
+          </strong>
+
+          —
+          
+          <strong>
+            ${formatDate(data.to)}
+          </strong>
+
+        </div>
+
+        <small>
+          Generated:
+          ${generated}
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <!-- EXECUTIVE SUMMARY -->
+
+    <section class="report-section">
+
+      <div class="report-section-title">
+
+        <span>
+          01
+        </span>
+
+        <div>
+
+          <h2>
+            Executive Financial Summary
+          </h2>
+
+          <p>
+            Overall financial performance
+            for the selected reporting period.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="report-kpis">
+
+        <div class="report-kpi">
+
+          <span>
+            TOTAL INCOME
+          </span>
+
+          <strong>
+            ${money(
+              data.totalIncome,
+              "TZS"
+            )}
+          </strong>
+
+          <small>
+            Customer payments received
+          </small>
+
+        </div>
+
+
+        <div class="report-kpi">
+
+          <span>
+            TOTAL EXPENSES
+          </span>
+
+          <strong>
+            ${money(
+              data.totalExpenses,
+              "TZS"
+            )}
+          </strong>
+
+          <small>
+            All business expenses
+          </small>
+
+        </div>
+
+
+        <div class="report-kpi">
+
+          <span>
+            NET PROFIT
+          </span>
+
+          <strong>
+            ${money(
+              data.netProfit,
+              "TZS"
+            )}
+          </strong>
+
+          <small>
+            Income less total expenses
+          </small>
+
+        </div>
+
+
+        <div class="report-kpi">
+
+          <span>
+            PROFIT MARGIN
+          </span>
+
+          <strong>
+            ${data.profitMargin.toFixed(1)}%
+          </strong>
+
+          <small>
+            Net profit / income
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- PROFIT & LOSS -->
+
+    <section class="report-section">
+
+      <div class="report-section-title">
+
+        <span>
+          02
+        </span>
+
+        <div>
+
+          <h2>
+            Profit & Loss Statement
+          </h2>
+
+          <p>
+            Detailed income and expenditure summary.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="statement">
+
+        <div class="statement-row income-row">
+
+          <span>
+            Customer Payments Received
+          </span>
+
+          <strong>
+            ${money(
+              data.totalIncome,
+              "TZS"
+            )}
+          </strong>
+
+        </div>
+
+
+        <div class="statement-group">
+
+          <div class="statement-heading">
+            EXPENSES
+          </div>
+
+
+          <div class="statement-row">
+
+            <span>
+              Vehicle / Sales Expenses
+            </span>
+
+            <span>
+              ${money(
+                data.totalVehicleExpenses,
+                "TZS"
+              )}
+            </span>
+
+          </div>
+
+
+          <div class="statement-row">
+
+            <span>
+              Office Expenses
+            </span>
+
+            <span>
+              ${money(
+                data.totalOfficeExpenses,
+                "TZS"
+              )}
+            </span>
+
+          </div>
+
+
+          <div class="statement-row">
+
+            <span>
+              Employee Salaries
+            </span>
+
+            <span>
+              ${money(
+                data.totalSalaries,
+                "TZS"
+              )}
+            </span>
+
+          </div>
+
+
+          <div class="statement-row">
+
+            <span>
+              Employee Commissions
+            </span>
+
+            <span>
+              ${money(
+                data.totalCommissions,
+                "TZS"
+              )}
+            </span>
+
+          </div>
+
+
+          <div class="statement-row total-row">
+
+            <strong>
+              TOTAL EXPENSES
+            </strong>
+
+            <strong>
+              ${money(
+                data.totalExpenses,
+                "TZS"
+              )}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="statement-row profit-row">
+
+          <strong>
+            NET PROFIT
+          </strong>
+
+          <strong>
+            ${money(
+              data.netProfit,
+              "TZS"
+            )}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- GRAPH PRESENTATION -->
+
+    <section class="report-section report-page-break">
+
+      <div class="report-section-title">
+
+        <span>
+          03
+        </span>
+
+        <div>
+
+          <h2>
+            Financial Presentation
+          </h2>
+
+          <p>
+            Visual representation of financial performance.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="report-graphs">
+
+        <div class="report-chart-card">
+
+          <h3>
+            Expense Distribution
+          </h3>
+
+          <p>
+            Breakdown of total business expenses
+          </p>
+
+
+          <div class="expense-chart">
+
+            ${expenseBars}
+
+          </div>
+
+        </div>
+
+
+        <div class="report-chart-card">
+
+          <h3>
+            Income vs Expenses vs Profit
+          </h3>
+
+          <p>
+            Overall financial position
+          </p>
+
+
+          <div class="comparison-chart">
+
+            <div class="comparison-column">
+
+              <div
+                class="comparison-bar income"
+                style="
+                  height:${Math.min(
+                    (
+                      data.totalIncome /
+                      Math.max(
+                        data.totalIncome,
+                        data.totalExpenses,
+                        1
+                      )
+                    ) * 180,
+                    180
+                  )}px
+                "
+              ></div>
+
+              <span>
+                Income
+              </span>
+
+            </div>
+
+
+            <div class="comparison-column">
+
+              <div
+                class="comparison-bar expenses"
+                style="
+                  height:${Math.min(
+                    (
+                      data.totalExpenses /
+                      Math.max(
+                        data.totalIncome,
+                        data.totalExpenses,
+                        1
+                      )
+                    ) * 180,
+                    180
+                  )}px
+                "
+              ></div>
+
+              <span>
+                Expenses
+              </span>
+
+            </div>
+
+
+            <div class="comparison-column">
+
+              <div
+                class="comparison-bar profit"
+                style="
+                  height:${Math.max(
+                    Math.min(
+                      (
+                        Math.max(
+                          data.netProfit,
+                          0
+                        ) /
+                        Math.max(
+                          data.totalIncome,
+                          data.totalExpenses,
+                          1
+                        )
+                      ) * 180,
+                      180
+                    ),
+                    8
+                  )}px
+                "
+              ></div>
+
+              <span>
+                Profit
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- SALES PERFORMANCE -->
+
+    <section class="report-section report-page-break">
+
+      <div class="report-section-title">
+
+        <span>
+          04
+        </span>
+
+        <div>
+
+          <h2>
+            Sales Performance
+          </h2>
+
+          <p>
+            Vehicle sales and actual customer collections.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="report-mini-summary">
+
+        <div>
+
+          <span>
+            VEHICLES SOLD
+          </span>
+
+          <strong>
+            ${data.sales.length}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            AGREED SALES VALUE
+          </span>
+
+          <strong>
+            ${money(
+              data.sales.reduce(
+                (sum,sale) =>
+                  sale.currency === "TZS"
+                    ? sum +
+                      Number(
+                        sale.selling_price || 0
+                      )
+                    : sum,
+                0
+              ),
+              "TZS"
+            )}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            AMOUNT COLLECTED
+          </span>
+
+          <strong>
+            ${money(
+              data.totalIncome,
+              "TZS"
+            )}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="report-table-wrap">
+
+        <table class="report-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                DATE
+              </th>
+
+              <th>
+                SALE
+              </th>
+
+              <th>
+                CUSTOMER
+              </th>
+
+              <th>
+                VEHICLE
+              </th>
+
+              <th>
+                AGREED PRICE
+              </th>
+
+              <th>
+                AMOUNT PAID
+              </th>
+
+              <th>
+                EXPENSES
+              </th>
+
+              <th>
+                NET INCOME
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${salesRows}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- MANAGEMENT COSTS -->
+
+    <section class="report-section report-page-break">
+
+      <div class="report-section-title">
+
+        <span>
+          05
+        </span>
+
+        <div>
+
+          <h2>
+            Management & Operating Costs
+          </h2>
+
+          <p>
+            Salaries, commissions and office operating expenses.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="management-grid">
+
+        <div class="management-card">
+
+          <span>
+            OFFICE EXPENSES
+          </span>
+
+          <strong>
+            ${money(
+              data.totalOfficeExpenses,
+              "TZS"
+            )}
+          </strong>
+
+        </div>
+
+
+        <div class="management-card">
+
+          <span>
+            SALARIES
+          </span>
+
+          <strong>
+            ${money(
+              data.totalSalaries,
+              "TZS"
+            )}
+          </strong>
+
+        </div>
+
+
+        <div class="management-card">
+
+          <span>
+            COMMISSIONS
+          </span>
+
+          <strong>
+            ${money(
+              data.totalCommissions,
+              "TZS"
+            )}
+          </strong>
+
+        </div>
+
+
+        <div class="management-card">
+
+          <span>
+            TOTAL MANAGEMENT COST
+          </span>
+
+          <strong>
+            ${money(
+              data.totalOfficeExpenses +
+              data.totalSalaries +
+              data.totalCommissions,
+              "TZS"
+            )}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- MANAGEMENT CONCLUSION -->
+
+    <section class="report-section">
+
+      <div class="report-conclusion">
+
+        <h2>
+          Management Financial Summary
+        </h2>
+
+        <p>
+
+          During the selected reporting period,
+          <strong>
+            Mattex Company Limited
+          </strong>
+          received a total of
+          <strong>
+            ${money(
+              data.totalIncome,
+              "TZS"
+            )}
+          </strong>
+          from customer payments.
+
+          The company incurred total business
+          expenses of
+          <strong>
+            ${money(
+              data.totalExpenses,
+              "TZS"
+            )}
+          </strong>,
+
+          comprising vehicle and sales expenses,
+          office operating expenses,
+          employee salaries and commissions.
+
+          After accounting for these expenses,
+          the company recorded a net profit of
+          <strong>
+            ${money(
+              data.netProfit,
+              "TZS"
+            )}
+          </strong>,
+
+          representing a profit margin of
+          <strong>
+            ${data.profitMargin.toFixed(1)}%
+          </strong>.
+
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <div class="report-footer">
+
+      <span>
+        MATТEX COMPANY LIMITED
+      </span>
+
+      <span>
+        Financial & Management Report
+      </span>
+
+      <span>
+        ${formatDate(data.from)}
+        —
+        ${formatDate(data.to)}
+      </span>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   PRINT / SAVE PDF
+========================================================= */
+
+function printFinancialReport(){
+
+  if(!reportData){
+
+    toast(
+      "Generate the report first.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  window.print();
+
+}
 function money(n,c="TZS"){
   try{return new Intl.NumberFormat("en-TZ",{style:"currency",currency:c,maximumFractionDigits:0}).format(Number(n||0))}
   catch{return `${c} ${Number(n||0).toLocaleString()}`}
