@@ -560,118 +560,219 @@ tr:hover td{background:#fbfcfd}
     </div>
 
     <!-- OTHER VIEWS -->
-    <div class="view" id="view-income">
+   <!-- =========================
+     INCOME VIEW
+========================= -->
+
+<div class="view" id="view-income">
+
+  <!-- =========================
+       HEADER
+  ========================== -->
 
   <div class="hero">
+
     <div>
+
       <h2>Income</h2>
-      <p>Track every source of money received by Mattex Company Limited.</p>
+
+      <p>
+        Automatic income generated from vehicle sales
+        after sale expenses.
+      </p>
+
     </div>
 
-    <button class="primary" onclick="openIncomeModal()">
-      + Record Income
+
+    <button
+      class="secondary"
+      onclick="loadIncome()"
+    >
+      ↻ Refresh
     </button>
+
   </div>
+
+
+  <!-- =========================
+       INCOME SUMMARY
+  ========================== -->
 
   <div class="cards">
 
+
+    <!-- GROSS SALES -->
+
     <div class="card kpi">
+
       <div class="kpi-top">
-        <div class="kpi-label">Total Income</div>
-        <div class="kpi-icon">TZS</div>
+
+        <div class="kpi-label">
+          Gross Sales
+        </div>
+
+        <div class="kpi-icon">
+          TZS
+        </div>
+
       </div>
 
-      <div class="kpi-value" id="incomeTotal">
+
+      <div
+        class="kpi-value"
+        id="incomeTotal"
+      >
         TZS 0
       </div>
 
+
       <div class="kpi-note">
-        All recorded income
+        Total selling price of vehicle sales
       </div>
+
     </div>
 
+
+
+    <!-- SALE EXPENSES -->
+
     <div class="card kpi">
+
       <div class="kpi-top">
-        <div class="kpi-label">This Month</div>
-        <div class="kpi-icon">↗</div>
+
+        <div class="kpi-label">
+          Sale Expenses
+        </div>
+
+        <div class="kpi-icon">
+          −
+        </div>
+
       </div>
 
-      <div class="kpi-value" id="incomeMonth">
+
+      <div
+        class="kpi-value"
+        id="incomeExpenses"
+      >
         TZS 0
       </div>
 
+
       <div class="kpi-note">
-        Income received this month
+        Expenses attached to vehicle sales
       </div>
+
     </div>
 
+
+
+    <!-- NET INCOME -->
+
     <div class="card kpi">
+
       <div class="kpi-top">
-        <div class="kpi-label">Vehicle Sales</div>
-        <div class="kpi-icon">V</div>
+
+        <div class="kpi-label">
+          Net Sales Income
+        </div>
+
+        <div class="kpi-icon">
+          ↗
+        </div>
+
       </div>
 
-      <div class="kpi-value" id="incomeVehicleTotal">
+
+      <div
+        class="kpi-value"
+        id="incomeNet"
+      >
         TZS 0
       </div>
 
+
       <div class="kpi-note">
-        Income linked to vehicles
+        Gross sales less sale expenses
       </div>
+
     </div>
+
+
+
+    <!-- VEHICLES SOLD -->
 
     <div class="card kpi">
+
       <div class="kpi-top">
-        <div class="kpi-label">Other Income</div>
-        <div class="kpi-icon">+</div>
+
+        <div class="kpi-label">
+          Vehicles Sold
+        </div>
+
+        <div class="kpi-icon">
+          V
+        </div>
+
       </div>
 
-      <div class="kpi-value" id="incomeOther">
-        TZS 0
+
+      <div
+        class="kpi-value"
+        id="incomeSalesCount"
+      >
+        0
       </div>
+
 
       <div class="kpi-note">
-        Other recorded income
+        Vehicle sales included
       </div>
+
     </div>
+
 
   </div>
 
+
+
+  <!-- =========================
+       SALES INCOME
+  ========================== -->
+
   <div class="panel">
+
+
+    <!-- TOOLBAR -->
 
     <div class="toolbar">
 
       <input
         class="search"
         id="incomeSearch"
-        placeholder="Search income..."
+        placeholder="Search sale, customer, vehicle..."
         oninput="filterIncome()"
       >
 
-      <div class="filters">
-
-        <select id="incomeCategoryFilter" onchange="filterIncome()">
-          <option value="">All Categories</option>
-        </select>
-
-        <select id="incomeCurrencyFilter" onchange="filterIncome()">
-          <option value="">All Currencies</option>
-          <option value="TZS">TZS</option>
-          <option value="USD">USD</option>
-          <option value="JPY">JPY</option>
-        </select>
-
-      </div>
-
     </div>
+
+
+
+    <!-- TABLE -->
 
     <div id="incomeTableContainer">
+
       <div class="empty">
-        Loading income...
+
+        Loading sales income...
+
       </div>
+
     </div>
 
+
   </div>
+
 
 </div>
     <div class="view" id="view-expenses"></div>
@@ -688,190 +789,6 @@ tr:hover td{background:#fbfcfd}
 </main>
 </div>
 
-<!-- INCOME MODAL -->
-
-<div class="modal-bg" id="incomeModal">
-
-  <div class="modal">
-
-    <div class="modal-head">
-
-      <h3>Record Income</h3>
-
-      <button
-        class="close"
-        onclick="closeIncomeModal()"
-      >
-        ×
-      </button>
-
-    </div>
-
-    <form class="form" id="incomeForm">
-
-      <div class="form-grid">
-
-        <div class="field">
-
-          <label>AMOUNT *</label>
-
-          <input
-            id="incomeAmount"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="0.00"
-            required
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>CURRENCY *</label>
-
-          <select id="incomeCurrency" required>
-
-            <option value="TZS">
-              TZS — Tanzanian Shilling
-            </option>
-
-            <option value="USD">
-              USD — US Dollar
-            </option>
-
-            <option value="JPY">
-              JPY — Japanese Yen
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <div class="field">
-
-          <label>INCOME CATEGORY *</label>
-
-          <select id="incomeCategory" required>
-
-            <option value="">
-              Select category
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <div class="field">
-
-          <label>RECEIVING ACCOUNT</label>
-
-          <select id="incomeAccount">
-
-            <option value="">
-              Select account
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <div class="field">
-
-          <label>CUSTOMER</label>
-
-          <select id="incomeCustomer">
-
-            <option value="">
-              None / Other
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <div class="field">
-
-          <label>VEHICLE</label>
-
-          <select id="incomeVehicle">
-
-            <option value="">
-              None / Other
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <div class="field">
-
-          <label>INCOME DATE *</label>
-
-          <input
-            id="incomeDate"
-            type="date"
-            required
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>REFERENCE NUMBER</label>
-
-          <input
-            id="incomeReference"
-            placeholder="e.g. RCPT-0001"
-          >
-
-        </div>
-
-
-        <div class="field full">
-
-          <label>DESCRIPTION</label>
-
-          <input
-            id="incomeDescription"
-            placeholder="Describe where this money came from..."
-          >
-
-        </div>
-
-      </div>
-
-    </form>
-
-
-    <div class="modal-foot">
-
-      <button
-        class="secondary"
-        onclick="closeIncomeModal()"
-      >
-        Cancel
-      </button>
-
-      <button
-        class="primary"
-        onclick="saveIncome()"
-      >
-        Save Income
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
 
   <!-- =====================================================
      NEW SALE MODAL
@@ -10433,369 +10350,17 @@ openSaleDetails(
 }
 
 /* =========================================================
+ /* =========================================================
    INCOME MODULE
+   SALES → NET SALES INCOME
 ========================================================= */
 
 let incomeRecords = [];
-let incomeCategories = [];
 
-/* ---------- OPEN MODAL ---------- */
 
-async function openIncomeModal(){
-
-  const modal = document.getElementById("incomeModal");
-  const form = document.getElementById("incomeForm");
-
-  if(!modal){
-    alert("Income modal was not found.");
-    return;
-  }
-
-  if(form){
-    form.reset();
-  }
-
-  const dateInput = document.getElementById("incomeDate");
-
-  if(dateInput){
-    dateInput.value =
-      new Date().toISOString().split("T")[0];
-  }
-
-  modal.classList.add("show");
-
-  /*
-    Load dropdown data AFTER the modal is open.
-  */
-
-  await loadIncomeFormData();
-
-}
-
-function closeIncomeModal(){
-
-  document
-    .getElementById("incomeModal")
-    .classList.remove("show");
-
-}
-
-
-/* ---------- FORM DATA ---------- */
-
-async function loadIncomeFormData() {
-
-  const categorySelect =
-    document.getElementById("incomeCategory");
-
-  const accountSelect =
-    document.getElementById("incomeAccount");
-
-  const customerSelect =
-    document.getElementById("incomeCustomer");
-
-  const vehicleSelect =
-    document.getElementById("incomeVehicle");
-
-
-  /* =========================================
-     CATEGORY
-  ========================================= */
-
-  categorySelect.innerHTML =
-    `<option value="">Loading categories...</option>`;
-
-
-  try {
-
-    const { data, error } =
-      await sb
-        .from("income_categories")
-        .select("id,name")
-        .order("name", {
-          ascending: true
-        });
-
-
-    if (error) {
-
-      categorySelect.innerHTML =
-        `<option value="">
-          ERROR: ${error.message}
-        </option>`;
-
-      console.error(
-        "Income category error:",
-        error
-      );
-
-      return;
-    }
-
-
-    categorySelect.innerHTML =
-      `<option value="">
-        Select category
-      </option>`;
-
-
-    if (!data || data.length === 0) {
-
-      categorySelect.innerHTML =
-        `<option value="">
-          No categories found
-        </option>`;
-
-      return;
-    }
-
-
-    data.forEach(category => {
-
-      const option =
-        document.createElement("option");
-
-      option.value =
-        category.id;
-
-      option.textContent =
-        category.name;
-
-      categorySelect.appendChild(
-        option
-      );
-
-    });
-
-
-    incomeCategories = data;
-
-
-  } catch (error) {
-
-    console.error(
-      "Category loading failed:",
-      error
-    );
-
-    categorySelect.innerHTML =
-      `<option value="">
-        ERROR: ${error.message}
-      </option>`;
-
-  }
-
-
-
-  /* =========================================
-     ACCOUNTS
-  ========================================= */
-
-  accountSelect.innerHTML =
-    `<option value="">
-      No accounts available
-    </option>`;
-
-
-  try {
-
-    const { data, error } =
-      await sb
-        .from("accounts")
-        .select(
-          "id,name,account_type,currency"
-        )
-        .eq(
-          "is_active",
-          true
-        )
-        .order("name");
-
-
-    if (error) {
-
-      console.error(
-        "Accounts error:",
-        error
-      );
-
-      return;
-    }
-
-
-    if (data && data.length) {
-
-      accountSelect.innerHTML =
-        `<option value="">
-          Select account
-        </option>`;
-
-
-      data.forEach(account => {
-
-        const option =
-          document.createElement("option");
-
-        option.value =
-          account.id;
-
-        option.textContent =
-          `${account.name} — ${account.currency}`;
-
-        accountSelect.appendChild(
-          option
-        );
-
-      });
-
-    }
-
-  } catch(error) {
-
-    console.error(
-      "Account loading failed:",
-      error
-    );
-
-  }
-
-
-
-  /* =========================================
-     CUSTOMERS
-  ========================================= */
-
-  customerSelect.innerHTML =
-    `<option value="">
-      None / Other
-    </option>`;
-
-
-  try {
-
-    const { data, error } =
-      await sb
-        .from("customers")
-        .select(
-          "id,full_name,phone"
-        )
-        .order(
-          "full_name"
-        );
-
-
-    if (error) {
-
-      console.error(
-        "Customers error:",
-        error
-      );
-
-      return;
-    }
-
-
-    (data || []).forEach(customer => {
-
-      const option =
-        document.createElement("option");
-
-      option.value =
-        customer.id;
-
-      option.textContent =
-        customer.phone
-          ? `${customer.full_name} — ${customer.phone}`
-          : customer.full_name;
-
-      customerSelect.appendChild(
-        option
-      );
-
-    });
-
-  } catch(error) {
-
-    console.error(
-      "Customer loading failed:",
-      error
-    );
-
-  }
-
-
-
-  /* =========================================
-     VEHICLES
-  ========================================= */
-
-  vehicleSelect.innerHTML =
-    `<option value="">
-      None / Other
-    </option>`;
-
-
-  try {
-
-    const { data, error } =
-      await sb
-        .from("vehicles")
-        .select(
-          "id,stock_number,make,model,year"
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false
-          }
-        );
-
-
-    if (error) {
-
-      console.error(
-        "Vehicles error:",
-        error
-      );
-
-      return;
-    }
-
-
-    (data || []).forEach(vehicle => {
-
-      const option =
-        document.createElement("option");
-
-      option.value =
-        vehicle.id;
-
-      option.textContent =
-        `${vehicle.stock_number} — ${vehicle.make} ${vehicle.model}${
-          vehicle.year
-            ? ` (${vehicle.year})`
-            : ""
-        }`;
-
-      vehicleSelect.appendChild(
-        option
-      );
-
-    });
-
-  } catch(error) {
-
-    console.error(
-      "Vehicle loading failed:",
-      error
-    );
-
-  }
-
-}
-
-
-/* ---------- LOAD INCOME ---------- */
+/* =========================================================
+   LOAD SALES INCOME
+========================================================= */
 
 async function loadIncome(){
 
@@ -10804,40 +10369,238 @@ async function loadIncome(){
       "incomeTableContainer"
     );
 
-  container.innerHTML =
-    `<div class="empty">Loading income...</div>`;
+  if(!container) return;
+
+
+  container.innerHTML = `
+    <div class="empty">
+      Loading sales income...
+    </div>
+  `;
 
 
   try{
 
+    /* =====================================================
+       LOAD SALES
+    ===================================================== */
+
     const {
-      data,
-      error
+      data: sales,
+      error: salesError
     } = await sb
-      .from("income")
+      .from("sales")
       .select(`
-        *,
-        income_categories(name),
-        customers(full_name),
-        vehicles(stock_number,make,model)
+        id,
+        sale_number,
+        customer_id,
+        vehicle_id,
+        selling_price,
+        currency,
+        sale_date,
+        status,
+
+        customers(
+          id,
+          full_name,
+          phone
+        ),
+
+        vehicles(
+          id,
+          stock_number,
+          vehicle_name,
+          make,
+          model,
+          year
+        )
       `)
       .order(
-        "income_date",
-        { ascending:false }
+        "sale_date",
+        {
+          ascending:false
+        }
       );
 
 
-    if(error) throw error;
+    if(salesError)
+      throw salesError;
 
 
-    incomeRecords = data || [];
+    const saleRecords =
+      sales || [];
 
 
-    renderIncome(incomeRecords);
+    /* =====================================================
+       NO SALES
+    ===================================================== */
+
+    if(!saleRecords.length){
+
+      incomeRecords = [];
+
+      calculateIncomeSummary();
+
+
+      container.innerHTML = `
+        <div class="empty">
+
+          <strong>
+            No vehicle sales recorded yet
+          </strong>
+
+          <p>
+            Income will automatically appear here
+            when a vehicle sale is recorded.
+          </p>
+
+        </div>
+      `;
+
+      return;
+    }
+
+
+    /* =====================================================
+       GET SALE IDS
+    ===================================================== */
+
+    const saleIds =
+      saleRecords.map(
+        sale => sale.id
+      );
+
+
+    /* =====================================================
+       LOAD VEHICLE COSTS
+    ===================================================== */
+
+    const {
+      data: expenses,
+      error: expensesError
+    } = await sb
+      .from("vehicle_costs")
+      .select(`
+        id,
+        sale_id,
+        amount,
+        currency
+      `)
+      .in(
+        "sale_id",
+        saleIds
+      );
+
+
+    if(expensesError)
+      throw expensesError;
+
+
+    const expenseRecords =
+      expenses || [];
+
+
+    /* =====================================================
+       BUILD INCOME RECORDS
+    ===================================================== */
+
+    incomeRecords =
+      saleRecords.map(
+        sale => {
+
+          const saleExpenses =
+            expenseRecords.filter(
+              expense =>
+                expense.sale_id === sale.id
+            );
+
+
+          /*
+             Only subtract expenses that use
+             the same currency as the sale.
+          */
+
+          const matchingExpenses =
+            saleExpenses.filter(
+              expense =>
+                !expense.currency ||
+                expense.currency === sale.currency
+            );
+
+
+          const totalExpenses =
+            matchingExpenses.reduce(
+              (
+                total,
+                expense
+              ) => {
+
+                return (
+                  total +
+                  Number(
+                    expense.amount || 0
+                  )
+                );
+
+              },
+              0
+            );
+
+
+          const sellingPrice =
+            Number(
+              sale.selling_price || 0
+            );
+
+
+          /*
+             NET INCOME
+
+             Selling Price
+             -
+             Sale Expenses
+          */
+
+          const netIncome =
+            Math.max(
+              sellingPrice -
+              totalExpenses,
+              0
+            );
+
+
+          return {
+
+            ...sale,
+
+            sale_expenses:
+              matchingExpenses,
+
+            total_expenses:
+              totalExpenses,
+
+            net_income:
+              netIncome
+
+          };
+
+        }
+      );
+
+
+    /* =====================================================
+       RENDER
+    ===================================================== */
+
+    renderIncome(
+      incomeRecords
+    );
+
 
     calculateIncomeSummary();
 
   }
+
 
   catch(error){
 
@@ -10846,16 +10609,24 @@ async function loadIncome(){
       error
     );
 
+
     container.innerHTML = `
+
       <div class="empty">
 
         <strong>
-          Unable to load income
+          Unable to load sales income
         </strong>
 
-        ${esc(error.message)}
+        <p>
+          ${esc(
+            error.message ||
+            "Unknown error"
+          )}
+        </p>
 
       </div>
+
     `;
 
   }
@@ -10863,7 +10634,9 @@ async function loadIncome(){
 }
 
 
-/* ---------- RENDER ---------- */
+/* =========================================================
+   RENDER INCOME TABLE
+========================================================= */
 
 function renderIncome(records){
 
@@ -10873,20 +10646,22 @@ function renderIncome(records){
     );
 
 
+  if(!container)
+    return;
+
+
   if(!records.length){
 
     container.innerHTML = `
+
       <div class="empty">
 
         <strong>
-          No income recorded yet
+          No matching sales found
         </strong>
 
-        Click
-        <b>+ Record Income</b>
-        to add the first income transaction.
-
       </div>
+
     `;
 
     return;
@@ -10903,19 +10678,21 @@ function renderIncome(records){
 
           <tr>
 
-            <th>Date</th>
+            <th>DATE</th>
 
-            <th>Description</th>
+            <th>SALE</th>
 
-            <th>Category</th>
+            <th>CUSTOMER</th>
 
-            <th>Customer</th>
+            <th>VEHICLE</th>
 
-            <th>Vehicle</th>
+            <th>SELLING PRICE</th>
 
-            <th>Account</th>
+            <th>SALE EXPENSES</th>
 
-            <th>Amount</th>
+            <th>NET INCOME</th>
+
+            <th>STATUS</th>
 
           </tr>
 
@@ -10925,122 +10702,208 @@ function renderIncome(records){
         <tbody>
 
           ${
-            records.map(record => `
+            records
+              .map(
+                sale => `
 
-              <tr>
+                  <tr>
 
-                <td>
-                  ${formatDate(record.income_date)}
-                </td>
+                    <!-- DATE -->
 
+                    <td>
 
-                <td>
+                      ${formatDate(
+                        sale.sale_date
+                      )}
 
-                  <div class="name">
-
-                    ${
-                      esc(
-                        record.description ||
-                        "Income"
-                      )
-                    }
-
-                  </div>
-
-                  ${
-                    record.reference_number
-                    ? `
-                      <div class="sub">
-                        Ref:
-                        ${esc(
-                          record.reference_number
-                        )}
-                      </div>
-                    `
-                    : ""
-                  }
-
-                </td>
+                    </td>
 
 
-                <td>
+                    <!-- SALE -->
 
-                  <span class="badge orange">
+                    <td>
 
-                    ${
-                      esc(
-                        record.income_categories?.name
-                        || "Uncategorized"
-                      )
-                    }
-
-                  </span>
-
-                </td>
-
-
-                <td>
-
-                  ${
-                    record.customers?.full_name
-                    ? esc(
-                        record.customers.full_name
-                      )
-                    : '<span class="sub">—</span>'
-                  }
-
-                </td>
-
-
-                <td>
-
-                  ${
-                    record.vehicles
-                    ? `
                       <div class="name">
+
                         ${esc(
-                          record.vehicles.stock_number
+                          sale.sale_number ||
+                          "Sale"
                         )}
+
                       </div>
 
-                      <div class="sub">
+                    </td>
+
+
+                    <!-- CUSTOMER -->
+
+                    <td>
+
+                      <div class="name">
+
                         ${esc(
-                          record.vehicles.make
+                          sale.customers?.full_name ||
+                          "Unknown Customer"
                         )}
-                        ${esc(
-                          record.vehicles.model
-                        )}
+
                       </div>
-                    `
-                    : '<span class="sub">—</span>'
-                  }
-
-                </td>
 
 
-                <td>
+                      ${
+                        sale.customers?.phone
+                        ? `
 
-                  ${
-                    record.account_id
-                    ? '<span class="badge green">Recorded</span>'
-                    : '<span class="badge gray">Unassigned</span>'
-                  }
+                          <div class="sub">
 
-                </td>
+                            ${esc(
+                              sale.customers.phone
+                            )}
+
+                          </div>
+
+                        `
+                        : ""
+                      }
+
+                    </td>
 
 
-                <td class="amount">
+                    <!-- VEHICLE -->
 
-                  ${money(
-                    record.amount,
-                    record.currency
-                  )}
+                    <td>
 
-                </td>
+                      ${
+                        sale.vehicles
+                        ? `
 
-              </tr>
+                          <div class="name">
 
-            `).join("")
+                            ${esc(
+                              sale.vehicles.stock_number ||
+                              "Vehicle"
+                            )}
+
+                          </div>
+
+
+                          <div class="sub">
+
+                            ${esc(
+                              sale.vehicles.make ||
+                              ""
+                            )}
+
+                            ${" "}
+
+                            ${esc(
+                              sale.vehicles.model ||
+                              ""
+                            )}
+
+                            ${
+                              sale.vehicles.year
+                              ? ` — ${sale.vehicles.year}`
+                              : ""
+                            }
+
+                          </div>
+
+                        `
+                        :
+
+                        `<span class="sub">—</span>`
+
+                      }
+
+                    </td>
+
+
+                    <!-- SELLING PRICE -->
+
+                    <td class="amount">
+
+                      ${money(
+                        sale.selling_price,
+                        sale.currency
+                      )}
+
+                    </td>
+
+
+                    <!-- SALE EXPENSES -->
+
+                    <td class="amount">
+
+                      ${money(
+                        sale.total_expenses,
+                        sale.currency
+                      )}
+
+                    </td>
+
+
+                    <!-- NET INCOME -->
+
+                    <td class="amount">
+
+                      <strong>
+
+                        ${money(
+                          sale.net_income,
+                          sale.currency
+                        )}
+
+                      </strong>
+
+                    </td>
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                      ${
+                        sale.status === "PAID"
+
+                        ?
+
+                        `
+                          <span class="badge green">
+                            PAID
+                          </span>
+                        `
+
+                        :
+
+                        sale.status === "PARTIAL"
+
+                        ?
+
+                        `
+                          <span class="badge orange">
+                            PARTIAL
+                          </span>
+                        `
+
+                        :
+
+                        `
+                          <span class="badge gray">
+                            ${esc(
+                              sale.status ||
+                              "OPEN"
+                            )}
+                          </span>
+                        `
+                      }
+
+                    </td>
+
+                  </tr>
+
+                `
+              )
+              .join("")
           }
 
         </tbody>
@@ -11054,188 +10917,198 @@ function renderIncome(records){
 }
 
 
-/* ---------- SUMMARY ---------- */
+/* =========================================================
+   INCOME SUMMARY
+========================================================= */
 
 function calculateIncomeSummary(){
 
-  let total = 0;
+  let grossSales = 0;
 
-  let month = 0;
+  let saleExpenses = 0;
 
-  let vehicle = 0;
-
-  let other = 0;
+  let netIncome = 0;
 
 
-  const now =
-    new Date();
+  incomeRecords.forEach(
+    sale => {
+
+      /*
+         Dashboard summary is in TZS.
+
+         Do not mix USD / JPY into TZS
+         without FX conversion.
+      */
+
+      if(
+        sale.currency !== "TZS"
+      ){
+        return;
+      }
 
 
-  const currentMonth =
-    now.getMonth();
-
-
-  const currentYear =
-    now.getFullYear();
-
-
-  incomeRecords.forEach(record => {
-
-    const amount =
-      Number(
-        record.amount || 0
-      );
-
-
-    /*
-      Summary is primarily displayed in TZS.
-      Different currencies should eventually
-      use FX conversion.
-    */
-
-    if(record.currency === "TZS"){
-
-      total += amount;
-
-
-      const d =
-        new Date(
-          record.income_date
+      const sellingPrice =
+        Number(
+          sale.selling_price || 0
         );
 
 
-      if(
-        d.getMonth() === currentMonth &&
-        d.getFullYear() === currentYear
-      ){
-
-        month += amount;
-
-      }
+      const expenses =
+        Number(
+          sale.total_expenses || 0
+        );
 
 
-      if(record.vehicle_id){
+      const net =
+        Math.max(
+          sellingPrice -
+          expenses,
+          0
+        );
 
-        vehicle += amount;
 
-      }
-      else{
+      grossSales +=
+        sellingPrice;
 
-        other += amount;
 
-      }
+      saleExpenses +=
+        expenses;
+
+
+      netIncome +=
+        net;
 
     }
+  );
 
-  });
 
+  /* =========================
+     GROSS SALES
+  ========================== */
 
   set(
     "incomeTotal",
-    money(total,"TZS")
+    money(
+      grossSales,
+      "TZS"
+    )
   );
 
-  set(
-    "incomeMonth",
-    money(month,"TZS")
-  );
+
+  /* =========================
+     SALE EXPENSES
+  ========================== */
 
   set(
-    "incomeVehicle",
-    money(vehicle,"TZS")
+    "incomeExpenses",
+    money(
+      saleExpenses,
+      "TZS"
+    )
   );
 
+
+  /* =========================
+     NET INCOME
+  ========================== */
+
   set(
-    "incomeOther",
-    money(other,"TZS")
+    "incomeNet",
+    money(
+      netIncome,
+      "TZS"
+    )
+  );
+
+
+  /* =========================
+     SALES COUNT
+  ========================== */
+
+  set(
+    "incomeSalesCount",
+    incomeRecords.length
   );
 
 }
 
 
-/* ---------- SEARCH / FILTER ---------- */
+/* =========================================================
+   SEARCH
+========================================================= */
 
 function filterIncome(){
 
-  const search =
+  const input =
     document.getElementById(
       "incomeSearch"
-    ).value
+    );
+
+
+  const search =
+    (
+      input?.value ||
+      ""
+    )
     .toLowerCase()
     .trim();
 
 
-  const category =
-    document.getElementById(
-      "incomeCategoryFilter"
-    ).value;
-
-
-  const currency =
-    document.getElementById(
-      "incomeCurrencyFilter"
-    ).value;
-
-
   const filtered =
-    incomeRecords.filter(record => {
+    incomeRecords.filter(
+      sale => {
 
-      const text = [
+        const text = [
 
-        record.description,
+          sale.sale_number,
 
-        record.reference_number,
+          sale.customers?.full_name,
 
-        record.income_categories?.name,
+          sale.customers?.phone,
 
-        record.customers?.full_name,
+          sale.vehicles?.stock_number,
 
-        record.vehicles?.stock_number,
+          sale.vehicles?.vehicle_name,
 
-        record.vehicles?.make,
+          sale.vehicles?.make,
 
-        record.vehicles?.model
+          sale.vehicles?.model,
 
-      ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+          sale.vehicles?.year
 
+        ]
 
-      const searchMatch =
-        !search ||
-        text.includes(search);
+        .filter(Boolean)
 
+        .join(" ")
 
-      const categoryMatch =
-        !category ||
-        record.category_id === category;
+        .toLowerCase();
 
 
-      const currencyMatch =
-        !currency ||
-        record.currency === currency;
+        return (
+          !search ||
+          text.includes(search)
+        );
+
+      }
+    );
 
 
-      return (
-        searchMatch &&
-        categoryMatch &&
-        currencyMatch
-      );
-
-    });
-
-
-  renderIncome(filtered);
+  renderIncome(
+    filtered
+  );
 
 }
 
 
-/* ---------- HELPERS ---------- */
+/* =========================================================
+   DATE FORMAT
+========================================================= */
 
 function formatDate(date){
 
-  if(!date) return "—";
+  if(!date)
+    return "—";
 
 
   return new Date(
@@ -11252,25 +11125,52 @@ function formatDate(date){
 }
 
 
-/* ---------- INCOME MODAL CLOSE ---------- */
+/* =========================================================
+   AUTOMATIC REFRESH
+========================================================= */
 
-document
-  .getElementById("incomeModal")
-  .addEventListener(
-    "click",
-    e => {
+let incomeRefreshTimer = null;
 
-      if(
-        e.target === e.currentTarget
-      ){
 
-        closeIncomeModal();
+function startIncomeAutoRefresh(){
 
-      }
+  if(incomeRefreshTimer){
 
-    }
-  );
+    clearInterval(
+      incomeRefreshTimer
+    );
 
+  }
+
+
+  incomeRefreshTimer =
+    setInterval(
+      () => {
+
+        const incomeView =
+          document.getElementById(
+            "view-income"
+          );
+
+
+        if(
+          incomeView &&
+          incomeView.classList.contains("active")
+        ){
+
+          loadIncome();
+
+        }
+
+      },
+      10000
+    );
+
+}
+
+
+startIncomeAutoRefresh();
+  
 async function loadAccounts(){
   const box=document.getElementById("accountsContainer");
   box.innerHTML='<div class="empty">Loading accounts...</div>';
