@@ -11294,6 +11294,31 @@ async function loadOverview(){
 
   try{
 
+
+  /* =====================================================
+   LOAD ACCOUNT POSITION
+===================================================== */
+
+const {
+  data: overviewAccounts,
+  error: overviewAccountsError
+} = await sb
+  .from("account_balances")
+  .select(`
+    account_type,
+    current_balance
+  `);
+
+
+if(overviewAccountsError)
+  throw overviewAccountsError;
+
+
+accounts =
+  overviewAccounts || [];
+
+
+renderOverviewAccounts();
     /* =====================================================
        1. TOTAL INCOME
        Actual customer payments received
@@ -11638,17 +11663,141 @@ function calculateAccountSummary(){
 }
 
 function renderOverviewAccounts(){
-  const box=document.getElementById("overviewAccounts");
-  if(!accounts.length){box.innerHTML='<div class="empty">No accounts configured yet.</div>';return}
-  const groups={bank:0,cash:0,mobile_money:0,other:0};
-  accounts.forEach(a=>{const t=String(a.account_type||"other").toLowerCase();groups[t]=(groups[t]||0)+Number(a.current_balance||0)});
-  box.innerHTML=`
+
+  const box =
+    document.getElementById(
+      "overviewAccounts"
+    );
+
+  if(!box) return;
+
+
+  box.innerHTML = `
     <div style="display:grid;gap:10px">
-      ${["bank","cash","mobile_money","other"].map(t=>`
-      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f2f4">
-        <span style="font-size:11px;color:#69737e">${typeName(t)}</span><b style="font-size:11px">${money(groups[t]||0,"TZS")}</b>
-      </div>`).join("")}
-    </div>`;
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:10px 0;
+        border-bottom:1px solid #eee;
+      ">
+        <span>Bank</span>
+        <strong id="overviewBank">
+          TSh 0
+        </strong>
+      </div>
+
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:10px 0;
+        border-bottom:1px solid #eee;
+      ">
+        <span>Cash</span>
+        <strong id="overviewCash">
+          TSh 0
+        </strong>
+      </div>
+
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:10px 0;
+        border-bottom:1px solid #eee;
+      ">
+        <span>Mobile Money</span>
+        <strong id="overviewMobile">
+          TSh 0
+        </strong>
+      </div>
+
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:10px 0;
+      ">
+        <span>Other</span>
+        <strong id="overviewOther">
+          TSh 0
+        </strong>
+      </div>
+
+    </div>
+  `;
+
+
+  const groups = {
+    bank: 0,
+    cash: 0,
+    mobile_money: 0,
+    other: 0
+  };
+
+
+  (accounts || []).forEach(
+    account => {
+
+      const type =
+        String(
+          account.account_type ||
+          "other"
+        ).toLowerCase();
+
+
+      groups[type] =
+        (
+          groups[type] || 0
+        ) +
+        Number(
+          account.current_balance || 0
+        );
+
+    }
+  );
+
+
+  set(
+    "overviewBank",
+    money(
+      groups.bank,
+      "TZS"
+    )
+  );
+
+
+  set(
+    "overviewCash",
+    money(
+      groups.cash,
+      "TZS"
+    )
+  );
+
+
+  set(
+    "overviewMobile",
+    money(
+      groups.mobile_money,
+      "TZS"
+    )
+  );
+
+
+  set(
+    "overviewOther",
+    money(
+      groups.other,
+      "TZS"
+    )
+  );
+
 }
 
 function dist(icon,name,amount,count){
