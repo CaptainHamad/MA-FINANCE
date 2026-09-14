@@ -592,13 +592,21 @@ tr:hover td{background:#fbfcfd}
       <div class="grid2">
         <div class="panel">
           <div class="panel-head"><div><h3>Business Snapshot</h3><span>Current records</span></div></div>
-          <div class="panel-body">
-            <div class="mini-grid">
-              <div class="mini"><b id="ovVehicles">0</b><span>Vehicles</span></div>
-              <div class="mini"><b id="ovSales">0</b><span>Sales</span></div>
-              <div class="mini"><b id="ovCustomers">0</b><span>Customers</span></div>
-            </div>
-          </div>
+         <div class="panel-body">
+  <div class="mini-grid">
+
+    <div class="mini">
+      <b id="ovVehicles">0</b>
+      <span>Vehicles</span>
+    </div>
+
+    <div class="mini">
+      <b id="ovSales">0</b>
+      <span>Sales</span>
+    </div>
+
+  </div>
+</div>
         </div>
         <div class="panel">
           <div class="panel-head"><div><h3>Account Position</h3><span>By account type</span></div></div>
@@ -11471,6 +11479,52 @@ async function loadOverview(){
       overallExpenses;
 
 
+
+    /* =====================================================
+   6B. BUSINESS COUNTS
+===================================================== */
+
+const {
+  count: vehicleCount,
+  error: vehicleCountError
+} = await sb
+  .from("vehicles")
+  .select("id", {
+    count: "exact",
+    head: true
+  });
+
+if(vehicleCountError)
+  throw vehicleCountError;
+
+
+const {
+  count: salesCount,
+  error: salesCountError
+} = await sb
+  .from("sales")
+  .select("id", {
+    count: "exact",
+    head: true
+  });
+
+if(salesCountError)
+  throw salesCountError;
+
+
+/* =====================================================
+   UPDATE BUSINESS SNAPSHOT
+===================================================== */
+
+set(
+  "ovVehicles",
+  vehicleCount || 0
+);
+
+set(
+  "ovSales",
+  salesCount || 0
+);
     /* =====================================================
        7. UPDATE DASHBOARD
     ===================================================== */
