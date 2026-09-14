@@ -463,21 +463,52 @@ tr:hover td{background:#fbfcfd}
     <button class="nav-btn active" data-view="overview"><i class="nav-ico">⌂</i><span>Dashboard</span></button>
 
     <div class="nav-label">FINANCE</div>
-    <button class="nav-btn" data-view="income"><i class="nav-ico">↗</i><span>Income</span></button>
-    <button class="nav-btn" data-view="expenses"><i class="nav-ico">↘</i><span>Expenses</span></button>
-    <button class="nav-btn" data-view="accounts"><i class="nav-ico">▣</i><span>Accounts</span></button>
-    <button class="nav-btn" data-view="transactions"><i class="nav-ico">≡</i><span>Transactions</span></button>
-    <button class="nav-btn" data-view="transfers"><i class="nav-ico">⇄</i><span>Transfers</span></button>
 
-    <div class="nav-label">BUSINESS</div>
-    <button class="nav-btn" data-view="vehicles"><i class="nav-ico">▱</i><span>Vehicles</span></button>
-    <button class="nav-btn" data-view="customers"><i class="nav-ico">♙</i><span>Customers</span></button>
-    <button class="nav-btn" data-view="sales"><i class="nav-ico">◆</i><span>Sales</span></button>
-    <button class="nav-btn" data-view="suppliers"><i class="nav-ico">◈</i><span>Suppliers</span></button>
+<button
+  class="nav-btn"
+  data-view="income"
+>
+  <i class="nav-ico">↗</i>
+  <span>Income</span>
+</button>
 
-    <div class="nav-label">MANAGEMENT</div>
-    <button class="nav-btn" data-view="employees"><i class="nav-ico">♟</i><span>Employees</span></button>
-    <button class="nav-btn" data-view="reports"><i class="nav-ico">▥</i><span>Reports</span></button>
+<button
+  class="nav-btn"
+  data-view="expenses"
+>
+  <i class="nav-ico">↘</i>
+  <span>Office Expenses</span>
+</button>
+
+
+<div class="nav-label">BUSINESS</div>
+
+<button
+  class="nav-btn"
+  data-view="sales"
+>
+  <i class="nav-ico">◆</i>
+  <span>Sales</span>
+</button>
+
+
+<div class="nav-label">MANAGEMENT</div>
+
+<button
+  class="nav-btn"
+  data-view="employees"
+>
+  <i class="nav-ico">♟</i>
+  <span>Employees</span>
+</button>
+
+<button
+  class="nav-btn"
+  data-view="reports"
+>
+  <i class="nav-ico">▥</i>
+  <span>Reports</span>
+</button>
   </nav>
 
   <div class="sidebar-bottom">
@@ -1189,7 +1220,7 @@ let editingAccountId=null;
 let currentView="overview";
 
 const viewTitles={
-  overview:"Financial Overview",income:"Income",expenses:"Expenses",accounts:"Accounts",
+  overview:"Financial Overview",income:"Income",expenses:" Office Expenses",accounts:"Accounts",
   transactions:"Transactions",transfers:"Transfers",vehicles:"Vehicles",customers:"Customers",
   sales:"Sales",suppliers:"Suppliers",employees:"Employees",reports:"Reports"
 };
@@ -1233,7 +1264,7 @@ if(view==="overview") loadOverview();
 
 function buildPlaceholders(){
   const data={
-    expenses:["↘","Expenses","This module will manage office expenses, staff costs and company operating expenses."],
+    expenses:["↘","Office Expenses","This module will manage office expenses, staff costs and company operating expenses."],
     transactions:["≡","Transactions","Central ledger view for all money movements across Mattex accounts."],
     transfers:["⇄","Transfers","Move money between Mattex bank, cash and mobile-money accounts."],
     vehicles:["▱","Vehicles","Vehicle acquisition, landed cost, preparation cost and profitability will live here."],
