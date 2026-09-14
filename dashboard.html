@@ -11202,52 +11202,6 @@ function formatDate(date){
 
 }
 
-
-/* =========================================================
-   AUTOMATIC REFRESH
-========================================================= */
-
-let incomeRefreshTimer = null;
-
-
-function startIncomeAutoRefresh(){
-
-  if(incomeRefreshTimer){
-
-    clearInterval(
-      incomeRefreshTimer
-    );
-
-  }
-
-
-  incomeRefreshTimer =
-    setInterval(
-      () => {
-
-        const incomeView =
-          document.getElementById(
-            "view-income"
-          );
-
-
-        if(
-          incomeView &&
-          incomeView.classList.contains("active")
-        ){
-
-          loadIncome();
-
-        }
-
-      },
-      10000
-    );
-
-}
-
-
-startIncomeAutoRefresh();
   
 async function loadAccounts(){
   const box=document.getElementById("accountsContainer");
