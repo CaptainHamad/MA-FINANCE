@@ -723,8 +723,12 @@ tr:hover td{background:#fbfcfd}
 
 .report-bar-fill{
   height:100%;
-  background:#ff7a00;
+  background:#ff7a00 !important;
+  border:1px solid #d95f00;
   border-radius:20px;
+  min-width:3px;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
 }
 
 .report-bar-value{
@@ -759,17 +763,21 @@ tr:hover td{background:#fbfcfd}
   width:52px;
   min-height:8px;
   border-radius:8px 8px 0 0;
-  background:#ff7a00;
+  background:#ff7a00 !important;
+  border:2px solid #d95f00;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
 }
 
 .comparison-bar.expenses{
-  background:#64748b;
+  background:#64748b !important;
+  border-color:#475569;
 }
 
 .comparison-bar.profit{
-  background:#0f1f33;
+  background:#0f1f33 !important;
+  border-color:#0f1f33;
 }
-
 .comparison-column span{
   font-size:10px;
   font-weight:700;
@@ -928,7 +936,31 @@ tr:hover td{background:#fbfcfd}
     margin:12mm;
   }
 
+  *{
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+  }
 
+  .report-bar-fill{
+    background:#ff7a00 !important;
+    border:1px solid #d95f00 !important;
+  }
+
+  .comparison-bar{
+    background:#ff7a00 !important;
+    border:2px solid #d95f00 !important;
+  }
+
+  .comparison-bar.expenses{
+    background:#64748b !important;
+    border-color:#475569 !important;
+  }
+
+  .comparison-bar.profit{
+    background:#0f1f33 !important;
+    border-color:#0f1f33 !important;
+  }
+  
   body{
     background:#fff !important;
   }
