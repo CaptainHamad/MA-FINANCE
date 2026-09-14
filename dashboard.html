@@ -8540,7 +8540,9 @@ async function openSaleDetails(
     return;
   }
 
+go("sales");
 
+  
   const view =
     document.getElementById(
       "view-sales"
@@ -15358,9 +15360,9 @@ if(sales && sales.length){
 
         await loadSales();
 
-        openSaleDetails(
-          sale.id
-        );
+openSaleDetails(
+  sale.id
+);
 
       }
     );
