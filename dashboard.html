@@ -541,9 +541,52 @@ tr:hover td{background:#fbfcfd}
 
       <div class="cards">
         <div class="card kpi"><div class="kpi-top"><div class="kpi-label">Total Cash</div><div class="kpi-icon">TZS</div></div><div class="kpi-value" id="ovCash">TZS 0</div><div class="kpi-note">Active financial accounts</div></div>
-        <div class="card kpi"><div class="kpi-top"><div class="kpi-label">Total Income</div><div class="kpi-icon">↗</div></div><div class="kpi-value" id="ovIncome">TZS 0</div><div class="kpi-note">Recorded income</div></div>
-        <div class="card kpi"><div class="kpi-top"><div class="kpi-label">Total Expenses</div><div class="kpi-icon">↘</div></div><div class="kpi-value" id="ovExpenses">TZS 0</div><div class="kpi-note">Recorded expenses</div></div>
-        <div class="card kpi"><div class="kpi-top"><div class="kpi-label">Net Profit</div><div class="kpi-icon">P</div></div><div class="kpi-value" id="ovProfit">TZS 0</div><div class="kpi-note">Income less expenses</div></div>
+        <div class="card kpi">
+  <div class="kpi-top">
+    <div class="kpi-label">Total Income</div>
+    <div class="kpi-icon">↗</div>
+  </div>
+
+  <div class="kpi-value" id="ovIncome">
+    TZS 0
+  </div>
+
+  <div class="kpi-note">
+    Total customer payments received
+  </div>
+</div>
+
+
+<div class="card kpi">
+  <div class="kpi-top">
+    <div class="kpi-label">Overall Expenses</div>
+    <div class="kpi-icon">↘</div>
+  </div>
+
+  <div class="kpi-value" id="ovExpenses">
+    TZS 0
+  </div>
+
+  <div class="kpi-note">
+    Sales, office, salaries & commissions
+  </div>
+</div>
+
+
+<div class="card kpi">
+  <div class="kpi-top">
+    <div class="kpi-label">Net Profit</div>
+    <div class="kpi-icon">P</div>
+  </div>
+
+  <div class="kpi-value" id="ovProfit">
+    TZS 0
+  </div>
+
+  <div class="kpi-note">
+    Income less all business expenses
+  </div>
+</div>
       </div>
 
       <div class="grid2">
@@ -1236,6 +1279,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
   buildExpensesModule();
 
   buildEmployeesModule();
+
+  loadOverview();
 
 });
 function bindNavigation(){
@@ -11233,6 +11278,257 @@ function formatDate(date){
 
 }
 
+/* =========================================================
+   DASHBOARD / FINANCIAL OVERVIEW
+========================================================= */
+
+async function loadOverview(){
+
+  try{
+
+    /* =====================================================
+       1. TOTAL INCOME
+       Actual customer payments received
+    ===================================================== */
+
+    const {
+      data: payments,
+      error: paymentsError
+    } = await sb
+      .from("customer_payments")
+      .select(`
+        amount,
+        currency
+      `);
+
+
+    if(paymentsError)
+      throw paymentsError;
+
+
+    const totalIncome =
+      (payments || [])
+        .filter(
+          payment =>
+            !payment.currency ||
+            payment.currency === "TZS"
+        )
+        .reduce(
+          (
+            total,
+            payment
+          ) =>
+            total +
+            Number(
+              payment.amount || 0
+            ),
+          0
+        );
+
+
+    /* =====================================================
+       2. VEHICLE / SALES EXPENSES
+       Costs attached to vehicle sales
+    ===================================================== */
+
+    const {
+      data: vehicleCosts,
+      error: vehicleCostsError
+    } = await sb
+      .from("vehicle_costs")
+      .select(`
+        amount,
+        currency
+      `);
+
+
+    if(vehicleCostsError)
+      throw vehicleCostsError;
+
+
+    const totalVehicleCosts =
+      (vehicleCosts || [])
+        .filter(
+          cost =>
+            !cost.currency ||
+            cost.currency === "TZS"
+        )
+        .reduce(
+          (
+            total,
+            cost
+          ) =>
+            total +
+            Number(
+              cost.amount || 0
+            ),
+          0
+        );
+
+
+    /* =====================================================
+       3. OFFICE / GENERAL EXPENSES
+    ===================================================== */
+
+    const {
+      data: officeExpenses,
+      error: officeExpensesError
+    } = await sb
+      .from("expenses")
+      .select(`
+        amount,
+        currency
+      `);
+
+
+    if(officeExpensesError)
+      throw officeExpensesError;
+
+
+    const totalOfficeExpenses =
+      (officeExpenses || [])
+        .filter(
+          expense =>
+            !expense.currency ||
+            expense.currency === "TZS"
+        )
+        .reduce(
+          (
+            total,
+            expense
+          ) =>
+            total +
+            Number(
+              expense.amount || 0
+            ),
+          0
+        );
+
+
+    /* =====================================================
+       4. EMPLOYEE EXPENSES
+       Salaries + Commissions
+    ===================================================== */
+
+    const {
+      data: employeePayments,
+      error: employeePaymentsError
+    } = await sb
+      .from("employee_payments")
+      .select(`
+        payment_type,
+        amount,
+        currency
+      `);
+
+
+    if(employeePaymentsError)
+      throw employeePaymentsError;
+
+
+    const totalEmployeeExpenses =
+      (employeePayments || [])
+        .filter(
+          payment =>
+            (
+              payment.payment_type === "SALARY" ||
+              payment.payment_type === "COMMISSION"
+            ) &&
+            (
+              !payment.currency ||
+              payment.currency === "TZS"
+            )
+        )
+        .reduce(
+          (
+            total,
+            payment
+          ) =>
+            total +
+            Number(
+              payment.amount || 0
+            ),
+          0
+        );
+
+
+    /* =====================================================
+       5. OVERALL EXPENSES
+    ===================================================== */
+
+    const overallExpenses =
+      totalVehicleCosts +
+      totalOfficeExpenses +
+      totalEmployeeExpenses;
+
+
+    /* =====================================================
+       6. NET PROFIT
+    ===================================================== */
+
+    const netProfit =
+      totalIncome -
+      overallExpenses;
+
+
+    /* =====================================================
+       7. UPDATE DASHBOARD
+    ===================================================== */
+
+    set(
+      "ovIncome",
+      money(
+        totalIncome,
+        "TZS"
+      )
+    );
+
+
+    set(
+      "ovExpenses",
+      money(
+        overallExpenses,
+        "TZS"
+      )
+    );
+
+
+    set(
+      "ovProfit",
+      money(
+        netProfit,
+        "TZS"
+      )
+    );
+
+
+  }
+
+  catch(error){
+
+    console.error(
+      "Dashboard overview error:",
+      error
+    );
+
+    set(
+      "ovIncome",
+      "TZS 0"
+    );
+
+    set(
+      "ovExpenses",
+      "TZS 0"
+    );
+
+    set(
+      "ovProfit",
+      "TZS 0"
+    );
+
+  }
+
+}
   
 async function loadAccounts(){
   const box=document.getElementById("accountsContainer");
