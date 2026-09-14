@@ -15633,6 +15633,75 @@ if(sales && sales.length){
   renderSystemAlerts();
 
 }
+
+/* =========================================================
+   REFRESH CURRENT VIEW
+========================================================= */
+
+async function refreshCurrent(){
+
+  try{
+
+    if(currentView === "overview"){
+
+      await loadOverview();
+      await loadSystemAlerts();
+
+    }
+
+    else if(currentView === "income"){
+
+      await loadIncome();
+
+    }
+
+    else if(currentView === "expenses"){
+
+      await loadExpenses();
+
+    }
+
+    else if(currentView === "accounts"){
+
+      await loadAccounts();
+
+    }
+
+    else if(currentView === "sales"){
+
+      await loadSales();
+
+    }
+
+    else if(currentView === "employees"){
+
+      await loadEmployees();
+
+    }
+
+    else if(currentView === "reports"){
+
+      await loadReports();
+
+    }
+
+  }
+
+  catch(error){
+
+    console.error(
+      "Refresh error:",
+      error
+    );
+
+    toast(
+      "Unable to refresh this page.",
+      "err"
+    );
+
+  }
+
+}
 </script>
 </body>
 </html>
