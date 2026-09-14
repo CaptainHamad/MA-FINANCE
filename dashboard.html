@@ -7681,10 +7681,13 @@ async function openSaleDetails(
   );
 
 
-const grossProfit =
+const totalPaid =
   Number(
-    sale.selling_price || 0
-  ) -
+    sale.total_paid || 0
+  );
+
+const netIncome =
+  totalPaid -
   vehicleExpenses;
 
   const totalPaid =
@@ -8097,7 +8100,7 @@ const grossProfit =
     "
   >
     ${money(
-      grossProfit,
+netIncome,
       sale.currency
     )}
   </b>
@@ -8483,7 +8486,7 @@ const grossProfit =
 
             <b>
               ${money(
-                grossProfit,
+                netIncome,
                 sale.currency
               )}
             </b>
@@ -10547,26 +10550,153 @@ async function loadIncome(){
             );
 
 
-          const sellingPrice =
-            Number(
-              sale.selling_price || 0
+         /* =====================================================
+   LOAD PAYMENTS
+===================================================== */
+
+const {
+  data: payments,
+  error: paymentsError
+} = await sb
+  .from("customer_payments")
+  .select(`
+    id,
+    sale_id,
+    amount,
+    currency,
+    payment_date,
+    payment_method,
+    reference_number,
+    payment_number,
+    payment_type,
+    due_date
+  `)
+  .in(
+    "sale_id",
+    saleIds
+  );
+
+if(paymentsError)
+  throw paymentsError;
+
+const paymentRecords =
+  payments || [];
+
+
+/* =====================================================
+   BUILD INCOME RECORDS
+===================================================== */
+
+incomeRecords =
+  saleRecords.map(
+    sale => {
+
+      /* -------------------------
+         PAYMENTS FOR THIS SALE
+      ------------------------- */
+
+      const salePayments =
+        paymentRecords.filter(
+          payment =>
+            payment.sale_id === sale.id &&
+            (
+              !payment.currency ||
+              payment.currency === sale.currency
+            )
+        );
+
+
+      /* -------------------------
+         TOTAL ACTUALLY RECEIVED
+      ------------------------- */
+
+      const totalPaid =
+        salePayments.reduce(
+          (total,payment) => {
+
+            return (
+              total +
+              Number(
+                payment.amount || 0
+              )
             );
 
+          },
+          0
+        );
 
-          /*
-             NET INCOME
 
-             Selling Price
-             -
-             Sale Expenses
-          */
+      /* -------------------------
+         SALE EXPENSES
+      ------------------------- */
 
-          const netIncome =
-            Math.max(
-              sellingPrice -
-              totalExpenses,
-              0
+      const saleExpenses =
+        expenseRecords.filter(
+          expense =>
+            expense.sale_id === sale.id
+        );
+
+
+      const matchingExpenses =
+        saleExpenses.filter(
+          expense =>
+            !expense.currency ||
+            expense.currency === sale.currency
+        );
+
+
+      const totalExpenses =
+        matchingExpenses.reduce(
+          (total,expense) => {
+
+            return (
+              total +
+              Number(
+                expense.amount || 0
+              )
             );
+
+          },
+          0
+        );
+
+
+      /* -------------------------
+         NET INCOME
+
+         ACTUALLY PAID
+         -
+         SALE EXPENSES
+      ------------------------- */
+
+      const netIncome =
+        totalPaid -
+        totalExpenses;
+
+
+      return {
+
+        ...sale,
+
+        payments:
+          salePayments,
+
+        total_paid:
+          totalPaid,
+
+        sale_expenses:
+          matchingExpenses,
+
+        total_expenses:
+          totalExpenses,
+
+        net_income:
+          netIncome
+
+      };
+
+    }
+  );
 
 
           return {
@@ -10686,7 +10816,8 @@ function renderIncome(records){
 
             <th>VEHICLE</th>
 
-            <th>SELLING PRICE</th>
+            <th>AGREED PRICE</th>
+            <th>AMOUNT PAID</th>
 
             <th>SALE EXPENSES</th>
 
@@ -10818,16 +10949,13 @@ function renderIncome(records){
                     </td>
 
 
-                    <!-- SELLING PRICE -->
-
-                    <td class="amount">
-
-                      ${money(
-                        sale.selling_price,
-                        sale.currency
-                      )}
-
-                    </td>
+                    <!-- AMOUNT PAID -->
+<td class="amount">
+  ${money(
+    sale.total_paid || 0,
+    sale.currency
+  )}
+</td>
 
 
                     <!-- SALE EXPENSES -->
@@ -10923,10 +11051,8 @@ function renderIncome(records){
 
 function calculateIncomeSummary(){
 
-  let grossSales = 0;
-
+  let paidIncome = 0;
   let saleExpenses = 0;
-
   let netIncome = 0;
 
 
@@ -10947,9 +11073,9 @@ function calculateIncomeSummary(){
       }
 
 
-      const sellingPrice =
+      const paid =
         Number(
-          sale.selling_price || 0
+          sale.total_paid || 0
         );
 
 
@@ -10960,20 +11086,15 @@ function calculateIncomeSummary(){
 
 
       const net =
-        Math.max(
-          sellingPrice -
-          expenses,
-          0
-        );
+        paid -
+        expenses;
 
 
-      grossSales +=
-        sellingPrice;
-
+      paidIncome +=
+        paid;
 
       saleExpenses +=
         expenses;
-
 
       netIncome +=
         net;
@@ -10983,13 +11104,13 @@ function calculateIncomeSummary(){
 
 
   /* =========================
-     GROSS SALES
+     ACTUAL MONEY RECEIVED
   ========================== */
 
   set(
     "incomeTotal",
     money(
-      grossSales,
+      paidIncome,
       "TZS"
     )
   );
@@ -11031,7 +11152,6 @@ function calculateIncomeSummary(){
   );
 
 }
-
 
 /* =========================================================
    SEARCH
