@@ -1242,7 +1242,13 @@ tr:hover td{background:#fbfcfd}
 
 
 <div class="nav-label">MANAGEMENT</div>
-
+<button
+  class="nav-btn"
+  data-view="budgets"
+>
+  <i class="nav-ico">◫</i>
+  <span>Budgeting</span>
+</button>
 <button
   class="nav-btn"
   data-view="employees"
@@ -1666,6 +1672,7 @@ tr:hover td{background:#fbfcfd}
     <div class="view" id="view-sales"></div>
     <div class="view" id="view-suppliers"></div>
     <div class="view" id="view-employees"></div>
+    <div class="view" id="view-budgets"></div>
     <div class="view" id="view-reports"></div>
 
   </section>
@@ -2074,7 +2081,7 @@ let currentView="overview";
 const viewTitles={
   overview:"Financial Overview",income:"Income",expenses:" Office Expenses",accounts:"Accounts",
   transactions:"Transaction Ledger",transfers:"Transfers",vehicles:"Vehicles",customers:"Customers",
-  sales:"Sales",suppliers:"Suppliers",employees:"Employees",reports:"Reports"
+  sales:"Sales",suppliers:"Suppliers",employees:"Employees",budgets:"Budgeting",reports:"Reports"
 };
 
 document.addEventListener("DOMContentLoaded",async()=>{
@@ -2090,6 +2097,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
   buildExpensesModule();
 
   buildEmployeesModule();
+
+  buildBudgetsModule();
 
   buildReportsModule();
 
@@ -2123,6 +2132,9 @@ if(view==="transactions")
 if(view==="overview") loadOverview();
 
 if(view==="overview") loadSystemAlerts();
+
+if(view==="budgets")
+  loadBudgets();
   
 if(view==="reports") loadReports();
 }
@@ -18967,6 +18979,2013 @@ openSaleDetails(
 }
 
 /* =========================================================
+   BUDGETING MODULE
+========================================================= */
+
+let budgetRecords = [];
+let editingBudgetId = null;
+
+
+/* ---------------------------------------------------------
+   BUILD BUDGETING PAGE
+--------------------------------------------------------- */
+
+function buildBudgetsModule(){
+
+  const view = document.getElementById("view-budgets");
+
+  if(!view) return;
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+        <h2>Budgeting</h2>
+
+        <p>
+          Plan company spending and compare budgets against actual expenses.
+        </p>
+      </div>
+
+      <button
+        class="primary"
+        onclick="openBudgetModal()"
+      >
+        + Create Budget
+      </button>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="panel">
+
+      <div class="toolbar">
+
+        <select
+          id="budgetCurrencyFilter"
+          onchange="loadBudgets()"
+        >
+          <option value="TZS">TZS</option>
+          <option value="USD">USD</option>
+          <option value="JPY">JPY</option>
+        </select>
+
+        <select
+          id="budgetStatusFilter"
+          onchange="renderBudgetTable()"
+        >
+          <option value="ALL">All Budgets</option>
+          <option value="WITHIN">Within Budget</option>
+          <option value="NEAR">Near Limit</option>
+          <option value="OVER">Over Budget</option>
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <!-- KPI SUMMARY -->
+
+    <div class="kpi-grid">
+
+      <div class="card kpi">
+
+        <div class="kpi-top">
+
+          <div class="kpi-label">
+            Total Budget
+          </div>
+
+          <div class="kpi-icon">
+            B
+          </div>
+
+        </div>
+
+        <div
+          class="kpi-value"
+          id="budgetTotal"
+        >
+          TZS 0
+        </div>
+
+        <div class="kpi-note">
+          Planned spending
+        </div>
+
+      </div>
+
+
+      <div class="card kpi">
+
+        <div class="kpi-top">
+
+          <div class="kpi-label">
+            Actual Spending
+          </div>
+
+          <div class="kpi-icon">
+            −
+          </div>
+
+        </div>
+
+        <div
+          class="kpi-value"
+          id="budgetActual"
+        >
+          TZS 0
+        </div>
+
+        <div class="kpi-note">
+          Actual paid expenses
+        </div>
+
+      </div>
+
+
+      <div class="card kpi">
+
+        <div class="kpi-top">
+
+          <div class="kpi-label">
+            Remaining Budget
+          </div>
+
+          <div class="kpi-icon">
+            R
+          </div>
+
+        </div>
+
+        <div
+          class="kpi-value"
+          id="budgetRemaining"
+        >
+          TZS 0
+        </div>
+
+        <div class="kpi-note">
+          Budget less actual spending
+        </div>
+
+      </div>
+
+
+      <div class="card kpi">
+
+        <div class="kpi-top">
+
+          <div class="kpi-label">
+            Budget Utilization
+          </div>
+
+          <div class="kpi-icon">
+            %
+          </div>
+
+        </div>
+
+        <div
+          class="kpi-value"
+          id="budgetUtilization"
+        >
+          0%
+        </div>
+
+        <div class="kpi-note">
+          Actual spending vs budget
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- BUDGET TABLE -->
+
+    <div class="panel">
+
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          margin-bottom:16px;
+          gap:12px;
+          flex-wrap:wrap;
+        "
+      >
+
+        <div>
+
+          <h3 style="margin:0;">
+            Budget vs Actual
+          </h3>
+
+          <div
+            style="
+              font-size:12px;
+              color:#68727d;
+              margin-top:4px;
+            "
+          >
+            Automatic comparison between planned and actual spending.
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div id="budgetTableContainer">
+
+        <div class="empty">
+          Loading budgets...
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- BUDGET INSIGHTS -->
+
+    <div class="panel">
+
+      <h3 style="margin:0 0 14px;">
+        Budget Insights
+      </h3>
+
+      <div id="budgetInsights">
+
+        <div class="empty">
+          No budget insights available.
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* ---------------------------------------------------------
+   LOAD BUDGETS
+--------------------------------------------------------- */
+
+async function loadBudgets(){
+
+  const container =
+    document.getElementById("budgetTableContainer");
+
+  if(container){
+
+    container.innerHTML = `
+      <div class="empty">
+        Loading budgets...
+      </div>
+    `;
+
+  }
+
+  try{
+
+    const currency =
+      document.getElementById(
+        "budgetCurrencyFilter"
+      )?.value || "TZS";
+
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("budgets")
+      .select("*")
+      .eq("currency",currency)
+      .order("period_start",{ascending:false});
+
+
+    if(error) throw error;
+
+
+    budgetRecords = data || [];
+
+
+    await calculateBudgetActuals();
+
+
+    renderBudgetTable();
+
+    renderBudgetSummary();
+
+    renderBudgetInsights();
+
+
+  }catch(error){
+
+    console.error(
+      "Budget loading error:",
+      error
+    );
+
+    if(container){
+
+      container.innerHTML = `
+        <div class="empty">
+          Failed to load budgets.
+          ${esc(error.message || "")}
+        </div>
+      `;
+
+    }
+
+  }
+
+}
+
+
+/* ---------------------------------------------------------
+   CALCULATE ACTUAL SPENDING
+--------------------------------------------------------- */
+
+async function calculateBudgetActuals(){
+
+  if(!budgetRecords.length){
+
+    return;
+
+  }
+
+
+  const minDate =
+    budgetRecords.reduce(
+      (min,b) =>
+        !min || b.period_start < min
+          ? b.period_start
+          : min,
+      null
+    );
+
+
+  const maxDate =
+    budgetRecords.reduce(
+      (max,b) =>
+        !max || b.period_end > max
+          ? b.period_end
+          : max,
+      null
+    );
+
+
+  /*
+     OFFICE EXPENSES
+  */
+
+  const {
+    data: officeExpenses,
+    error: officeError
+  } = await sb
+    .from("expenses")
+    .select(`
+      id,
+      category,
+      amount,
+      currency,
+      expense_date,
+      payment_status
+    `)
+    .eq(
+      "currency",
+      budgetRecords[0].currency
+    )
+    .gte(
+      "expense_date",
+      minDate
+    )
+    .lte(
+      "expense_date",
+      maxDate
+    );
+
+
+  if(officeError){
+
+    console.error(
+      "Office budget actual error:",
+      officeError
+    );
+
+  }
+
+
+  /*
+     VEHICLE COSTS
+  */
+
+  const {
+    data: vehicleCosts,
+    error: vehicleError
+  } = await sb
+    .from("vehicle_costs")
+    .select(`
+      id,
+      amount,
+      currency,
+      cost_date,
+      payment_status
+    `)
+    .eq(
+      "currency",
+      budgetRecords[0].currency
+    )
+    .gte(
+      "cost_date",
+      minDate
+    )
+    .lte(
+      "cost_date",
+      maxDate
+    );
+
+
+  if(vehicleError){
+
+    console.error(
+      "Vehicle budget actual error:",
+      vehicleError
+    );
+
+  }
+
+
+  /*
+     EMPLOYEE PAYMENTS
+  */
+
+  const {
+    data: employeePayments,
+    error: employeeError
+  } = await sb
+    .from("employee_payments")
+    .select(`
+      id,
+      payment_type,
+      amount,
+      currency,
+      payment_date
+    `)
+    .eq(
+      "currency",
+      budgetRecords[0].currency
+    )
+    .gte(
+      "payment_date",
+      minDate
+    )
+    .lte(
+      "payment_date",
+      maxDate
+    );
+
+
+  if(employeeError){
+
+    console.error(
+      "Employee budget actual error:",
+      employeeError
+    );
+
+  }
+
+
+  /*
+     CALCULATE ACTUAL FOR EACH BUDGET
+  */
+
+  budgetRecords =
+    budgetRecords.map(budget => {
+
+      let actual = 0;
+
+
+      /*
+         VEHICLE
+      */
+
+      if(budget.category === "VEHICLE"){
+
+        actual =
+          (vehicleCosts || [])
+            .filter(row =>
+              row.payment_status === "Paid" &&
+              row.cost_date >= budget.period_start &&
+              row.cost_date <= budget.period_end
+            )
+            .reduce(
+              (sum,row) =>
+                sum + Number(row.amount || 0),
+              0
+            );
+
+      }
+
+
+      /*
+         OFFICE
+      */
+
+      else if(budget.category === "OFFICE"){
+
+        actual =
+          (officeExpenses || [])
+            .filter(row =>
+              row.payment_status === "Paid" &&
+              row.expense_date >= budget.period_start &&
+              row.expense_date <= budget.period_end
+            )
+            .reduce(
+              (sum,row) =>
+                sum + Number(row.amount || 0),
+              0
+            );
+
+      }
+
+
+      /*
+         SALARY
+      */
+
+      else if(budget.category === "SALARY"){
+
+        actual =
+          (employeePayments || [])
+            .filter(row =>
+              String(row.payment_type || "")
+                .toUpperCase() === "SALARY" &&
+              row.payment_date >= budget.period_start &&
+              row.payment_date <= budget.period_end
+            )
+            .reduce(
+              (sum,row) =>
+                sum + Number(row.amount || 0),
+              0
+            );
+
+      }
+
+
+      /*
+         COMMISSION
+      */
+
+      else if(budget.category === "COMMISSION"){
+
+        actual =
+          (employeePayments || [])
+            .filter(row =>
+              String(row.payment_type || "")
+                .toUpperCase() === "COMMISSION" &&
+              row.payment_date >= budget.period_start &&
+              row.payment_date <= budget.period_end
+            )
+            .reduce(
+              (sum,row) =>
+                sum + Number(row.amount || 0),
+              0
+            );
+
+      }
+
+
+      /*
+         OTHER
+      */
+
+      else if(budget.category === "OTHER"){
+
+        actual =
+          (officeExpenses || [])
+            .filter(row =>
+              row.payment_status === "Paid" &&
+              String(row.category || "")
+                .toUpperCase() === "OTHER" &&
+              row.expense_date >= budget.period_start &&
+              row.expense_date <= budget.period_end
+            )
+            .reduce(
+              (sum,row) =>
+                sum + Number(row.amount || 0),
+              0
+            );
+
+      }
+
+
+      const budgetAmount =
+        Number(budget.amount || 0);
+
+
+      const variance =
+        budgetAmount - actual;
+
+
+      const utilization =
+        budgetAmount > 0
+          ? (actual / budgetAmount) * 100
+          : 0;
+
+
+      let status =
+        "WITHIN";
+
+
+      if(utilization > 100){
+
+        status = "OVER";
+
+      }
+      else if(utilization >= 80){
+
+        status = "NEAR";
+
+      }
+
+
+      return {
+
+        ...budget,
+
+        actual,
+
+        variance,
+
+        utilization,
+
+        status
+
+      };
+
+    });
+
+}
+
+
+/* ---------------------------------------------------------
+   RENDER BUDGET TABLE
+--------------------------------------------------------- */
+
+function renderBudgetTable(){
+
+  const container =
+    document.getElementById(
+      "budgetTableContainer"
+    );
+
+  if(!container) return;
+
+
+  const statusFilter =
+    document.getElementById(
+      "budgetStatusFilter"
+    )?.value || "ALL";
+
+
+  let rows =
+    budgetRecords.filter(row => {
+
+      if(statusFilter === "ALL")
+        return true;
+
+      return row.status === statusFilter;
+
+    });
+
+
+  if(!rows.length){
+
+    container.innerHTML = `
+
+      <div class="empty">
+
+        No budgets found.
+
+        <div
+          style="
+            margin-top:8px;
+            font-size:12px;
+          "
+        >
+          Create your first budget using
+          <b>+ Create Budget</b>.
+        </div>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML = `
+
+    <div style="overflow-x:auto;">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>CATEGORY</th>
+
+            <th>PERIOD</th>
+
+            <th>BUDGET</th>
+
+            <th>ACTUAL</th>
+
+            <th>VARIANCE</th>
+
+            <th>USAGE</th>
+
+            <th>STATUS</th>
+
+            <th>ACTION</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          ${rows.map(row => {
+
+            const statusLabel =
+              row.status === "OVER"
+                ? "Over Budget"
+                : row.status === "NEAR"
+                  ? "Near Limit"
+                  : "Within Budget";
+
+
+            return `
+
+              <tr>
+
+                <td>
+
+                  <b>
+                    ${esc(
+                      budgetCategoryLabel(
+                        row.category
+                      )
+                    )}
+                  </b>
+
+                  <div
+                    style="
+                      font-size:11px;
+                      color:#68727d;
+                      margin-top:3px;
+                    "
+                  >
+                    ${esc(row.budget_name)}
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  <div>
+                    ${formatBudgetDate(
+                      row.period_start
+                    )}
+                    —
+                    ${formatBudgetDate(
+                      row.period_end
+                    )}
+                  </div>
+
+                  <div
+                    style="
+                      font-size:11px;
+                      color:#68727d;
+                      margin-top:3px;
+                    "
+                  >
+                    ${esc(row.period_type)}
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  <b>
+                    ${money(
+                      row.amount,
+                      row.currency
+                    )}
+                  </b>
+
+                </td>
+
+
+                <td>
+
+                  <b>
+                    ${money(
+                      row.actual,
+                      row.currency
+                    )}
+                  </b>
+
+                </td>
+
+
+                <td>
+
+                  <b>
+                    ${money(
+                      row.variance,
+                      row.currency
+                    )}
+                  </b>
+
+                </td>
+
+
+                <td>
+
+                  <b>
+                    ${Number(
+                      row.utilization || 0
+                    ).toFixed(1)}%
+                  </b>
+
+                  <div
+                    style="
+                      height:6px;
+                      background:#edf0f3;
+                      border-radius:20px;
+                      margin-top:7px;
+                      overflow:hidden;
+                    "
+                  >
+
+                    <div
+                      style="
+                        height:100%;
+                        width:${Math.min(
+                          Number(row.utilization || 0),
+                          100
+                        )}%;
+                        background:#222;
+                        border-radius:20px;
+                      "
+                    ></div>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  <span
+                    style="
+                      display:inline-block;
+                      padding:5px 9px;
+                      border-radius:20px;
+                      font-size:11px;
+                      font-weight:700;
+                      background:${
+                        row.status === "OVER"
+                          ? "#fee2e2"
+                          : row.status === "NEAR"
+                            ? "#fff3cd"
+                            : "#e8f5e9"
+                      };
+                      color:${
+                        row.status === "OVER"
+                          ? "#b42318"
+                          : row.status === "NEAR"
+                            ? "#8a6100"
+                            : "#18794e"
+                      };
+                    "
+                  >
+                    ${statusLabel}
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <div
+                    style="
+                      display:flex;
+                      gap:6px;
+                    "
+                  >
+
+                    <button
+                      class="secondary"
+                      onclick="editBudget('${row.id}')"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="secondary"
+                      onclick="deleteBudget('${row.id}')"
+                    >
+                      Delete
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            `;
+
+          }).join("")}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  `;
+
+}
+
+
+/* ---------------------------------------------------------
+   BUDGET SUMMARY
+--------------------------------------------------------- */
+
+function renderBudgetSummary(){
+
+  const total =
+    budgetRecords.reduce(
+      (sum,row) =>
+        sum + Number(row.amount || 0),
+      0
+    );
+
+
+  const actual =
+    budgetRecords.reduce(
+      (sum,row) =>
+        sum + Number(row.actual || 0),
+      0
+    );
+
+
+  const remaining =
+    total - actual;
+
+
+  const utilization =
+    total > 0
+      ? (actual / total) * 100
+      : 0;
+
+
+  const currency =
+    document.getElementById(
+      "budgetCurrencyFilter"
+    )?.value || "TZS";
+
+
+  set(
+    "budgetTotal",
+    money(total,currency)
+  );
+
+
+  set(
+    "budgetActual",
+    money(actual,currency)
+  );
+
+
+  set(
+    "budgetRemaining",
+    money(remaining,currency)
+  );
+
+
+  set(
+    "budgetUtilization",
+    `${utilization.toFixed(1)}%`
+  );
+
+}
+
+
+/* ---------------------------------------------------------
+   BUDGET INSIGHTS
+--------------------------------------------------------- */
+
+function renderBudgetInsights(){
+
+  const container =
+    document.getElementById(
+      "budgetInsights"
+    );
+
+  if(!container) return;
+
+
+  if(!budgetRecords.length){
+
+    container.innerHTML = `
+      <div class="empty">
+        No budget data available.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  const over =
+    budgetRecords.filter(
+      row => row.status === "OVER"
+    );
+
+
+  const near =
+    budgetRecords.filter(
+      row => row.status === "NEAR"
+    );
+
+
+  const within =
+    budgetRecords.filter(
+      row => row.status === "WITHIN"
+    );
+
+
+  const insights = [];
+
+
+  if(over.length){
+
+    insights.push(`
+      <div
+        style="
+          padding:14px;
+          border:1px solid #f1caca;
+          border-radius:10px;
+          margin-bottom:10px;
+        "
+      >
+
+        <b>
+          ${over.length}
+          budget${over.length > 1 ? "s" : ""}
+          over limit
+        </b>
+
+        <div
+          style="
+            font-size:12px;
+            color:#68727d;
+            margin-top:4px;
+          "
+        >
+          Management attention is required because
+          actual spending has exceeded the approved budget.
+        </div>
+
+      </div>
+    `);
+
+  }
+
+
+  if(near.length){
+
+    insights.push(`
+      <div
+        style="
+          padding:14px;
+          border:1px solid #eadca8;
+          border-radius:10px;
+          margin-bottom:10px;
+        "
+      >
+
+        <b>
+          ${near.length}
+          budget${near.length > 1 ? "s" : ""}
+          approaching limit
+        </b>
+
+        <div
+          style="
+            font-size:12px;
+            color:#68727d;
+            margin-top:4px;
+          "
+        >
+          These budgets have reached at least 80%
+          of their planned spending.
+        </div>
+
+      </div>
+    `);
+
+  }
+
+
+  if(within.length){
+
+    insights.push(`
+      <div
+        style="
+          padding:14px;
+          border:1px solid #d8eadf;
+          border-radius:10px;
+          margin-bottom:10px;
+        "
+      >
+
+        <b>
+          ${within.length}
+          budget${within.length > 1 ? "s" : ""}
+          within limit
+        </b>
+
+        <div
+          style="
+            font-size:12px;
+            color:#68727d;
+            margin-top:4px;
+          "
+        >
+          Spending is currently within the planned
+          budget limits.
+        </div>
+
+      </div>
+    `);
+
+  }
+
+
+  container.innerHTML =
+    insights.join("");
+
+}
+
+
+/* ---------------------------------------------------------
+   OPEN BUDGET MODAL
+--------------------------------------------------------- */
+
+function openBudgetModal(id=null){
+
+  editingBudgetId = id;
+
+
+  let budget = null;
+
+
+  if(id){
+
+    budget =
+      budgetRecords.find(
+        row => row.id === id
+      );
+
+  }
+
+
+  let modal =
+    document.getElementById(
+      "budgetModal"
+    );
+
+
+  if(!modal){
+
+    modal =
+      document.createElement("div");
+
+    modal.id = "budgetModal";
+
+    modal.className = "modal";
+
+    document.body.appendChild(modal);
+
+  }
+
+
+  const today =
+    new Date();
+
+
+  const currentYear =
+    today.getFullYear();
+
+
+  const currentMonth =
+    String(
+      today.getMonth() + 1
+    ).padStart(2,"0");
+
+
+  const monthStart =
+    `${currentYear}-${currentMonth}-01`;
+
+
+  const monthEnd =
+    new Date(
+      currentYear,
+      today.getMonth() + 1,
+      0
+    )
+      .toISOString()
+      .slice(0,10);
+
+
+  modal.innerHTML = `
+
+    <div class="modal-box">
+
+      <div class="modal-head">
+
+        <div>
+
+          <h3 style="margin:0;">
+            ${budget ? "Edit Budget" : "Create Budget"}
+          </h3>
+
+          <div
+            style="
+              font-size:12px;
+              color:#68727d;
+              margin-top:4px;
+            "
+          >
+            Set planned spending for a company category.
+          </div>
+
+        </div>
+
+        <button
+          class="secondary"
+          onclick="closeBudgetModal()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div class="form-grid">
+
+
+          <div class="field">
+
+            <label>BUDGET NAME *</label>
+
+            <input
+              id="budgetName"
+              value="${esc(
+                budget?.budget_name || ""
+              )}"
+              placeholder="e.g. September Office Budget"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>PERIOD TYPE *</label>
+
+            <select id="budgetPeriodType">
+
+              <option
+                value="MONTHLY"
+                ${budget?.period_type === "MONTHLY" ? "selected" : ""}
+              >
+                Monthly
+              </option>
+
+              <option
+                value="QUARTERLY"
+                ${budget?.period_type === "QUARTERLY" ? "selected" : ""}
+              >
+                Quarterly
+              </option>
+
+              <option
+                value="YEARLY"
+                ${budget?.period_type === "YEARLY" ? "selected" : ""}
+              >
+                Yearly
+              </option>
+
+              <option
+                value="CUSTOM"
+                ${budget?.period_type === "CUSTOM" ? "selected" : ""}
+              >
+                Custom
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>PERIOD START *</label>
+
+            <input
+              id="budgetPeriodStart"
+              type="date"
+              value="${budget?.period_start || monthStart}"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>PERIOD END *</label>
+
+            <input
+              id="budgetPeriodEnd"
+              type="date"
+              value="${budget?.period_end || monthEnd}"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>CATEGORY *</label>
+
+            <select id="budgetCategory">
+
+              <option
+                value="VEHICLE"
+                ${budget?.category === "VEHICLE" ? "selected" : ""}
+              >
+                Vehicle
+              </option>
+
+              <option
+                value="OFFICE"
+                ${budget?.category === "OFFICE" ? "selected" : ""}
+              >
+                Office
+              </option>
+
+              <option
+                value="SALARY"
+                ${budget?.category === "SALARY" ? "selected" : ""}
+              >
+                Salary
+              </option>
+
+              <option
+                value="COMMISSION"
+                ${budget?.category === "COMMISSION" ? "selected" : ""}
+              >
+                Commission
+              </option>
+
+              <option
+                value="OTHER"
+                ${budget?.category === "OTHER" ? "selected" : ""}
+              >
+                Other
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>AMOUNT *</label>
+
+            <input
+              id="budgetAmount"
+              type="number"
+              min="0"
+              step="0.01"
+              value="${budget?.amount ?? ""}"
+              placeholder="0"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>CURRENCY *</label>
+
+            <select id="budgetCurrency">
+
+              <option
+                value="TZS"
+                ${(
+                  budget?.currency ||
+                  document.getElementById(
+                    "budgetCurrencyFilter"
+                  )?.value ||
+                  "TZS"
+                ) === "TZS" ? "selected" : ""}
+              >
+                TZS — Tanzanian Shilling
+              </option>
+
+              <option
+                value="USD"
+                ${budget?.currency === "USD" ? "selected" : ""}
+              >
+                USD — US Dollar
+              </option>
+
+              <option
+                value="JPY"
+                ${budget?.currency === "JPY" ? "selected" : ""}
+              >
+                JPY — Japanese Yen
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>NOTES</label>
+
+            <input
+              id="budgetNotes"
+              value="${esc(
+                budget?.notes || ""
+              )}"
+              placeholder="Optional notes"
+            >
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-foot">
+
+        <button
+          class="secondary"
+          onclick="closeBudgetModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="primary"
+          onclick="saveBudget()"
+        >
+          ${budget ? "Update Budget" : "Save Budget"}
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  modal.classList.add("show");
+
+
+  const periodType =
+    document.getElementById(
+      "budgetPeriodType"
+    );
+
+
+  periodType.addEventListener(
+    "change",
+    applyBudgetPeriodPreset
+  );
+
+}
+
+
+/* ---------------------------------------------------------
+   APPLY PERIOD PRESETS
+--------------------------------------------------------- */
+
+function applyBudgetPeriodPreset(){
+
+  const type =
+    document.getElementById(
+      "budgetPeriodType"
+    )?.value;
+
+
+  if(!type) return;
+
+
+  const startEl =
+    document.getElementById(
+      "budgetPeriodStart"
+    );
+
+
+  const endEl =
+    document.getElementById(
+      "budgetPeriodEnd"
+    );
+
+
+  if(!startEl || !endEl) return;
+
+
+  const today =
+    new Date();
+
+
+  let start;
+  let end;
+
+
+  if(type === "MONTHLY"){
+
+    start =
+      new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
+      );
+
+    end =
+      new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        0
+      );
+
+  }
+
+
+  else if(type === "QUARTERLY"){
+
+    const quarter =
+      Math.floor(
+        today.getMonth() / 3
+      );
+
+
+    start =
+      new Date(
+        today.getFullYear(),
+        quarter * 3,
+        1
+      );
+
+
+    end =
+      new Date(
+        today.getFullYear(),
+        quarter * 3 + 3,
+        0
+      );
+
+  }
+
+
+  else if(type === "YEARLY"){
+
+    start =
+      new Date(
+        today.getFullYear(),
+        0,
+        1
+      );
+
+    end =
+      new Date(
+        today.getFullYear(),
+        11,
+        31
+      );
+
+  }
+
+
+  else{
+
+    return;
+
+  }
+
+
+  startEl.value =
+    start.toISOString().slice(0,10);
+
+  endEl.value =
+    end.toISOString().slice(0,10);
+
+}
+
+
+/* ---------------------------------------------------------
+   SAVE BUDGET
+--------------------------------------------------------- */
+
+async function saveBudget(){
+
+  const budgetName =
+    val("budgetName").trim();
+
+
+  const periodType =
+    val("budgetPeriodType");
+
+
+  const periodStart =
+    val("budgetPeriodStart");
+
+
+  const periodEnd =
+    val("budgetPeriodEnd");
+
+
+  const category =
+    val("budgetCategory");
+
+
+  const amount =
+    Number(
+      val("budgetAmount")
+    );
+
+
+  const currency =
+    val("budgetCurrency");
+
+
+  const notes =
+    val("budgetNotes").trim();
+
+
+  if(!budgetName){
+
+    toast(
+      "Budget name is required.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(!periodStart || !periodEnd){
+
+    toast(
+      "Budget period is required.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(periodEnd < periodStart){
+
+    toast(
+      "Budget end date cannot be before start date.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(!Number.isFinite(amount) || amount < 0){
+
+    toast(
+      "Enter a valid budget amount.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const payload = {
+
+    budget_name: budgetName,
+
+    period_type: periodType,
+
+    period_start: periodStart,
+
+    period_end: periodEnd,
+
+    category: category,
+
+    amount: amount,
+
+    currency: currency,
+
+    notes: notes || null
+
+  };
+
+
+  try{
+
+    if(editingBudgetId){
+
+      const {
+        error
+      } = await sb
+        .from("budgets")
+        .update(payload)
+        .eq(
+          "id",
+          editingBudgetId
+        );
+
+
+      if(error) throw error;
+
+
+      toast(
+        "Budget updated successfully.",
+        "ok"
+      );
+
+    }
+
+
+    else{
+
+      const {
+        error
+      } = await sb
+        .from("budgets")
+        .insert(payload);
+
+
+      if(error) throw error;
+
+
+      toast(
+        "Budget created successfully.",
+        "ok"
+      );
+
+    }
+
+
+    closeBudgetModal();
+
+
+    /*
+       Keep the currency filter on the currency
+       that was just saved.
+    */
+
+    const filter =
+      document.getElementById(
+        "budgetCurrencyFilter"
+      );
+
+
+    if(filter){
+
+      filter.value = currency;
+
+    }
+
+
+    await loadBudgets();
+
+
+  }catch(error){
+
+    console.error(
+      "Save budget error:",
+      error
+    );
+
+
+    toast(
+      error.message ||
+      "Failed to save budget.",
+      "error"
+    );
+
+  }
+
+}
+
+
+/* ---------------------------------------------------------
+   EDIT BUDGET
+--------------------------------------------------------- */
+
+function editBudget(id){
+
+  openBudgetModal(id);
+
+}
+
+
+/* ---------------------------------------------------------
+   DELETE BUDGET
+--------------------------------------------------------- */
+
+async function deleteBudget(id){
+
+  const budget =
+    budgetRecords.find(
+      row => row.id === id
+    );
+
+
+  if(!budget) return;
+
+
+  const confirmed =
+    confirm(
+      `Delete budget "${budget.budget_name}"?`
+    );
+
+
+  if(!confirmed) return;
+
+
+  try{
+
+    const {
+      error
+    } = await sb
+      .from("budgets")
+      .delete()
+      .eq(
+        "id",
+        id
+      );
+
+
+    if(error) throw error;
+
+
+    toast(
+      "Budget deleted successfully.",
+      "ok"
+    );
+
+
+    await loadBudgets();
+
+
+  }catch(error){
+
+    console.error(
+      "Delete budget error:",
+      error
+    );
+
+
+    toast(
+      error.message ||
+      "Failed to delete budget.",
+      "error"
+    );
+
+  }
+
+}
+
+
+/* ---------------------------------------------------------
+   CLOSE MODAL
+--------------------------------------------------------- */
+
+function closeBudgetModal(){
+
+  const modal =
+    document.getElementById(
+      "budgetModal"
+    );
+
+
+  if(modal){
+
+    modal.classList.remove("show");
+
+  }
+
+
+  editingBudgetId = null;
+
+}
+
+
+/* ---------------------------------------------------------
+   CATEGORY LABEL
+--------------------------------------------------------- */
+
+function budgetCategoryLabel(category){
+
+  const labels = {
+
+    VEHICLE:"Vehicle",
+
+    OFFICE:"Office",
+
+    SALARY:"Salary",
+
+    COMMISSION:"Commission",
+
+    OTHER:"Other"
+
+  };
+
+
+  return labels[category] ||
+         category ||
+         "-";
+
+}
+
+
+/* ---------------------------------------------------------
+   DATE FORMAT
+--------------------------------------------------------- */
+
+function formatBudgetDate(date){
+
+  if(!date) return "-";
+
+
+  try{
+
+    return new Date(
+      `${date}T00:00:00`
+    ).toLocaleDateString(
+      "en-GB",
+      {
+        day:"2-digit",
+        month:"short",
+        year:"numeric"
+      }
+    );
+
+  }catch{
+
+    return date;
+
+  }
+
+}
+/* =========================================================
    REFRESH CURRENT VIEW
 ========================================================= */
 
@@ -19008,6 +21027,11 @@ async function refreshCurrent(){
    else if(currentView === "employees"){
   await loadEmployees();
 }
+
+else if(currentView === "budgets"){
+  await loadBudgets();
+}     
+    
 else if(currentView === "transactions"){
   await loadTransactions();
 }
