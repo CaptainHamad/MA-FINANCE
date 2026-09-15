@@ -122,6 +122,107 @@ tr:hover td{background:#fbfcfd}
 .field input,.field select{height:42px;border:1px solid #dfe4e8;border-radius:9px;padding:0 11px;outline:none;background:#fff}
 .field input:focus,.field select:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(245,130,32,.08)}
 .modal-foot{padding:15px 21px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+/* =========================================================
+   BUDGET MODAL — POLISHED
+========================================================= */
+
+#budgetModal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(20,27,35,.42);
+  backdrop-filter:blur(6px);
+  z-index:100;
+}
+
+#budgetModal.show{
+  display:flex;
+}
+
+#budgetModal > .modal{
+  width:min(650px,100%);
+  max-height:calc(100vh - 48px);
+  background:#fff;
+  border-radius:20px;
+  box-shadow:0 30px 90px rgba(0,0,0,.22);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+#budgetModal .modal-head{
+  padding:20px 22px;
+  flex-shrink:0;
+}
+
+#budgetModal .modal-body{
+  padding:21px 22px;
+  overflow-y:auto;
+}
+
+#budgetModal .form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+#budgetModal .field{
+  min-width:0;
+}
+
+#budgetModal .field label{
+  font-size:10px;
+  color:#68727d;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+
+#budgetModal .field input,
+#budgetModal .field select{
+  width:100%;
+  height:43px;
+  border:1px solid #dfe4e8;
+  border-radius:10px;
+  padding:0 12px;
+  outline:none;
+  background:#fff;
+  transition:.15s ease;
+}
+
+#budgetModal .field input:focus,
+#budgetModal .field select:focus{
+  border-color:var(--orange);
+  box-shadow:0 0 0 3px rgba(245,130,32,.08);
+}
+
+#budgetModal .modal-foot{
+  padding:15px 22px;
+  background:#fff;
+  flex-shrink:0;
+}
+
+#budgetModal .modal-foot .primary{
+  min-width:130px;
+}
+
+@media(max-width:650px){
+
+  #budgetModal{
+    padding:14px;
+  }
+
+  #budgetModal > .modal{
+    max-height:calc(100vh - 28px);
+  }
+
+  #budgetModal .form-grid{
+    grid-template-columns:1fr;
+  }
+
+}
 
 /* =========================================================
    GENERAL EXPENSE FORM — FULL PAGE MODE
