@@ -2249,10 +2249,12 @@ if(view==="budgets")
   loadBudgets();
   
 if(view==="reports") loadReports();
-}
+
 
 if(view==="intelligence")
   loadIntelligence();
+
+}
 
 function buildPlaceholders(){
   const data={
@@ -22917,7 +22919,12 @@ async function refreshCurrent(){
 
 else if(currentView === "budgets"){
   await loadBudgets();
-}     
+}
+
+else if(currentView === "intelligence"){
+  await loadIntelligence();
+}
+
     
 else if(currentView === "transactions"){
   await loadTransactions();
