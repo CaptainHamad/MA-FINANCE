@@ -33,7 +33,13 @@ button{cursor:pointer}
   display:flex;flex-direction:column
 }
 .brand{height:82px;padding:17px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
-.brandmark{width:44px;height:44px;border-radius:13px;background:var(--orange);display:grid;place-items:center;font-weight:900;font-size:21px;color:#151515;box-shadow:0 8px 20px rgba(245,130,32,.22)}
+.brand-logo{
+  width:44px;
+  height:44px;
+  object-fit:contain;
+  display:block;
+  flex-shrink:0;
+}
 .brand strong{display:block;font-size:14px;letter-spacing:.6px}
 .brand small{display:block;margin-top:3px;color:#9aa3ad;font-size:9px;letter-spacing:2.1px;font-weight:700}
 .nav{padding:18px 12px;overflow:auto}
@@ -1298,9 +1304,12 @@ tr:hover td{background:#fbfcfd}
 
 <aside class="sidebar">
   <div class="brand">
-    <div class="brandmark">M</div>
-    <div><strong>MATTEX</strong><small>FINANCE OS</small></div>
+  <img src="mattex-logo.png" alt="Mattex" class="brand-logo">
+  <div>
+    <strong>MATTEX</strong>
+    <small>FINANCE OS</small>
   </div>
+</div>
 
   <nav class="nav">
     <div class="nav-label">OVERVIEW</div>
