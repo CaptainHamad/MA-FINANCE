@@ -1350,6 +1350,14 @@ tr:hover td{background:#fbfcfd}
   <i class="nav-ico">◫</i>
   <span>Budgeting</span>
 </button>
+
+<button
+  class="nav-btn"
+  data-view="intelligence"
+>
+  <i class="nav-ico">✦</i>
+  <span>Intelligence</span>
+</button>
 <button
   class="nav-btn"
   data-view="employees"
@@ -1774,6 +1782,7 @@ tr:hover td{background:#fbfcfd}
     <div class="view" id="view-suppliers"></div>
     <div class="view" id="view-employees"></div>
     <div class="view" id="view-budgets"></div>
+    <div class="view" id="view-intelligence"></div>
     <div class="view" id="view-reports"></div>
 
   </section>
@@ -2182,7 +2191,7 @@ let currentView="overview";
 const viewTitles={
   overview:"Financial Overview",income:"Income",expenses:" Office Expenses",accounts:"Accounts",
   transactions:"Transaction Ledger",transfers:"Transfers",vehicles:"Vehicles",customers:"Customers",
-  sales:"Sales",suppliers:"Suppliers",employees:"Employees",budgets:"Budgeting",reports:"Reports"
+  sales:"Sales",suppliers:"Suppliers",employees:"Employees",budgets:"Budgeting",intelligence:"Intelligence Center",reports:"Reports"
 };
 
 document.addEventListener("DOMContentLoaded",async()=>{
@@ -2200,6 +2209,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
   buildEmployeesModule();
 
   buildBudgetsModule();
+
+  buildIntelligenceModule();
 
   buildReportsModule();
 
@@ -2239,6 +2250,9 @@ if(view==="budgets")
   
 if(view==="reports") loadReports();
 }
+
+if(view==="intelligence")
+  loadIntelligence();
 
 function buildPlaceholders(){
   const data={
@@ -21081,6 +21095,1781 @@ function formatBudgetDate(date){
     return date;
 
   }
+
+}
+
+/* =========================================================
+   MAT TEX INTELLIGENCE CENTER
+   MANAGEMENT INTELLIGENCE / ADVICE / DECISIONS
+========================================================= */
+
+let intelligenceData = {
+  cash: 0,
+  income: 0,
+  expenses: 0,
+  profit: 0,
+  receivables: 0,
+  pendingExpenses: 0,
+  salesCount: 0,
+  salesValue: 0,
+  employeePayments: 0,
+  vehicleCosts: 0
+};
+
+let intelligenceItems = [];
+
+
+/* =========================================================
+   BUILD PAGE
+========================================================= */
+
+function buildIntelligenceModule(){
+
+  const view =
+    document.getElementById(
+      "view-intelligence"
+    );
+
+  if(!view) return;
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+
+        <h2>Intelligence Center</h2>
+
+        <p>
+          Financial intelligence, management advice and
+          decision support across Mattex operations.
+        </p>
+
+      </div>
+
+      <button
+        class="secondary"
+        onclick="loadIntelligence()"
+      >
+        ↻ Refresh Analysis
+      </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         FINANCIAL CAPACITY
+    ====================================================== -->
+
+    <div class="panel" style="margin-bottom:20px;">
+
+      <div class="panel-head">
+
+        <div>
+
+          <h3>
+            Financial Capacity
+          </h3>
+
+          <span>
+            Estimated room for discretionary business spending
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="panel-body">
+
+        <div
+          style="
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:14px;
+          "
+        >
+
+          <div class="mini">
+
+            <b id="intelCash">
+              TZS 0
+            </b>
+
+            <span>
+              Available Cash
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b id="intelCommitted">
+              TZS 0
+            </b>
+
+            <span>
+              Known Commitments
+            </span>
+
+          </div>
+
+
+          <div class="mini">
+
+            <b id="intelReserve">
+              TZS 0
+            </b>
+
+            <span>
+              Recommended Reserve
+            </span>
+
+          </div>
+
+
+          <div
+            class="mini"
+            style="
+              border:2px solid #f58220;
+              background:#fffaf5;
+            "
+          >
+
+            <b id="intelCapacity">
+              TZS 0
+            </b>
+
+            <span>
+              Discretionary Capacity
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="intelCapacityAdvice"
+          style="
+            margin-top:16px;
+          "
+        ></div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         EXECUTIVE SUMMARY
+    ====================================================== -->
+
+    <div class="panel" style="margin-bottom:20px;">
+
+      <div class="panel-head">
+
+        <div>
+
+          <h3>
+            Executive Assessment
+          </h3>
+
+          <span>
+            Overall interpretation of current business activity
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="panel-body"
+        id="intelExecutive"
+      >
+
+        <div class="empty">
+          Analyzing Mattex activity...
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PRIORITY ITEMS
+    ====================================================== -->
+
+    <div
+      style="
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:18px;
+        margin-bottom:20px;
+      "
+    >
+
+      <div class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <h3>
+              Alerts & Risks
+            </h3>
+
+            <span>
+              Issues requiring management attention
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="panel-body"
+          id="intelAlerts"
+        >
+
+          <div class="empty">
+            Analyzing...
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <h3>
+              Opportunities
+            </h3>
+
+            <span>
+              Areas where management may improve performance
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="panel-body"
+          id="intelOpportunities"
+        >
+
+          <div class="empty">
+            Analyzing...
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RECOMMENDED DECISIONS
+    ====================================================== -->
+
+    <div class="panel">
+
+      <div class="panel-head">
+
+        <div>
+
+          <h3>
+            Recommended Decisions
+          </h3>
+
+          <span>
+            Suggested management actions based on current data
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="panel-body"
+        id="intelDecisions"
+      >
+
+        <div class="empty">
+          Analyzing...
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   LOAD INTELLIGENCE
+========================================================= */
+
+async function loadIntelligence(){
+
+  buildIntelligenceModule();
+
+  const executive =
+    document.getElementById(
+      "intelExecutive"
+    );
+
+  if(executive){
+
+    executive.innerHTML = `
+      <div class="empty">
+        Analyzing current Mattex activity...
+      </div>
+    `;
+
+  }
+
+
+  intelligenceItems = [];
+
+
+  try{
+
+    await collectIntelligenceData();
+
+    generateIntelligence();
+
+    renderIntelligence();
+
+  }
+  catch(error){
+
+    console.error(
+      "Intelligence engine error:",
+      error
+    );
+
+    if(executive){
+
+      executive.innerHTML = `
+        <div class="empty">
+
+          <strong>
+            Unable to complete analysis
+          </strong>
+
+          ${esc(
+            error.message ||
+            "Unknown error"
+          )}
+
+        </div>
+      `;
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   COLLECT DATA
+========================================================= */
+
+async function collectIntelligenceData(){
+
+  /*
+     ---------------------------------------------------------
+     1. ACCOUNT POSITION
+     ---------------------------------------------------------
+  */
+
+  const {
+    data: accounts,
+    error: accountError
+  } = await sb
+    .from("account_balances")
+    .select("*");
+
+  if(accountError)
+    throw accountError;
+
+
+  intelligenceData.cash =
+    (accounts || [])
+      .filter(
+        account =>
+          account.currency === "TZS"
+      )
+      .reduce(
+        (sum,account) =>
+          sum +
+          Number(
+            account.current_balance || 0
+          ),
+        0
+      );
+
+
+  /*
+     ---------------------------------------------------------
+     2. CUSTOMER PAYMENTS
+     ---------------------------------------------------------
+  */
+
+  const {
+    data: payments,
+    error: paymentError
+  } = await sb
+    .from("customer_payments")
+    .select(`
+      amount,
+      currency,
+      payment_date
+    `);
+
+  if(paymentError)
+    throw paymentError;
+
+
+  intelligenceData.income =
+    (payments || [])
+      .filter(
+        payment =>
+          !payment.currency ||
+          payment.currency === "TZS"
+      )
+      .reduce(
+        (sum,payment) =>
+          sum +
+          Number(
+            payment.amount || 0
+          ),
+        0
+      );
+
+
+  /*
+     ---------------------------------------------------------
+     3. SALES
+     ---------------------------------------------------------
+  */
+
+  const {
+    data: sales,
+    error: salesError
+  } = await sb
+    .from("sales")
+    .select(`
+      id,
+      selling_price,
+      currency,
+      status
+    `);
+
+  if(salesError)
+    throw salesError;
+
+
+  intelligenceData.salesCount =
+    (sales || []).length;
+
+
+  intelligenceData.salesValue =
+    (sales || [])
+      .filter(
+        sale =>
+          !sale.currency ||
+          sale.currency === "TZS"
+      )
+      .reduce(
+        (sum,sale) =>
+          sum +
+          Number(
+            sale.selling_price || 0
+          ),
+        0
+      );
+
+
+  /*
+     ---------------------------------------------------------
+     4. OFFICE EXPENSES
+     ---------------------------------------------------------
+  */
+
+  const {
+    data: officeExpenses,
+    error: officeError
+  } = await sb
+    .from("expenses")
+    .select(`
+      amount,
+      currency,
+      payment_status
+    `);
+
+  if(officeError)
+    throw officeError;
+
+
+  intelligenceData.expenses =
+    (officeExpenses || [])
+      .filter(
+        expense =>
+          !expense.currency ||
+          expense.currency === "TZS"
+      )
+      .filter(
+        expense =>
+          String(
+            expense.payment_status || ""
+          ).toLowerCase() === "paid"
+      )
+      .reduce(
+        (sum,expense) =>
+          sum +
+          Number(
+            expense.amount || 0
+          ),
+        0
+      );
+
+
+  intelligenceData.pendingExpenses =
+    (officeExpenses || [])
+      .filter(
+        expense =>
+          !expense.currency ||
+          expense.currency === "TZS"
+      )
+      .filter(
+        expense =>
+          String(
+            expense.payment_status || ""
+          ).toLowerCase() === "pending"
+      )
+      .reduce(
+        (sum,expense) =>
+          sum +
+          Number(
+            expense.amount || 0
+          ),
+        0
+      );
+
+
+  /*
+     ---------------------------------------------------------
+     5. VEHICLE COSTS
+     ---------------------------------------------------------
+  */
+
+  const {
+    data: vehicleCosts,
+    error: vehicleError
+  } = await sb
+    .from("vehicle_costs")
+    .select(`
+      amount,
+      currency,
+      payment_status
+    `);
+
+  if(vehicleError)
+    throw vehicleError;
+
+
+  intelligenceData.vehicleCosts =
+    (vehicleCosts || [])
+      .filter(
+        cost =>
+          !cost.currency ||
+          cost.currency === "TZS"
+      )
+      .filter(
+        cost =>
+          String(
+            cost.payment_status || ""
+          ).toLowerCase() === "paid"
+      )
+      .reduce(
+        (sum,cost) =>
+          sum +
+          Number(
+            cost.amount || 0
+          ),
+        0
+      );
+
+
+  /*
+     ---------------------------------------------------------
+     6. EMPLOYEE PAYMENTS
+     ---------------------------------------------------------
+  */
+
+  const {
+    data: employeePayments,
+    error: employeeError
+  } = await sb
+    .from("employee_payments")
+    .select(`
+      amount,
+      currency,
+      payment_type
+    `);
+
+  if(employeeError)
+    throw employeeError;
+
+
+  intelligenceData.employeePayments =
+    (employeePayments || [])
+      .filter(
+        payment =>
+          !payment.currency ||
+          payment.currency === "TZS"
+      )
+      .reduce(
+        (sum,payment) =>
+          sum +
+          Number(
+            payment.amount || 0
+          ),
+        0
+      );
+
+
+  /*
+     ---------------------------------------------------------
+     7. CUSTOMER RECEIVABLES
+     ---------------------------------------------------------
+  */
+
+  const {
+    data: receivableSales,
+    error: receivableError
+  } = await sb
+    .from("sales")
+    .select(`
+      id,
+      selling_price,
+      currency,
+      status
+    `)
+    .in(
+      "status",
+      [
+        "partial",
+        "PARTIAL",
+        "unpaid",
+        "UNPAID"
+      ]
+    );
+
+  if(receivableError)
+    throw receivableError;
+
+
+  let receivableTotal = 0;
+
+
+  if(
+    receivableSales &&
+    receivableSales.length
+  ){
+
+    const saleIds =
+      receivableSales.map(
+        sale => sale.id
+      );
+
+
+    const {
+      data: salePayments,
+      error: salePaymentError
+    } = await sb
+      .from("customer_payments")
+      .select(`
+        sale_id,
+        amount,
+        currency
+      `)
+      .in(
+        "sale_id",
+        saleIds
+      );
+
+    if(salePaymentError)
+      throw salePaymentError;
+
+
+    receivableSales.forEach(
+      sale => {
+
+        if(
+          sale.currency &&
+          sale.currency !== "TZS"
+        )
+          return;
+
+
+        const paid =
+          (salePayments || [])
+            .filter(
+              payment =>
+                payment.sale_id === sale.id &&
+                (
+                  !payment.currency ||
+                  payment.currency === sale.currency
+                )
+            )
+            .reduce(
+              (sum,payment) =>
+                sum +
+                Number(
+                  payment.amount || 0
+                ),
+              0
+            );
+
+
+        receivableTotal +=
+          Math.max(
+            Number(
+              sale.selling_price || 0
+            ) -
+            paid,
+            0
+          );
+
+      }
+    );
+
+  }
+
+
+  intelligenceData.receivables =
+    receivableTotal;
+
+
+  /*
+     ---------------------------------------------------------
+     8. OVERALL PROFIT
+     ---------------------------------------------------------
+  */
+
+  intelligenceData.profit =
+    intelligenceData.income -
+    intelligenceData.expenses -
+    intelligenceData.vehicleCosts -
+    intelligenceData.employeePayments;
+
+}
+
+
+/* =========================================================
+   GENERATE INTELLIGENCE
+========================================================= */
+
+function generateIntelligence(){
+
+  intelligenceItems = [];
+
+
+  const d =
+    intelligenceData;
+
+
+  /*
+     ========================================================
+     CASH / LIQUIDITY
+     ========================================================
+  */
+
+  const knownCommitments =
+    d.pendingExpenses;
+
+
+  /*
+     Recommended reserve:
+     25% of current operating activity
+     OR TZS 5M minimum.
+  */
+
+  const operatingActivity =
+    d.expenses +
+    d.vehicleCosts +
+    d.employeePayments;
+
+
+  const recommendedReserve =
+    Math.max(
+      operatingActivity * 0.25,
+      5000000
+    );
+
+
+  const discretionaryCapacity =
+    Math.max(
+      d.cash -
+      knownCommitments -
+      recommendedReserve,
+      0
+    );
+
+
+  intelligenceData.committed =
+    knownCommitments;
+
+  intelligenceData.reserve =
+    recommendedReserve;
+
+  intelligenceData.capacity =
+    discretionaryCapacity;
+
+
+  /*
+     ========================================================
+     RECEIVABLES
+     ========================================================
+  */
+
+  if(d.receivables > 0){
+
+    const receivableRatio =
+      d.income > 0
+        ? (
+            d.receivables /
+            d.income
+          ) * 100
+        : 0;
+
+
+    if(
+      receivableRatio >= 50
+    ){
+
+      intelligenceItems.push({
+
+        type:"danger",
+
+        section:"ALERT",
+
+        title:
+          "Customer Receivables Require Attention",
+
+        text:
+          `${money(
+            d.receivables,
+            "TZS"
+          )} remains outstanding from customers. ` +
+          `Outstanding balances represent approximately ` +
+          `${receivableRatio.toFixed(0)}% of recorded customer payments.`,
+
+        recommendation:
+          "Prioritize collection before committing to major discretionary spending.",
+
+        priority:3
+
+      });
+
+    }
+
+    else if(
+      d.receivables >= 10000000
+    ){
+
+      intelligenceItems.push({
+
+        type:"warning",
+
+        section:"ALERT",
+
+        title:
+          "Significant Customer Receivables",
+
+        text:
+          `${money(
+            d.receivables,
+            "TZS"
+          )} is currently outstanding from customers.`,
+
+        recommendation:
+          "Review collection priorities and expected payment dates.",
+
+        priority:2
+
+      });
+
+    }
+
+  }
+
+
+  /*
+     ========================================================
+     PENDING OBLIGATIONS
+     ========================================================
+  */
+
+  if(
+    d.pendingExpenses >= 10000000
+  ){
+
+    intelligenceItems.push({
+
+      type:"warning",
+
+      section:"ALERT",
+
+      title:
+        "Pending Financial Obligations",
+
+      text:
+        `${money(
+          d.pendingExpenses,
+          "TZS"
+        )} in recorded office expenses are still pending payment.`,
+
+      recommendation:
+        "Review upcoming obligations before approving additional discretionary spending.",
+
+      priority:2
+
+    });
+
+  }
+
+
+  /*
+     ========================================================
+     PROFITABILITY
+     ========================================================
+  */
+
+  if(
+    d.income > 0 &&
+    d.profit < 0
+  ){
+
+    intelligenceItems.push({
+
+      type:"danger",
+
+      section:"ALERT",
+
+      title:
+        "Negative Current Financial Result",
+
+      text:
+        `Recorded customer payments are currently lower than combined operating and business expenses.`,
+
+      recommendation:
+        "Review major expense categories and improve cash collection before expanding spending.",
+
+      priority:3
+
+    });
+
+  }
+
+
+  /*
+     ========================================================
+     POSITIVE CASH
+     ========================================================
+  */
+
+  if(
+    d.cash > 0 &&
+    discretionaryCapacity >= 10000000
+  ){
+
+    intelligenceItems.push({
+
+      type:"positive",
+
+      section:"OPPORTUNITY",
+
+      title:
+        "Discretionary Financial Capacity Available",
+
+      text:
+        `Current account balances indicate approximately ` +
+        `${money(
+          discretionaryCapacity,
+          "TZS"
+        )} may be available after known commitments and the recommended operating reserve.`,
+
+      recommendation:
+        "Management may consider productive business improvements within this capacity.",
+
+      priority:1
+
+    });
+
+  }
+
+
+  /*
+     ========================================================
+     HIGH VEHICLE COST
+     ========================================================
+  */
+
+  if(
+    d.expenses > 0 &&
+    d.vehicleCosts >
+    d.expenses
+  ){
+
+    intelligenceItems.push({
+
+      type:"warning",
+
+      section:"ADVICE",
+
+      title:
+        "Vehicle Costs Are Material",
+
+      text:
+        `Vehicle-related costs currently exceed recorded office expenses.`,
+
+      recommendation:
+        "Review vehicle-level profitability and identify vehicles generating weak returns before committing additional capital.",
+
+      priority:2
+
+    });
+
+  }
+
+
+  /*
+     ========================================================
+     SALES OPPORTUNITY
+     ========================================================
+  */
+
+  if(
+    d.salesCount > 0 &&
+    d.receivables > 0
+  ){
+
+    intelligenceItems.push({
+
+      type:"info",
+
+      section:"OPPORTUNITY",
+
+      title:
+        "Convert Sales Into Cash",
+
+      text:
+        `${d.salesCount} vehicle sales are recorded while ` +
+        `${money(
+          d.receivables,
+          "TZS"
+        )} remains outstanding.`,
+
+      recommendation:
+        "Focus on converting existing receivables into cash before relying solely on additional sales volume.",
+
+      priority:2
+
+    });
+
+  }
+
+
+  /*
+     ========================================================
+     LOW CASH
+     ========================================================
+  */
+
+  if(
+    d.cash < recommendedReserve
+  ){
+
+    intelligenceItems.push({
+
+      type:"danger",
+
+      section:"ALERT",
+
+      title:
+        "Liquidity Is Tight",
+
+      text:
+        `Available cash is below the recommended operating reserve of ` +
+        `${money(
+          recommendedReserve,
+          "TZS"
+        )}.`,
+
+      recommendation:
+        "Preserve cash, prioritize collections and avoid major discretionary commitments.",
+
+      priority:3
+
+    });
+
+  }
+
+
+  /*
+     ========================================================
+     DECISION: INVESTMENT CAPACITY
+     ========================================================
+  */
+
+  if(
+    discretionaryCapacity >= 5000000
+  ){
+
+    intelligenceItems.push({
+
+      type:"decision",
+
+      section:"DECISION",
+
+      title:
+        "Potential Investment Capacity",
+
+      text:
+        `Based on current cash, known commitments and the recommended reserve, Mattex could consider discretionary spending of approximately ` +
+        `${money(
+          discretionaryCapacity,
+          "TZS"
+        )}.`,
+
+      recommendation:
+        "Use this capacity only for activities expected to improve revenue, efficiency or business capability.",
+
+      priority:2
+
+    });
+
+  }
+
+
+  /*
+     ========================================================
+     NO CAPACITY
+     ========================================================
+  */
+
+  if(
+    discretionaryCapacity < 5000000
+  ){
+
+    intelligenceItems.push({
+
+      type:"warning",
+
+      section:"DECISION",
+
+      title:
+        "Limit New Discretionary Spending",
+
+      text:
+        `Current financial capacity does not provide a comfortable margin for major discretionary expenditure.`,
+
+      recommendation:
+        "Prioritize cash preservation and customer collections until financial capacity improves.",
+
+      priority:3
+
+    });
+
+  }
+
+
+  /*
+     SORT BY PRIORITY
+  */
+
+  intelligenceItems.sort(
+    (a,b) =>
+      b.priority -
+      a.priority
+  );
+
+}
+
+
+/* =========================================================
+   RENDER
+========================================================= */
+
+function renderIntelligence(){
+
+  const d =
+    intelligenceData;
+
+
+  /*
+     ---------------------------------------------------------
+     CAPACITY
+     ---------------------------------------------------------
+  */
+
+  set(
+    "intelCash",
+    money(
+      d.cash,
+      "TZS"
+    )
+  );
+
+
+  set(
+    "intelCommitted",
+    money(
+      d.committed,
+      "TZS"
+    )
+  );
+
+
+  set(
+    "intelReserve",
+    money(
+      d.reserve,
+      "TZS"
+    )
+  );
+
+
+  set(
+    "intelCapacity",
+    money(
+      d.capacity,
+      "TZS"
+    )
+  );
+
+
+  const capacityAdvice =
+    document.getElementById(
+      "intelCapacityAdvice"
+    );
+
+
+  if(capacityAdvice){
+
+    let title =
+      "Recommended Spending Position";
+
+    let text;
+
+
+    if(d.capacity >= 10000000){
+
+      text =
+        `Mattex appears to have meaningful discretionary capacity. ` +
+        `Consider productive investments rather than treating the entire amount as freely spendable.`;
+
+    }
+
+    else if(d.capacity >= 5000000){
+
+      text =
+        `There is some discretionary capacity, but management should remain selective about new commitments.`;
+
+    }
+
+    else{
+
+      text =
+        `Current capacity is limited. Preserve liquidity and prioritize collections and essential obligations.`;
+
+    }
+
+
+    capacityAdvice.innerHTML = `
+
+      <div
+        style="
+          padding:15px;
+          border-radius:11px;
+          background:#f8fafc;
+          border:1px solid #e5e9ee;
+        "
+      >
+
+        <b>
+          ${title}
+        </b>
+
+        <div
+          style="
+            margin-top:6px;
+            font-size:11px;
+            color:#68727d;
+            line-height:1.55;
+          "
+        >
+          ${esc(text)}
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  /*
+     ---------------------------------------------------------
+     ALERTS
+     ---------------------------------------------------------
+  */
+
+  const alerts =
+    intelligenceItems.filter(
+      item =>
+        item.section === "ALERT"
+    );
+
+
+  renderIntelligenceList(
+    "intelAlerts",
+    alerts,
+    "No significant financial risks detected."
+  );
+
+
+  /*
+     ---------------------------------------------------------
+     OPPORTUNITIES
+     ---------------------------------------------------------
+  */
+
+  const opportunities =
+    intelligenceItems.filter(
+      item =>
+        item.section === "OPPORTUNITY" ||
+        item.section === "ADVICE"
+    );
+
+
+  renderIntelligenceList(
+    "intelOpportunities",
+    opportunities,
+    "No major opportunities identified."
+  );
+
+
+  /*
+     ---------------------------------------------------------
+     DECISIONS
+     ---------------------------------------------------------
+  */
+
+  const decisions =
+    intelligenceItems.filter(
+      item =>
+        item.section === "DECISION"
+    );
+
+
+  renderIntelligenceList(
+    "intelDecisions",
+    decisions,
+    "No major decisions are currently recommended."
+  );
+
+
+  /*
+     ---------------------------------------------------------
+     EXECUTIVE SUMMARY
+     ---------------------------------------------------------
+  */
+
+  renderExecutiveAssessment();
+
+}
+
+
+/* =========================================================
+   RENDER LIST
+========================================================= */
+
+function renderIntelligenceList(
+  elementId,
+  items,
+  emptyMessage
+){
+
+  const container =
+    document.getElementById(
+      elementId
+    );
+
+  if(!container)
+    return;
+
+
+  if(!items.length){
+
+    container.innerHTML = `
+
+      <div class="empty">
+        ${esc(emptyMessage)}
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    items
+      .slice(0,6)
+      .map(
+        item => {
+
+          const icon =
+            item.type === "danger"
+              ? "!"
+              : item.type === "warning"
+                ? "⚠"
+                : item.type === "positive"
+                  ? "✓"
+                  : item.type === "decision"
+                    ? "→"
+                    : "i";
+
+
+          const background =
+            item.type === "danger"
+              ? "#fff5f5"
+              : item.type === "warning"
+                ? "#fffaf3"
+                : item.type === "positive"
+                  ? "#f3fbf6"
+                  : item.type === "decision"
+                    ? "#f7f8ff"
+                    : "#f5f9ff";
+
+
+          return `
+
+            <div
+              style="
+                padding:15px;
+                border:1px solid #e5e9ee;
+                border-radius:12px;
+                margin-bottom:10px;
+                background:${background};
+              "
+            >
+
+              <div
+                style="
+                  display:flex;
+                  gap:12px;
+                  align-items:flex-start;
+                "
+              >
+
+                <div
+                  style="
+                    width:32px;
+                    height:32px;
+                    min-width:32px;
+                    border-radius:9px;
+                    display:grid;
+                    place-items:center;
+                    font-weight:900;
+                    background:#fff;
+                    border:1px solid #e5e9ee;
+                  "
+                >
+                  ${icon}
+                </div>
+
+
+                <div>
+
+                  <div
+                    style="
+                      font-size:11px;
+                      font-weight:850;
+                    "
+                  >
+                    ${esc(item.title)}
+                  </div>
+
+
+                  <div
+                    style="
+                      margin-top:5px;
+                      font-size:10px;
+                      line-height:1.5;
+                      color:#68727d;
+                    "
+                  >
+                    ${esc(item.text)}
+                  </div>
+
+
+                  <div
+                    style="
+                      margin-top:8px;
+                      font-size:10px;
+                      font-weight:800;
+                      color:#dc6a0b;
+                    "
+                  >
+                    Recommended action:
+                  </div>
+
+
+                  <div
+                    style="
+                      margin-top:3px;
+                      font-size:10px;
+                      line-height:1.5;
+                      color:#4b5563;
+                    "
+                  >
+                    ${esc(item.recommendation)}
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+/* =========================================================
+   EXECUTIVE ASSESSMENT
+========================================================= */
+
+function renderExecutiveAssessment(){
+
+  const container =
+    document.getElementById(
+      "intelExecutive"
+    );
+
+  if(!container)
+    return;
+
+
+  const d =
+    intelligenceData;
+
+
+  const critical =
+    intelligenceItems.filter(
+      item =>
+        item.type === "danger"
+    ).length;
+
+
+  const warnings =
+    intelligenceItems.filter(
+      item =>
+        item.type === "warning"
+    ).length;
+
+
+  let headline;
+  let message;
+  let status;
+
+
+  if(critical >= 2){
+
+    status =
+      "HIGH RISK";
+
+    headline =
+      "Management attention is required.";
+
+    message =
+      "Several financial indicators currently require action. " +
+      "The priority should be liquidity protection, collections and control of discretionary spending.";
+
+  }
+
+  else if(critical === 1){
+
+    status =
+      "ATTENTION REQUIRED";
+
+    headline =
+      "There is at least one material issue to address.";
+
+    message =
+      "The business remains active, but management should address the highlighted risk before making major new commitments.";
+
+  }
+
+  else if(warnings >= 2){
+
+    status =
+      "CAUTION";
+
+    headline =
+      "The business is operating, but several areas deserve review.";
+
+    message =
+      "Management should monitor obligations, spending and cash conversion before making larger commitments.";
+
+  }
+
+  else{
+
+    status =
+      "STABLE";
+
+    headline =
+      "No major financial threat detected from the available data.";
+
+    message =
+      "Current activity appears manageable. Management can focus on improving efficiency, collections and productive investment.";
+
+  }
+
+
+  container.innerHTML = `
+
+    <div
+      style="
+        padding:20px;
+        border:1px solid #e5e9ee;
+        border-radius:14px;
+        background:#fafbfc;
+      "
+    >
+
+      <div
+        style="
+          font-size:10px;
+          font-weight:900;
+          letter-spacing:1px;
+          color:#f58220;
+        "
+      >
+        ${status}
+      </div>
+
+
+      <div
+        style="
+          margin-top:8px;
+          font-size:17px;
+          font-weight:850;
+        "
+      >
+        ${esc(headline)}
+      </div>
+
+
+      <div
+        style="
+          margin-top:7px;
+          font-size:11px;
+          color:#68727d;
+          line-height:1.6;
+        "
+      >
+        ${esc(message)}
+      </div>
+
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:repeat(3,1fr);
+          gap:10px;
+          margin-top:18px;
+        "
+      >
+
+        <div class="mini">
+
+          <b>
+            ${d.salesCount}
+          </b>
+
+          <span>
+            Recorded Sales
+          </span>
+
+        </div>
+
+
+        <div class="mini">
+
+          <b>
+            ${money(
+              d.receivables,
+              "TZS"
+            )}
+          </b>
+
+          <span>
+            Customer Receivables
+          </span>
+
+        </div>
+
+
+        <div class="mini">
+
+          <b>
+            ${money(
+              d.profit,
+              "TZS"
+            )}
+          </b>
+
+          <span>
+            Current Result
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
 
 }
 /* =========================================================
