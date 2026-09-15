@@ -3119,7 +3119,116 @@ function buildExpensesModule(){
 
     </div>
 
+<!-- EXPENSE INTELLIGENCE -->
 
+<div class="panel" style="margin-bottom:18px;">
+
+  <div class="panel-head">
+
+    <div>
+      <h3>
+        Expense Intelligence
+      </h3>
+
+      <span>
+        Understand where Mattex money is going and identify the biggest cost drivers.
+      </span>
+    </div>
+
+  </div>
+
+
+  <div
+    style="
+      padding:16px;
+      border-bottom:1px solid #edf0f3;
+      display:flex;
+      gap:10px;
+      align-items:end;
+      flex-wrap:wrap;
+    "
+  >
+
+    <div style="min-width:170px;">
+
+      <label
+        style="
+          display:block;
+          font-size:11px;
+          font-weight:700;
+          margin-bottom:6px;
+        "
+      >
+        FROM
+      </label>
+
+      <input
+        type="date"
+        id="expenseIntelFrom"
+        style="
+          width:100%;
+          padding:10px 12px;
+          border:1px solid #dfe4e8;
+          border-radius:9px;
+        "
+      >
+
+    </div>
+
+
+    <div style="min-width:170px;">
+
+      <label
+        style="
+          display:block;
+          font-size:11px;
+          font-weight:700;
+          margin-bottom:6px;
+        "
+      >
+        TO
+      </label>
+
+      <input
+        type="date"
+        id="expenseIntelTo"
+        style="
+          width:100%;
+          padding:10px 12px;
+          border:1px solid #dfe4e8;
+          border-radius:9px;
+        "
+      >
+
+    </div>
+
+
+    <button
+      class="primary"
+      type="button"
+      onclick="loadExpenseIntelligence()"
+    >
+      Analyze Expenses
+    </button>
+
+  </div>
+
+
+  <div
+    id="expenseIntelligenceContainer"
+    class="panel-body"
+  >
+
+    <div class="empty">
+      Expense intelligence will appear here.
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- EXPENSE LIST -->
     <!-- EXPENSE LIST -->
 
     <div class="panel">
@@ -4181,6 +4290,1303 @@ async function saveGeneralExpense(event){
 
 }
 
+/* =========================================================
+   EXPENSE INTELLIGENCE
+========================================================= */
+
+function getExpenseIntelDate(date){
+
+  const d = new Date(date);
+
+  const year =
+    d.getFullYear();
+
+  const month =
+    String(d.getMonth() + 1)
+      .padStart(2,"0");
+
+  const day =
+    String(d.getDate())
+      .padStart(2,"0");
+
+  return `${year}-${month}-${day}`;
+
+}
+
+
+/* ---------- DEFAULT DATES ---------- */
+
+function setExpenseIntelligenceDates(){
+
+  const from =
+    document.getElementById(
+      "expenseIntelFrom"
+    );
+
+  const to =
+    document.getElementById(
+      "expenseIntelTo"
+    );
+
+  if(!from || !to) return;
+
+
+  const today =
+    new Date();
+
+
+  const sixMonthsAgo =
+    new Date(
+      today.getFullYear(),
+      today.getMonth() - 5,
+      1
+    );
+
+
+  if(!from.value){
+
+    from.value =
+      getExpenseIntelDate(
+        sixMonthsAgo
+      );
+
+  }
+
+
+  if(!to.value){
+
+    to.value =
+      getExpenseIntelDate(
+        today
+      );
+
+  }
+
+}
+
+
+/* =========================================================
+   LOAD EXPENSE INTELLIGENCE
+========================================================= */
+
+async function loadExpenseIntelligence(){
+
+  const container =
+    document.getElementById(
+      "expenseIntelligenceContainer"
+    );
+
+  if(!container) return;
+
+
+  setExpenseIntelligenceDates();
+
+
+  const from =
+    document.getElementById(
+      "expenseIntelFrom"
+    ).value;
+
+  const to =
+    document.getElementById(
+      "expenseIntelTo"
+    ).value;
+
+
+  if(!from || !to){
+
+    toast(
+      "Please select the analysis period.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  if(from > to){
+
+    toast(
+      "The start date cannot be after the end date.",
+      "err"
+    );
+
+    return;
+
+  }
+
+
+  container.innerHTML = `
+    <div class="empty">
+      Analyzing expenses...
+    </div>
+  `;
+
+
+  try{
+
+    /* =====================================================
+       1. OFFICE EXPENSES
+    ===================================================== */
+
+    const {
+      data: officeExpenses,
+      error: officeError
+    } = await sb
+      .from("expenses")
+      .select(`
+        id,
+        description,
+        category,
+        amount,
+        currency,
+        expense_date,
+        payment_status
+      `)
+      .gte(
+        "expense_date",
+        from
+      )
+      .lte(
+        "expense_date",
+        to
+      );
+
+
+    if(officeError)
+      throw officeError;
+
+
+    /* =====================================================
+       2. VEHICLE / SALES EXPENSES
+    ===================================================== */
+
+    const {
+      data: vehicleCosts,
+      error: vehicleError
+    } = await sb
+      .from("vehicle_costs")
+      .select(`
+        id,
+        category,
+        description,
+        amount,
+        currency,
+        cost_date,
+        payment_status
+      `)
+      .gte(
+        "cost_date",
+        from
+      )
+      .lte(
+        "cost_date",
+        to
+      );
+
+
+    if(vehicleError)
+      throw vehicleError;
+
+
+    /* =====================================================
+       3. EMPLOYEE PAYMENTS
+    ===================================================== */
+
+    const {
+      data: employeePayments,
+      error: employeeError
+    } = await sb
+      .from("employee_payments")
+      .select(`
+        id,
+        payment_type,
+        amount,
+        currency,
+        payment_date
+      `)
+      .gte(
+        "payment_date",
+        from
+      )
+      .lte(
+        "payment_date",
+        to
+      );
+
+
+    if(employeeError)
+      throw employeeError;
+
+
+    /* =====================================================
+       TZS ONLY
+    ===================================================== */
+
+    const office =
+      (officeExpenses || [])
+        .filter(
+          e =>
+            !e.currency ||
+            e.currency === "TZS"
+        );
+
+
+    const vehicles =
+      (vehicleCosts || [])
+        .filter(
+          e =>
+            !e.currency ||
+            e.currency === "TZS"
+        );
+
+
+    const employees =
+      (employeePayments || [])
+        .filter(
+          e =>
+            (
+              e.payment_type === "SALARY" ||
+              e.payment_type === "COMMISSION"
+            ) &&
+            (
+              !e.currency ||
+              e.currency === "TZS"
+            )
+        );
+
+
+    /* =====================================================
+       TOTALS
+    ===================================================== */
+
+    const officeTotal =
+      office.reduce(
+        (sum,e) =>
+          sum +
+          Number(e.amount || 0),
+        0
+      );
+
+
+    const vehicleTotal =
+      vehicles.reduce(
+        (sum,e) =>
+          sum +
+          Number(e.amount || 0),
+        0
+      );
+
+
+    const salaryTotal =
+      employees
+        .filter(
+          e =>
+            e.payment_type === "SALARY"
+        )
+        .reduce(
+          (sum,e) =>
+            sum +
+            Number(e.amount || 0),
+          0
+        );
+
+
+    const commissionTotal =
+      employees
+        .filter(
+          e =>
+            e.payment_type === "COMMISSION"
+        )
+        .reduce(
+          (sum,e) =>
+            sum +
+            Number(e.amount || 0),
+          0
+        );
+
+
+    const totalExpense =
+      officeTotal +
+      vehicleTotal +
+      salaryTotal +
+      commissionTotal;
+
+
+    /* =====================================================
+       PAID / PENDING
+    ===================================================== */
+
+    const officePaid =
+      office
+        .filter(
+          e =>
+            e.payment_status === "Paid"
+        )
+        .reduce(
+          (sum,e) =>
+            sum +
+            Number(e.amount || 0),
+          0
+        );
+
+
+    const officePending =
+      office
+        .filter(
+          e =>
+            e.payment_status === "Pending"
+        )
+        .reduce(
+          (sum,e) =>
+            sum +
+            Number(e.amount || 0),
+          0
+        );
+
+
+    const vehiclePaid =
+      vehicles
+        .filter(
+          e =>
+            String(
+              e.payment_status || ""
+            ).toUpperCase() === "PAID"
+        )
+        .reduce(
+          (sum,e) =>
+            sum +
+            Number(e.amount || 0),
+          0
+        );
+
+
+    const vehiclePending =
+      vehicles
+        .filter(
+          e =>
+            String(
+              e.payment_status || ""
+            ).toUpperCase() === "PENDING"
+        )
+        .reduce(
+          (sum,e) =>
+            sum +
+            Number(e.amount || 0),
+          0
+        );
+
+
+    const paidExpenses =
+      officePaid +
+      vehiclePaid +
+      salaryTotal +
+      commissionTotal;
+
+
+    const pendingExpenses =
+      officePending +
+      vehiclePending;
+
+
+    /* =====================================================
+       OFFICE CATEGORIES
+    ===================================================== */
+
+    const officeCategories = {};
+
+
+    office.forEach(expense => {
+
+      const category =
+        expense.category ||
+        "Uncategorized";
+
+
+      officeCategories[category] =
+        (
+          officeCategories[category] || 0
+        ) +
+        Number(
+          expense.amount || 0
+        );
+
+    });
+
+
+    const topOfficeCategories =
+      Object.entries(
+        officeCategories
+      )
+      .sort(
+        (a,b) =>
+          b[1] - a[1]
+      )
+      .slice(0,5);
+
+
+    /* =====================================================
+       VEHICLE CATEGORIES
+    ===================================================== */
+
+    const vehicleCategories = {};
+
+
+    vehicles.forEach(expense => {
+
+      const category =
+        expense.category ||
+        "Uncategorized";
+
+
+      vehicleCategories[category] =
+        (
+          vehicleCategories[category] || 0
+        ) +
+        Number(
+          expense.amount || 0
+        );
+
+    });
+
+
+    const topVehicleCategories =
+      Object.entries(
+        vehicleCategories
+      )
+      .sort(
+        (a,b) =>
+          b[1] - a[1]
+      )
+      .slice(0,5);
+
+
+    /* =====================================================
+       MONTHLY TREND
+    ===================================================== */
+
+    const monthly = {};
+
+
+    const cursor =
+      new Date(
+        from + "T00:00:00"
+      );
+
+
+    const endDate =
+      new Date(
+        to + "T00:00:00"
+      );
+
+
+    cursor.setDate(1);
+
+
+    while(cursor <= endDate){
+
+      const key =
+        `${cursor.getFullYear()}-${String(
+          cursor.getMonth() + 1
+        ).padStart(2,"0")}`;
+
+
+      monthly[key] = 0;
+
+
+      cursor.setMonth(
+        cursor.getMonth() + 1
+      );
+
+    }
+
+
+    office.forEach(e => {
+
+      const d =
+        new Date(
+          e.expense_date +
+          "T00:00:00"
+        );
+
+
+      const key =
+        `${d.getFullYear()}-${String(
+          d.getMonth() + 1
+        ).padStart(2,"0")}`;
+
+
+      if(
+        monthly[key] !== undefined
+      ){
+
+        monthly[key] +=
+          Number(
+            e.amount || 0
+          );
+
+      }
+
+    });
+
+
+    vehicles.forEach(e => {
+
+      const d =
+        new Date(
+          e.cost_date +
+          "T00:00:00"
+        );
+
+
+      const key =
+        `${d.getFullYear()}-${String(
+          d.getMonth() + 1
+        ).padStart(2,"0")}`;
+
+
+      if(
+        monthly[key] !== undefined
+      ){
+
+        monthly[key] +=
+          Number(
+            e.amount || 0
+          );
+
+      }
+
+    });
+
+
+    employees.forEach(e => {
+
+      const d =
+        new Date(
+          e.payment_date +
+          "T00:00:00"
+        );
+
+
+      const key =
+        `${d.getFullYear()}-${String(
+          d.getMonth() + 1
+        ).padStart(2,"0")}`;
+
+
+      if(
+        monthly[key] !== undefined
+      ){
+
+        monthly[key] +=
+          Number(
+            e.amount || 0
+          );
+
+      }
+
+    });
+
+
+    const monthlyEntries =
+      Object.entries(
+        monthly
+      );
+
+
+    const averageMonthly =
+      monthlyEntries.length
+        ? totalExpense /
+          monthlyEntries.length
+        : 0;
+
+
+    const highestMonth =
+      monthlyEntries.length
+        ? monthlyEntries.reduce(
+            (max,current) =>
+              current[1] > max[1]
+                ? current
+                : max
+          )
+        : null;
+
+
+    /* =====================================================
+       EXPENSE MIX
+    ===================================================== */
+
+    const mix = [
+
+      {
+        label:"Vehicle / Sales",
+        value:vehicleTotal
+      },
+
+      {
+        label:"Office",
+        value:officeTotal
+      },
+
+      {
+        label:"Salaries",
+        value:salaryTotal
+      },
+
+      {
+        label:"Commissions",
+        value:commissionTotal
+      }
+
+    ];
+
+
+    /* =====================================================
+       MANAGEMENT INSIGHTS
+    ===================================================== */
+
+    const insights = [];
+
+
+    const largest =
+      mix.reduce(
+        (max,item) =>
+          item.value > max.value
+            ? item
+            : max,
+        mix[0]
+      );
+
+
+    if(largest.value > 0){
+
+      insights.push(
+        `<b>${esc(largest.label)}</b> is the largest expense area at <b>${money(largest.value,"TZS")}</b>.`
+      );
+
+    }
+
+
+    if(
+      topOfficeCategories.length
+    ){
+
+      const top =
+        topOfficeCategories[0];
+
+
+      insights.push(
+        `The largest office expense category is <b>${esc(top[0])}</b> at <b>${money(top[1],"TZS")}</b>.`
+      );
+
+    }
+
+
+    if(
+      pendingExpenses > 0
+    ){
+
+      insights.push(
+        `<b>${money(pendingExpenses,"TZS")}</b> is still pending payment and represents a future cash obligation.`
+      );
+
+    }
+
+
+    if(
+      salaryTotal +
+      commissionTotal > 0 &&
+      totalExpense > 0
+    ){
+
+      const payrollRatio =
+        (
+          (
+            salaryTotal +
+            commissionTotal
+          ) /
+          totalExpense
+        ) *
+        100;
+
+
+      insights.push(
+        `Employee costs account for <b>${payrollRatio.toFixed(1)}%</b> of total expenses.`
+      );
+
+    }
+
+
+    if(highestMonth){
+
+      insights.push(
+        `The highest-expense month in this period is <b>${highestMonth[0]}</b> with <b>${money(highestMonth[1],"TZS")}</b>.`
+      );
+
+    }
+
+
+    /* =====================================================
+       RENDER INTELLIGENCE
+    ===================================================== */
+
+    container.innerHTML = `
+
+      <div
+        style="
+          font-size:12px;
+          color:#68727d;
+          margin-bottom:16px;
+        "
+      >
+        Showing TZS expense intelligence from
+        <b>${formatDate(from)}</b>
+        to
+        <b>${formatDate(to)}</b>.
+        USD and JPY records are excluded from this analysis.
+      </div>
+
+
+      <!-- KPI -->
+
+      <div class="mini-grid">
+
+        <div class="mini">
+
+          <b>
+            ${money(
+              totalExpense,
+              "TZS"
+            )}
+          </b>
+
+          <span>
+            Total Expense
+          </span>
+
+        </div>
+
+
+        <div class="mini">
+
+          <b>
+            ${money(
+              paidExpenses,
+              "TZS"
+            )}
+          </b>
+
+          <span>
+            Paid / Cash Impact
+          </span>
+
+        </div>
+
+
+        <div class="mini">
+
+          <b>
+            ${money(
+              pendingExpenses,
+              "TZS"
+            )}
+          </b>
+
+          <span>
+            Pending Obligations
+          </span>
+
+        </div>
+
+
+        <div class="mini">
+
+          <b>
+            ${money(
+              averageMonthly,
+              "TZS"
+            )}
+          </b>
+
+          <span>
+            Average Monthly Expense
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- EXPENSE MIX + MONTHLY TREND -->
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:
+            repeat(auto-fit,minmax(280px,1fr));
+          gap:18px;
+          margin-top:18px;
+        "
+      >
+
+
+        <!-- EXPENSE MIX -->
+
+        <div
+          style="
+            border:1px solid #edf0f3;
+            border-radius:12px;
+            padding:18px;
+          "
+        >
+
+          <h4 style="margin:0 0 4px;">
+            Expense Mix
+          </h4>
+
+          <div
+            style="
+              font-size:12px;
+              color:#68727d;
+              margin-bottom:16px;
+            "
+          >
+            Where total expenditure is going
+          </div>
+
+
+          ${
+            mix.map(item => {
+
+              const percentage =
+                totalExpense > 0
+                  ? (
+                      item.value /
+                      totalExpense
+                    ) * 100
+                  : 0;
+
+
+              return `
+
+                <div
+                  style="
+                    margin-bottom:15px;
+                  "
+                >
+
+                  <div
+                    style="
+                      display:flex;
+                      justify-content:space-between;
+                      font-size:13px;
+                      margin-bottom:6px;
+                    "
+                  >
+
+                    <span>
+                      ${esc(item.label)}
+                    </span>
+
+                    <b>
+                      ${money(
+                        item.value,
+                        "TZS"
+                      )}
+                    </b>
+
+                  </div>
+
+
+                  <div
+                    style="
+                      height:8px;
+                      background:#eef1f4;
+                      border-radius:20px;
+                      overflow:hidden;
+                    "
+                  >
+
+                    <div
+                      style="
+                        width:${percentage}%;
+                        height:100%;
+                        background:#f28c28;
+                        border-radius:20px;
+                      "
+                    ></div>
+
+                  </div>
+
+
+                  <div
+                    style="
+                      font-size:11px;
+                      color:#7b858f;
+                      margin-top:4px;
+                    "
+                  >
+                    ${percentage.toFixed(1)}%
+                  </div>
+
+                </div>
+
+              `;
+
+            }).join("")
+          }
+
+        </div>
+
+
+        <!-- MONTHLY TREND -->
+
+        <div
+          style="
+            border:1px solid #edf0f3;
+            border-radius:12px;
+            padding:18px;
+          "
+        >
+
+          <h4 style="margin:0 0 4px;">
+            Monthly Expense Trend
+          </h4>
+
+          <div
+            style="
+              font-size:12px;
+              color:#68727d;
+              margin-bottom:16px;
+            "
+          >
+            Total expense movement by month
+          </div>
+
+
+          ${
+            monthlyEntries
+              .map(
+                ([month,value]) => {
+
+                  const max =
+                    Math.max(
+                      ...monthlyEntries.map(
+                        x => x[1]
+                      ),
+                      1
+                    );
+
+
+                  const width =
+                    (
+                      value /
+                      max
+                    ) * 100;
+
+
+                  return `
+
+                    <div
+                      style="
+                        display:grid;
+                        grid-template-columns:
+                          65px 1fr 120px;
+                        gap:10px;
+                        align-items:center;
+                        margin-bottom:10px;
+                        font-size:12px;
+                      "
+                    >
+
+                      <span>
+                        ${esc(month)}
+                      </span>
+
+
+                      <div
+                        style="
+                          height:8px;
+                          background:#eef1f4;
+                          border-radius:20px;
+                          overflow:hidden;
+                        "
+                      >
+
+                        <div
+                          style="
+                            width:${width}%;
+                            height:100%;
+                            background:#4f5965;
+                            border-radius:20px;
+                          "
+                        ></div>
+
+                      </div>
+
+
+                      <b
+                        style="
+                          text-align:right;
+                        "
+                      >
+                        ${money(
+                          value,
+                          "TZS"
+                        )}
+                      </b>
+
+                    </div>
+
+                  `;
+
+                }
+              )
+              .join("")
+          }
+
+        </div>
+
+      </div>
+
+
+      <!-- TOP CATEGORIES -->
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:
+            repeat(auto-fit,minmax(280px,1fr));
+          gap:18px;
+          margin-top:18px;
+        "
+      >
+
+
+        <!-- OFFICE -->
+
+        <div
+          style="
+            border:1px solid #edf0f3;
+            border-radius:12px;
+            padding:18px;
+          "
+        >
+
+          <h4 style="margin:0 0 4px;">
+            Top Office Expense Categories
+          </h4>
+
+          <div
+            style="
+              font-size:12px;
+              color:#68727d;
+              margin-bottom:14px;
+            "
+          >
+            Highest office cost drivers
+          </div>
+
+
+          ${
+            topOfficeCategories.length
+
+              ? topOfficeCategories
+                  .map(
+                    ([category,value],index) => `
+
+                      <div
+                        style="
+                          display:flex;
+                          justify-content:space-between;
+                          padding:10px 0;
+                          border-bottom:1px solid #f0f2f4;
+                        "
+                      >
+
+                        <span>
+
+                          <b>
+                            ${index + 1}.
+                          </b>
+
+                          ${esc(category)}
+
+                        </span>
+
+
+                        <b>
+                          ${money(
+                            value,
+                            "TZS"
+                          )}
+                        </b>
+
+                      </div>
+
+                    `
+                  )
+                  .join("")
+
+              : `
+                  <div class="empty">
+                    No office expenses in this period.
+                  </div>
+                `
+          }
+
+        </div>
+
+
+        <!-- VEHICLE -->
+
+        <div
+          style="
+            border:1px solid #edf0f3;
+            border-radius:12px;
+            padding:18px;
+          "
+        >
+
+          <h4 style="margin:0 0 4px;">
+            Top Vehicle Cost Categories
+          </h4>
+
+          <div
+            style="
+              font-size:12px;
+              color:#68727d;
+              margin-bottom:14px;
+            "
+          >
+            Highest vehicle-related cost drivers
+          </div>
+
+
+          ${
+            topVehicleCategories.length
+
+              ? topVehicleCategories
+                  .map(
+                    ([category,value],index) => `
+
+                      <div
+                        style="
+                          display:flex;
+                          justify-content:space-between;
+                          padding:10px 0;
+                          border-bottom:1px solid #f0f2f4;
+                        "
+                      >
+
+                        <span>
+
+                          <b>
+                            ${index + 1}.
+                          </b>
+
+                          ${esc(category)}
+
+                        </span>
+
+
+                        <b>
+                          ${money(
+                            value,
+                            "TZS"
+                          )}
+                        </b>
+
+                      </div>
+
+                    `
+                  )
+                  .join("")
+
+              : `
+                  <div class="empty">
+                    No vehicle costs in this period.
+                  </div>
+                `
+          }
+
+        </div>
+
+      </div>
+
+
+      <!-- MANAGEMENT INSIGHTS -->
+
+      <div
+        style="
+          margin-top:18px;
+          border:1px solid #edf0f3;
+          border-radius:12px;
+          padding:18px;
+        "
+      >
+
+        <h4 style="margin:0 0 4px;">
+          Management Insights
+        </h4>
+
+        <div
+          style="
+            font-size:12px;
+            color:#68727d;
+            margin-bottom:14px;
+          "
+        >
+          Automatic observations from the selected period
+        </div>
+
+
+        ${
+          insights.length
+
+            ? insights
+                .map(
+                  insight => `
+
+                    <div
+                      style="
+                        padding:11px 0;
+                        border-bottom:1px solid #f0f2f4;
+                        font-size:13px;
+                        line-height:1.5;
+                      "
+                    >
+                      • ${insight}
+                    </div>
+
+                  `
+                )
+                .join("")
+
+            : `
+                <div class="empty">
+                  Not enough expense data to generate insights.
+                </div>
+              `
+        }
+
+      </div>
+
+    `;
+
+}
+
+
+/* ---------- INITIALIZE INTELLIGENCE ---------- */
+
+function initializeExpenseIntelligence(){
+
+  setExpenseIntelligenceDates();
+
+  loadExpenseIntelligence();
+
+}
 
 /* ---------- LOAD EXPENSES ---------- */
 
@@ -4226,19 +5632,21 @@ async function loadExpenses(){
     if(error) throw error;
 
 
-    expenseRecords =
-      data || [];
+expenseRecords =
+  data || [];
 
 
-    calculateExpenseSummary(
-      expenseRecords
-    );
+calculateExpenseSummary(
+  expenseRecords
+);
 
 
-    renderExpenses(
-      expenseRecords
-    );
+renderExpenses(
+  expenseRecords
+);
 
+
+initializeExpenseIntelligence();
   }
 
   catch(error){
