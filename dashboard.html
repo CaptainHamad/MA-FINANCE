@@ -9306,330 +9306,6 @@ async function loadSalesExpenses(){
 
 }
 
-/* =====================================================
-   PROFIT ANALYSIS DATA
-===================================================== */
-
-const profitSales =
-  data.sales
-    .filter(
-      sale =>
-        (!sale.currency ||
-         sale.currency === "TZS")
-    )
-    .map(
-      sale => {
-
-        const salePayments =
-          data.payments.filter(
-            payment =>
-              payment.sale_id === sale.id
-          );
-
-        const amountPaid =
-          salePayments.reduce(
-            (sum,payment) =>
-              sum +
-              Number(
-                payment.amount || 0
-              ),
-            0
-          );
-
-        const saleCosts =
-          data.vehicleCosts
-            .filter(
-              cost =>
-                cost.sale_id === sale.id
-            )
-            .reduce(
-              (sum,cost) =>
-                sum +
-                Number(
-                  cost.amount || 0
-                ),
-              0
-            );
-
-        /*
-          SALE CONTRIBUTION
-
-          Actual customer payments
-          minus vehicle / sale costs.
-
-          Office expenses, salaries and
-          commissions are company-level
-          operating costs and are not
-          artificially allocated to individual
-          vehicles.
-        */
-
-        const contribution =
-          amountPaid -
-          saleCosts;
-
-        const margin =
-          amountPaid > 0
-            ? (
-                contribution /
-                amountPaid
-              ) * 100
-            : 0;
-
-        return {
-
-          ...sale,
-
-          amount_paid:
-            amountPaid,
-
-          sale_costs:
-            saleCosts,
-
-          contribution:
-            contribution,
-
-          margin:
-            margin
-
-        };
-
-      }
-    )
-    .sort(
-      (a,b) =>
-        b.contribution -
-        a.contribution
-    );
-
-
-const profitableSales =
-  profitSales.filter(
-    sale =>
-      sale.contribution > 0
-  );
-
-
-const lossMakingSales =
-  profitSales.filter(
-    sale =>
-      sale.contribution < 0
-  );
-
-
-const bestSale =
-  profitSales.length
-    ? profitSales[0]
-    : null;
-
-
-const worstSale =
-  profitSales.length
-    ? [...profitSales]
-        .sort(
-          (a,b) =>
-            a.contribution -
-            b.contribution
-        )[0]
-    : null;
-
-
-const saleContribution =
-  profitSales.reduce(
-    (sum,sale) =>
-      sum +
-      sale.contribution,
-    0
-  );
-
-
-const operatingCosts =
-  data.totalOfficeExpenses +
-  data.totalSalaries +
-  data.totalCommissions;
-
-
-const operatingProfit =
-  saleContribution -
-  operatingCosts;
-
-
-/* =====================================================
-   MANAGEMENT INSIGHTS
-===================================================== */
-
-const profitInsights = [];
-
-
-if(data.netProfit > 0){
-
-  profitInsights.push(`
-    The business generated a positive
-    net profit of
-    <strong>
-      ${money(data.netProfit,"TZS")}
-    </strong>
-    during the selected period.
-  `);
-
-}else if(data.netProfit < 0){
-
-  profitInsights.push(`
-    The business recorded a net loss of
-    <strong>
-      ${money(
-        Math.abs(data.netProfit),
-        "TZS"
-      )}
-    </strong>
-    during the selected period.
-  `);
-
-}else{
-
-  profitInsights.push(`
-    The business reached break-even
-    during the selected period.
-  `);
-
-}
-
-
-if(bestSale){
-
-  profitInsights.push(`
-    The strongest sale contribution came
-    from
-    <strong>
-      ${esc(
-        bestSale.sale_number || "-"
-      )}
-    </strong>
-    with
-    <strong>
-      ${money(
-        bestSale.contribution,
-        "TZS"
-      )}
-    </strong>
-    generated after vehicle/sale costs.
-  `);
-
-}
-
-
-if(worstSale){
-
-  if(worstSale.contribution < 0){
-
-    profitInsights.push(`
-      Sale
-      <strong>
-        ${esc(
-          worstSale.sale_number || "-"
-        )}
-      </strong>
-      is currently loss-making at
-      <strong>
-        ${money(
-          Math.abs(
-            worstSale.contribution
-          ),
-          "TZS"
-        )}
-      </strong>
-      before company-level operating costs.
-    `);
-
-  }else{
-
-    profitInsights.push(`
-      No individual sale recorded a
-      vehicle-level loss during the
-      selected period.
-    `);
-
-  }
-
-}
-
-
-if(
-  saleContribution > 0 &&
-  operatingCosts > saleContribution
-){
-
-  profitInsights.push(`
-    Company-level operating costs
-    exceeded sale contributions by
-    <strong>
-      ${money(
-        operatingCosts -
-        saleContribution,
-        "TZS"
-      )}
-    </strong>.
-    Management should review office,
-    salary and commission costs closely.
-  `);
-
-}
-
-
-if(
-  data.totalIncome > 0 &&
-  data.profitMargin < 10
-){
-
-  profitInsights.push(`
-    Overall profit margin is
-    <strong>
-      ${data.profitMargin.toFixed(1)}%
-    </strong>.
-    The business should focus on improving
-    collections, controlling costs and
-    protecting vehicle-level margins.
-  `);
-
-}
-
-
-if(
-  data.profitMargin >= 20
-){
-
-  profitInsights.push(`
-    Overall profitability is strong, with
-    a net margin of
-    <strong>
-      ${data.profitMargin.toFixed(1)}%
-    </strong>
-    on actual customer collections.
-  `);
-
-}
-
-
-const profitInsightHtml =
-  profitInsights
-    .map(
-      insight => `
-        <div
-          style="
-            padding:13px 15px;
-            border:1px solid #e6eaee;
-            border-radius:10px;
-            background:#fafbfc;
-            margin-bottom:9px;
-            line-height:1.6;
-            font-size:13px;
-          "
-        >
-          ${insight}
-        </div>
-      `
-    )
-    .join("");
 
 /* =========================================================
    RENDER SALES TABLE
@@ -15996,6 +15672,330 @@ function renderFinancialReport(data){
       )
       .join("");
 
+/* =====================================================
+   PROFIT ANALYSIS DATA
+===================================================== */
+
+const profitSales =
+  data.sales
+    .filter(
+      sale =>
+        (!sale.currency ||
+         sale.currency === "TZS")
+    )
+    .map(
+      sale => {
+
+        const salePayments =
+          data.payments.filter(
+            payment =>
+              payment.sale_id === sale.id
+          );
+
+        const amountPaid =
+          salePayments.reduce(
+            (sum,payment) =>
+              sum +
+              Number(
+                payment.amount || 0
+              ),
+            0
+          );
+
+        const saleCosts =
+          data.vehicleCosts
+            .filter(
+              cost =>
+                cost.sale_id === sale.id
+            )
+            .reduce(
+              (sum,cost) =>
+                sum +
+                Number(
+                  cost.amount || 0
+                ),
+              0
+            );
+
+        /*
+          SALE CONTRIBUTION
+
+          Actual customer payments
+          minus vehicle / sale costs.
+
+          Office expenses, salaries and
+          commissions are company-level
+          operating costs and are not
+          artificially allocated to individual
+          vehicles.
+        */
+
+        const contribution =
+          amountPaid -
+          saleCosts;
+
+        const margin =
+          amountPaid > 0
+            ? (
+                contribution /
+                amountPaid
+              ) * 100
+            : 0;
+
+        return {
+
+          ...sale,
+
+          amount_paid:
+            amountPaid,
+
+          sale_costs:
+            saleCosts,
+
+          contribution:
+            contribution,
+
+          margin:
+            margin
+
+        };
+
+      }
+    )
+    .sort(
+      (a,b) =>
+        b.contribution -
+        a.contribution
+    );
+
+
+const profitableSales =
+  profitSales.filter(
+    sale =>
+      sale.contribution > 0
+  );
+
+
+const lossMakingSales =
+  profitSales.filter(
+    sale =>
+      sale.contribution < 0
+  );
+
+
+const bestSale =
+  profitSales.length
+    ? profitSales[0]
+    : null;
+
+
+const worstSale =
+  profitSales.length
+    ? [...profitSales]
+        .sort(
+          (a,b) =>
+            a.contribution -
+            b.contribution
+        )[0]
+    : null;
+
+
+const saleContribution =
+  profitSales.reduce(
+    (sum,sale) =>
+      sum +
+      sale.contribution,
+    0
+  );
+
+
+const operatingCosts =
+  data.totalOfficeExpenses +
+  data.totalSalaries +
+  data.totalCommissions;
+
+
+const operatingProfit =
+  saleContribution -
+  operatingCosts;
+
+
+/* =====================================================
+   MANAGEMENT INSIGHTS
+===================================================== */
+
+const profitInsights = [];
+
+
+if(data.netProfit > 0){
+
+  profitInsights.push(`
+    The business generated a positive
+    net profit of
+    <strong>
+      ${money(data.netProfit,"TZS")}
+    </strong>
+    during the selected period.
+  `);
+
+}else if(data.netProfit < 0){
+
+  profitInsights.push(`
+    The business recorded a net loss of
+    <strong>
+      ${money(
+        Math.abs(data.netProfit),
+        "TZS"
+      )}
+    </strong>
+    during the selected period.
+  `);
+
+}else{
+
+  profitInsights.push(`
+    The business reached break-even
+    during the selected period.
+  `);
+
+}
+
+
+if(bestSale){
+
+  profitInsights.push(`
+    The strongest sale contribution came
+    from
+    <strong>
+      ${esc(
+        bestSale.sale_number || "-"
+      )}
+    </strong>
+    with
+    <strong>
+      ${money(
+        bestSale.contribution,
+        "TZS"
+      )}
+    </strong>
+    generated after vehicle/sale costs.
+  `);
+
+}
+
+
+if(worstSale){
+
+  if(worstSale.contribution < 0){
+
+    profitInsights.push(`
+      Sale
+      <strong>
+        ${esc(
+          worstSale.sale_number || "-"
+        )}
+      </strong>
+      is currently loss-making at
+      <strong>
+        ${money(
+          Math.abs(
+            worstSale.contribution
+          ),
+          "TZS"
+        )}
+      </strong>
+      before company-level operating costs.
+    `);
+
+  }else{
+
+    profitInsights.push(`
+      No individual sale recorded a
+      vehicle-level loss during the
+      selected period.
+    `);
+
+  }
+
+}
+
+
+if(
+  saleContribution > 0 &&
+  operatingCosts > saleContribution
+){
+
+  profitInsights.push(`
+    Company-level operating costs
+    exceeded sale contributions by
+    <strong>
+      ${money(
+        operatingCosts -
+        saleContribution,
+        "TZS"
+      )}
+    </strong>.
+    Management should review office,
+    salary and commission costs closely.
+  `);
+
+}
+
+
+if(
+  data.totalIncome > 0 &&
+  data.profitMargin < 10
+){
+
+  profitInsights.push(`
+    Overall profit margin is
+    <strong>
+      ${data.profitMargin.toFixed(1)}%
+    </strong>.
+    The business should focus on improving
+    collections, controlling costs and
+    protecting vehicle-level margins.
+  `);
+
+}
+
+
+if(
+  data.profitMargin >= 20
+){
+
+  profitInsights.push(`
+    Overall profitability is strong, with
+    a net margin of
+    <strong>
+      ${data.profitMargin.toFixed(1)}%
+    </strong>
+    on actual customer collections.
+  `);
+
+}
+
+
+const profitInsightHtml =
+  profitInsights
+    .map(
+      insight => `
+        <div
+          style="
+            padding:13px 15px;
+            border:1px solid #e6eaee;
+            border-radius:10px;
+            background:#fafbfc;
+            margin-bottom:9px;
+            line-height:1.6;
+            font-size:13px;
+          "
+        >
+          ${insight}
+        </div>
+      `
+    )
+    .join("");
 
   /* =====================================================
      SALES TABLE
