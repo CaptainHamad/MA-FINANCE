@@ -5575,6 +5575,30 @@ async function loadExpenseIntelligence(){
 
     `;
 
+  }
+  catch(error){
+
+    console.error(
+      "Expense intelligence error:",
+      error
+    );
+
+    container.innerHTML = `
+      <div class="empty">
+
+        <strong>
+          Unable to analyze expenses
+        </strong>
+
+        <br>
+
+        ${esc(error.message)}
+
+      </div>
+    `;
+
+  }
+
 }
 
 
