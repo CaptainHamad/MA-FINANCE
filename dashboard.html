@@ -1222,7 +1222,13 @@ tr:hover td{background:#fbfcfd}
   <i class="nav-ico">↘</i>
   <span>Office Expenses</span>
 </button>
-
+<button
+  class="nav-btn"
+  data-view="transactions"
+>
+  <i class="nav-ico">≡</i>
+  <span>Transaction Ledger</span>
+</button>
 
 <div class="nav-label">BUSINESS</div>
 
@@ -2067,7 +2073,7 @@ let currentView="overview";
 
 const viewTitles={
   overview:"Financial Overview",income:"Income",expenses:" Office Expenses",accounts:"Accounts",
-  transactions:"Transactions",transfers:"Transfers",vehicles:"Vehicles",customers:"Customers",
+  transactions:"Transaction Ledger",transfers:"Transfers",vehicles:"Vehicles",customers:"Customers",
   sales:"Sales",suppliers:"Suppliers",employees:"Employees",reports:"Reports"
 };
 
@@ -2077,6 +2083,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
   buildPlaceholders();
 
+  buildTransactionsModule();
+  
   buildSalesModule();
 
   buildExpensesModule();
@@ -2109,6 +2117,9 @@ if(view==="expenses") loadExpenses();
 
 if(view==="employees") loadEmployees();
 
+if(view==="transactions")
+  loadTransactions();
+
 if(view==="overview") loadOverview();
 
 if(view==="overview") loadSystemAlerts();
@@ -2119,7 +2130,6 @@ if(view==="reports") loadReports();
 function buildPlaceholders(){
   const data={
     expenses:["↘","Office Expenses","This module will manage office expenses, staff costs and company operating expenses."],
-    transactions:["≡","Transactions","Central ledger view for all money movements across Mattex accounts."],
     transfers:["⇄","Transfers","Move money between Mattex bank, cash and mobile-money accounts."],
     vehicles:["▱","Vehicles","Vehicle acquisition, landed cost, preparation cost and profitability will live here."],
     customers:["♙","Customers","Customer records, balances, deposits and payment history."],
@@ -2133,7 +2143,892 @@ function buildPlaceholders(){
       <div class="panel"><div class="placeholder"><div class="big">${v[0]}</div><h3>${v[1]} module</h3><p>${v[2]}</p></div></div>`;
   });
 }
+/* =========================================================
+   TRANSACTION LEDGER
+========================================================= */
 
+let ledgerRecords = [];
+
+function buildTransactionsModule(){
+
+  const view =
+    document.getElementById("view-transactions");
+
+  if(!view) return;
+
+  view.innerHTML = `
+
+    <div class="hero">
+
+      <div>
+        <h2>Transaction Ledger</h2>
+
+        <p>
+          Complete record of money movements across Mattex financial accounts.
+        </p>
+      </div>
+
+      <button
+        class="secondary"
+        onclick="loadTransactions()"
+      >
+        ↻ Refresh
+      </button>
+
+    </div>
+
+
+    <!-- LEDGER SUMMARY -->
+
+    <div class="mini-grid">
+
+      <div class="mini">
+
+        <b id="ledgerMoneyIn">
+          TZS 0
+        </b>
+
+        <span>
+          Money In
+        </span>
+
+      </div>
+
+
+      <div class="mini">
+
+        <b id="ledgerMoneyOut">
+          TZS 0
+        </b>
+
+        <span>
+          Money Out
+        </span>
+
+      </div>
+
+
+      <div class="mini">
+
+        <b id="ledgerNetMovement">
+          TZS 0
+        </b>
+
+        <span>
+          Net Movement
+        </span>
+
+      </div>
+
+
+      <div class="mini">
+
+        <b id="ledgerTransactionCount">
+          0
+        </b>
+
+        <span>
+          Transactions
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div
+      class="panel"
+      style="margin-top:18px;"
+    >
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:
+            repeat(auto-fit,minmax(180px,1fr));
+          gap:14px;
+          align-items:end;
+        "
+      >
+
+        <div class="field">
+
+          <label>
+            FROM
+          </label>
+
+          <input
+            type="date"
+            id="ledgerFrom"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            TO
+          </label>
+
+          <input
+            type="date"
+            id="ledgerTo"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            ACCOUNT
+          </label>
+
+          <select id="ledgerAccount">
+
+            <option value="">
+              All Accounts
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            TYPE
+          </label>
+
+          <select id="ledgerType">
+
+            <option value="">
+              All Transactions
+            </option>
+
+            <option value="income">
+              Money In
+            </option>
+
+            <option value="expense">
+              Money Out
+            </option>
+
+            <option value="transfer">
+              Transfer
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            SEARCH
+          </label>
+
+          <input
+            id="ledgerSearch"
+            placeholder="Description / reference"
+          >
+
+        </div>
+
+
+        <button
+          class="primary"
+          onclick="applyLedgerFilters()"
+        >
+          Apply Filters
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- LEDGER TABLE -->
+
+    <div
+      class="panel"
+      style="margin-top:18px;"
+    >
+
+      <div class="panel-head">
+
+        <div>
+
+          <h3>
+            Financial Transaction Ledger
+          </h3>
+
+          <span>
+            Every recorded movement of money
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="panel-body"
+        id="transactionsTableContainer"
+      >
+
+        <div class="empty">
+          Loading transaction ledger...
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  /* Default date range */
+
+  const today =
+    new Date()
+      .toISOString()
+      .slice(0,10);
+
+  const firstDay =
+    new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      1
+    )
+      .toISOString()
+      .slice(0,10);
+
+
+  const from =
+    document.getElementById("ledgerFrom");
+
+  const to =
+    document.getElementById("ledgerTo");
+
+
+  if(from)
+    from.value = firstDay;
+
+  if(to)
+    to.value = today;
+
+
+  loadLedgerAccounts();
+
+}
+
+
+/* =========================================================
+   LOAD ACCOUNTS FOR FILTER
+========================================================= */
+
+async function loadLedgerAccounts(){
+
+  const select =
+    document.getElementById("ledgerAccount");
+
+  if(!select) return;
+
+
+  try{
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("accounts")
+      .select(`
+        id,
+        name,
+        currency,
+        is_active
+      `)
+      .eq(
+        "is_active",
+        true
+      )
+      .order(
+        "name",
+        {
+          ascending:true
+        }
+      );
+
+
+    if(error)
+      throw error;
+
+
+    select.innerHTML = `
+      <option value="">
+        All Accounts
+      </option>
+    `;
+
+
+    (data || []).forEach(
+      account => {
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          account.id;
+
+        option.textContent =
+          `${account.name} — ${account.currency}`;
+
+        select.appendChild(option);
+
+      }
+    );
+
+
+  }
+  catch(error){
+
+    console.error(
+      "Ledger accounts error:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   LOAD TRANSACTION LEDGER
+========================================================= */
+
+async function loadTransactions(){
+
+  const container =
+    document.getElementById(
+      "transactionsTableContainer"
+    );
+
+  if(!container) return;
+
+
+  container.innerHTML = `
+    <div class="empty">
+      Loading transaction ledger...
+    </div>
+  `;
+
+
+  try{
+
+    const from =
+      document.getElementById(
+        "ledgerFrom"
+      )?.value;
+
+    const to =
+      document.getElementById(
+        "ledgerTo"
+      )?.value;
+
+    const accountId =
+      document.getElementById(
+        "ledgerAccount"
+      )?.value || "";
+
+    const type =
+      document.getElementById(
+        "ledgerType"
+      )?.value || "";
+
+
+    let query =
+      sb
+        .from("account_transactions")
+        .select(`
+          id,
+          account_id,
+          transaction_type,
+          amount,
+          currency,
+          reference_id,
+          reference_type,
+          description,
+          transaction_date,
+          accounts(
+            name,
+            currency
+          )
+        `)
+        .order(
+          "transaction_date",
+          {
+            ascending:false
+          }
+        );
+
+
+    if(from){
+
+      query =
+        query.gte(
+          "transaction_date",
+          from
+        );
+
+    }
+
+
+    if(to){
+
+      query =
+        query.lte(
+          "transaction_date",
+          to
+        );
+
+    }
+
+
+    if(accountId){
+
+      query =
+        query.eq(
+          "account_id",
+          accountId
+        );
+
+    }
+
+
+    if(type){
+
+      query =
+        query.eq(
+          "transaction_type",
+          type
+        );
+
+    }
+
+
+    const {
+      data,
+      error
+    } = await query;
+
+
+    if(error)
+      throw error;
+
+
+    ledgerRecords =
+      data || [];
+
+
+    applyLedgerSearch();
+
+
+  }
+  catch(error){
+
+    console.error(
+      "Transaction ledger error:",
+      error
+    );
+
+
+    container.innerHTML = `
+
+      <div class="empty">
+
+        <strong>
+          Unable to load transaction ledger
+        </strong>
+
+        <p>
+          ${esc(
+            error.message ||
+            "Unknown error"
+          )}
+        </p>
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* =========================================================
+   FILTER / SEARCH
+========================================================= */
+
+function applyLedgerFilters(){
+
+  loadTransactions();
+
+}
+
+
+function applyLedgerSearch(){
+
+  const search =
+    (
+      document.getElementById(
+        "ledgerSearch"
+      )?.value || ""
+    )
+      .trim()
+      .toLowerCase();
+
+
+  let records =
+    ledgerRecords;
+
+
+  if(search){
+
+    records =
+      records.filter(
+        row => {
+
+          const text =
+            [
+              row.description,
+              row.reference_id,
+              row.reference_type,
+              row.transaction_type,
+              row.accounts?.name
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+
+          return text.includes(search);
+
+        }
+      );
+
+  }
+
+
+  renderTransactions(
+    records
+  );
+
+}
+
+
+/* =========================================================
+   RENDER LEDGER
+========================================================= */
+
+function renderTransactions(
+  records
+){
+
+  const container =
+    document.getElementById(
+      "transactionsTableContainer"
+    );
+
+  if(!container)
+    return;
+
+
+  let moneyIn = 0;
+  let moneyOut = 0;
+
+
+  records.forEach(
+    row => {
+
+      const amount =
+        Number(
+          row.amount || 0
+        );
+
+      if(
+        row.transaction_type ===
+        "income"
+      ){
+
+        moneyIn += amount;
+
+      }
+      else if(
+        row.transaction_type ===
+        "expense"
+      ){
+
+        moneyOut += amount;
+
+      }
+
+    }
+  );
+
+
+  const net =
+    moneyIn -
+    moneyOut;
+
+
+  set(
+    "ledgerMoneyIn",
+    money(
+      moneyIn,
+      "TZS"
+    )
+  );
+
+  set(
+    "ledgerMoneyOut",
+    money(
+      moneyOut,
+      "TZS"
+    )
+  );
+
+  set(
+    "ledgerNetMovement",
+    money(
+      net,
+      "TZS"
+    )
+  );
+
+  set(
+    "ledgerTransactionCount",
+    records.length
+  );
+
+
+  if(!records.length){
+
+    container.innerHTML = `
+
+      <div class="empty">
+
+        <strong>
+          No transactions found
+        </strong>
+
+        <p>
+          No ledger transactions match
+          the selected filters.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML = `
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>DATE</th>
+
+            <th>TYPE</th>
+
+            <th>DESCRIPTION</th>
+
+            <th>ACCOUNT</th>
+
+            <th>REFERENCE</th>
+
+            <th>MONEY IN</th>
+
+            <th>MONEY OUT</th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          ${
+            records
+              .map(
+                row => {
+
+                  const amount =
+                    Number(
+                      row.amount || 0
+                    );
+
+                  const isIncome =
+                    row.transaction_type ===
+                    "income";
+
+
+                  const accountName =
+                    row.accounts?.name ||
+                    "Unknown Account";
+
+
+                  return `
+
+                    <tr>
+
+                      <td>
+                        ${formatDate(
+                          row.transaction_date
+                        )}
+                      </td>
+
+
+                      <td>
+
+                        <span
+                          class="badge ${
+                            isIncome
+                              ? "green"
+                              : "orange"
+                          }"
+                        >
+
+                          ${esc(
+                            row.transaction_type ||
+                            "Transaction"
+                          )}
+
+                        </span>
+
+                      </td>
+
+
+                      <td>
+
+                        <div class="name">
+
+                          ${esc(
+                            row.description ||
+                            "Money movement"
+                          )}
+
+                        </div>
+
+                      </td>
+
+
+                      <td>
+
+                        ${esc(
+                          accountName
+                        )}
+
+                        ${
+                          row.currency
+                            ? `
+                              <div class="sub">
+                                ${esc(
+                                  row.currency
+                                )}
+                              </div>
+                            `
+                            : ""
+                        }
+
+                      </td>
+
+
+                      <td>
+
+                        ${
+                          row.reference_type ||
+                          row.reference_id
+                            ? `
+                              <div class="sub">
+                                ${esc(
+                                  row.reference_type ||
+                                  ""
+                                )}
+                              </div>
+
+                              <div>
+                                ${esc(
+                                  row.reference_id ||
+                                  "-"
+                                )}
+                              </div>
+                            `
+                            : "-"
+                        }
+
+                      </td>
+
+
+                      <td class="amount">
+
+                        ${
+                          isIncome
+                            ? money(
+                                amount,
+                                row.currency
+                              )
+                            : "-"
+                        }
+
+                      </td>
+
+
+                      <td class="amount">
+
+                        ${
+                          !isIncome
+                            ? money(
+                                amount,
+                                row.currency
+                              )
+                            : "-"
+                        }
+
+                      </td>
+
+                    </tr>
+
+                  `;
+
+                }
+              )
+              .join("")
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  `;
+
+}
 
 /* =========================================================
    GENERAL EXPENSES MODULE
@@ -12639,7 +13534,7 @@ async function saveAccount(){
     if(editingAccountId) result=await sb.from("accounts").update(payload).eq("id",editingAccountId);
     else result=await sb.from("accounts").insert([payload]);
     if(result.error)throw result.error;
-    closeAccountModal();toast(editingAccountId?"Account updated":"Account created","ok");await refreshAll();
+    closeAccountModal();toast(editingAccountId?"Account updated":"Account created","ok");await refreshCurrent();
   }catch(e){console.error(e);toast(e.message||"Failed to save account","err")}
 }
 
@@ -15675,17 +16570,15 @@ async function refreshCurrent(){
 
     }
 
-    else if(currentView === "employees"){
-
-      await loadEmployees();
-
-    }
-
-    else if(currentView === "reports"){
-
-      await loadReports();
-
-    }
+   else if(currentView === "employees"){
+  await loadEmployees();
+}
+else if(currentView === "transactions"){
+  await loadTransactions();
+}
+else if(currentView === "reports"){
+  await loadReports();
+}
 
   }
 
