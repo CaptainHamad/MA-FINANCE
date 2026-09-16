@@ -2288,6 +2288,26 @@ const viewTitles={
 
 document.addEventListener("DOMContentLoaded",async()=>{
 
+    // AUTHENTICATION GUARD
+  // ================================
+
+  const {
+    data: { user },
+    error
+  } = await sb.auth.getUser();
+
+  if(error || !user){
+    window.location.replace("index.html");
+    return;
+  }
+
+  // Show logged-in user's email
+  const userEmail = document.getElementById("userEmail");
+
+  if(userEmail){
+    userEmail.textContent = user.email || "Authorized User";
+  }
+  
   bindNavigation();
 
   buildPlaceholders();
