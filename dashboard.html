@@ -2010,6 +2010,391 @@ body{
 .language-menu button span{
   flex:1;
 }
+
+/* =========================================================
+   MOBILE FINANCE OS — PROFESSIONAL RESPONSIVE LAYOUT
+   ========================================================= */
+
+.mobile-menu-btn{
+  display:none;
+}
+
+
+/* ---------------------------------------------------------
+   MOBILE SIDEBAR
+   --------------------------------------------------------- */
+
+.mobile-sidebar-overlay{
+  display:none;
+}
+
+
+@media(max-width:760px){
+
+  /* ---------- SIDEBAR ---------- */
+
+  .sidebar{
+    width:258px !important;
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    z-index:100;
+    box-shadow:12px 0 35px rgba(0,0,0,.18);
+  }
+
+  .sidebar.mobile-open{
+    transform:translateX(0);
+  }
+
+
+  /* Show full sidebar when opened */
+
+  .sidebar .brand{
+    justify-content:flex-start;
+    padding:18px;
+  }
+
+  .sidebar .brand > div:last-child{
+    display:block;
+  }
+
+  .sidebar .nav-label{
+    display:block;
+  }
+
+  .sidebar .nav-btn{
+    justify-content:flex-start;
+  }
+
+  .sidebar .nav-btn span{
+    display:block;
+  }
+
+  .sidebar .user > div:not(.avatar){
+    display:block;
+  }
+
+
+  /* ---------- OVERLAY ---------- */
+
+  .mobile-sidebar-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(7,18,30,.45);
+    backdrop-filter:blur(2px);
+    z-index:90;
+  }
+
+  .mobile-sidebar-overlay.show{
+    display:block;
+  }
+
+
+  /* ---------- MAIN ---------- */
+
+  .main{
+    margin-left:0 !important;
+    width:100%;
+    min-width:0;
+  }
+
+
+  /* ---------- TOPBAR ---------- */
+
+  .topbar{
+    height:auto;
+    min-height:72px;
+    padding:12px 14px;
+    gap:10px;
+  }
+
+  .topbar > div:first-child{
+    min-width:0;
+    flex:1;
+  }
+
+  .crumb{
+    font-size:8px;
+    line-height:1.25;
+    white-space:normal;
+  }
+
+  .topbar h1{
+    font-size:17px;
+    line-height:1.15;
+    max-width:170px;
+  }
+
+
+  /* ---------- MOBILE MENU BUTTON ---------- */
+
+  .mobile-menu-btn{
+    display:grid;
+
+    width:40px;
+    height:40px;
+
+    flex:0 0 40px;
+
+    place-items:center;
+
+    border:1px solid var(--line);
+    border-radius:11px;
+
+    background:#fff;
+
+    color:#14263b;
+    font-size:20px;
+    font-weight:800;
+
+    box-shadow:0 4px 12px rgba(15,31,51,.05);
+  }
+
+  .mobile-menu-btn:active{
+    transform:scale(.96);
+  }
+
+
+  /* ---------- TOP ACTIONS ---------- */
+
+  .top-actions{
+    gap:6px;
+    flex:0 0 auto;
+  }
+
+  .language-btn{
+    min-width:66px;
+    height:38px;
+    padding:0 8px;
+  }
+
+  .notification-btn,
+  .iconbtn{
+    width:38px;
+    height:38px;
+  }
+
+
+  /* ---------- CONTENT ---------- */
+
+  .content{
+    width:100%;
+    padding:20px 14px 30px;
+    overflow-x:hidden;
+  }
+
+
+  /* ---------- HERO ---------- */
+
+  .hero{
+    width:100%;
+    margin-bottom:18px;
+  }
+
+  .hero h2{
+    font-size:24px;
+    line-height:1.15;
+    letter-spacing:-.5px;
+  }
+
+  .hero p{
+    font-size:10px;
+    line-height:1.45;
+  }
+
+
+  /* ---------- KPI CARDS ---------- */
+
+  .cards{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr !important;
+    gap:12px;
+    margin-bottom:16px;
+  }
+
+  .cards .kpi{
+    width:100%;
+    min-width:0;
+    min-height:135px;
+    padding:19px;
+  }
+
+  .kpi-value{
+    font-size:23px;
+    line-height:1.15;
+    word-break:break-word;
+  }
+
+  .kpi-note{
+    font-size:9px;
+    line-height:1.4;
+  }
+
+
+  /* ---------- PANELS ---------- */
+
+  .grid2{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr !important;
+    gap:14px;
+  }
+
+  .panel{
+    width:100%;
+    min-width:0;
+  }
+
+  .panel-head{
+    padding:16px;
+  }
+
+  .panel-body{
+    padding:15px;
+  }
+
+
+  /* ---------- BUSINESS SNAPSHOT ---------- */
+
+  #view-overview .mini-grid{
+    width:100%;
+    grid-template-columns:1fr !important;
+    gap:11px;
+  }
+
+  #view-overview .mini{
+    width:100%;
+    min-height:105px;
+    padding:18px;
+  }
+
+  #view-overview .mini b{
+    font-size:26px;
+  }
+
+
+  /* ---------- ACCOUNT POSITION ---------- */
+
+  #overviewAccounts{
+    width:100%;
+  }
+
+  .overview-account-row{
+    min-height:60px;
+    padding:10px;
+  }
+
+  .overview-account-value{
+    font-size:11px;
+  }
+
+  .overview-account-total{
+    padding:13px;
+  }
+
+
+  /* ---------- TABLES ---------- */
+
+  .table-wrap{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  table{
+    min-width:650px;
+  }
+
+
+  /* ---------- FORMS ---------- */
+
+  .form-grid{
+    grid-template-columns:1fr !important;
+  }
+
+  .field{
+    width:100%;
+  }
+
+
+  /* ---------- BUTTONS ---------- */
+
+  .toolbar{
+    width:100%;
+  }
+
+  .toolbar > *{
+    max-width:100%;
+  }
+
+
+  /* ---------- MODALS ---------- */
+
+  .modal-bg{
+    padding:12px;
+  }
+
+  .modal{
+    width:100%;
+    max-width:100%;
+    max-height:92vh;
+    overflow-y:auto;
+  }
+
+}
+
+
+/* ---------------------------------------------------------
+   SMALL PHONES
+   --------------------------------------------------------- */
+
+@media(max-width:390px){
+
+  .topbar{
+    padding:10px;
+  }
+
+  .topbar h1{
+    font-size:15px;
+    max-width:130px;
+  }
+
+  .crumb{
+    font-size:7px;
+  }
+
+  .mobile-menu-btn{
+    width:36px;
+    height:36px;
+    flex-basis:36px;
+    font-size:18px;
+  }
+
+  .language-btn{
+    min-width:58px;
+    padding:0 6px;
+  }
+
+  .language-arrow{
+    display:none;
+  }
+
+  .notification-btn,
+  .iconbtn{
+    width:36px;
+    height:36px;
+  }
+
+  .content{
+    padding-left:11px;
+    padding-right:11px;
+  }
+
+  .kpi-value{
+    font-size:21px;
+  }
+
+}
 </style>
 </head>
 
@@ -2106,12 +2491,27 @@ body{
   </div>
 </aside>
 
+<div
+  class="mobile-sidebar-overlay"
+  id="mobileSidebarOverlay"
+  onclick="closeMobileSidebar()"
+></div>
 <main class="main">
   <header class="topbar">
     <div>
       <div class="crumb">MATTEX FINANCE OS / <span id="crumb">OVERVIEW</span></div>
       <h1 id="pageTitle">Financial Overview</h1>
     </div>
+
+    <button
+  class="mobile-menu-btn"
+  id="mobileMenuBtn"
+  type="button"
+  onclick="toggleMobileSidebar()"
+  aria-label="Open menu"
+>
+  ☰
+</button>
    <div class="top-actions">
 
 <!-- LANGUAGE SWITCHER -->
@@ -3563,10 +3963,75 @@ document.addEventListener("DOMContentLoaded",async()=>{
   loadOverview();
 
 });
+
+/* =========================================================
+   MOBILE SIDEBAR
+   ========================================================= */
+
+function toggleMobileSidebar(){
+
+  const sidebar =
+    document.querySelector(".sidebar");
+
+  const overlay =
+    document.getElementById(
+      "mobileSidebarOverlay"
+    );
+
+  if(!sidebar || !overlay) return;
+
+  sidebar.classList.toggle(
+    "mobile-open"
+  );
+
+  overlay.classList.toggle(
+    "show"
+  );
+
+}
+
+
+function closeMobileSidebar(){
+
+  const sidebar =
+    document.querySelector(".sidebar");
+
+  const overlay =
+    document.getElementById(
+      "mobileSidebarOverlay"
+    );
+
+  if(!sidebar || !overlay) return;
+
+  sidebar.classList.remove(
+    "mobile-open"
+  );
+
+  overlay.classList.remove(
+    "show"
+  );
+
+}
+
 function bindNavigation(){
-  document.querySelectorAll(".nav-btn").forEach(btn=>{
-    btn.addEventListener("click",()=>go(btn.dataset.view));
-  });
+
+  document
+    .querySelectorAll(".nav-btn")
+    .forEach(btn => {
+
+      btn.addEventListener(
+        "click",
+        () => {
+
+          go(btn.dataset.view);
+
+          closeMobileSidebar();
+
+        }
+      );
+
+    });
+
 }
 
 function go(view){
