@@ -3380,16 +3380,12 @@ function setLanguage(language){
     return;
   }
 
-
-  currentLanguage =
-    language;
-
+  currentLanguage = language;
 
   localStorage.setItem(
     "mattex_language",
     currentLanguage
   );
-
 
   const menu =
     document.getElementById("languageMenu");
@@ -3398,23 +3394,11 @@ function setLanguage(language){
     menu.classList.remove("show");
   }
 
+  updateLanguageButton();
 
   translatePage();
 
-
-  /* Re-render current module so
-     dynamic content follows language */
-  if(typeof go === "function"){
-
-    const view =
-      currentView || "overview";
-
-    go(view);
-
-  }
-
 }
-
 
 /* =========================================================
    CLOSE LANGUAGE MENU WHEN CLICKING OUTSIDE
@@ -3445,36 +3429,6 @@ document.addEventListener("click",function(e){
 });
 
 
-/* =========================================================
-   AUTO TRANSLATE NEWLY GENERATED CONTENT
-   ========================================================= */
-
-const languageObserver =
-  new MutationObserver(() => {
-
-    translatePage();
-
-  });
-
-
-/* Start observing after DOM is ready */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-
-    languageObserver.observe(
-      document.body,
-      {
-        childList:true,
-        subtree:true
-      }
-    );
-
-    translatePage();
-
-  }
-);
 
 let accounts=[];
 let editingAccountId=null;
