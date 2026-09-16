@@ -3532,7 +3532,31 @@ body{
   }
 
 }
+/* =========================================================
+   SALES — CLICKABLE ROW
+   ========================================================= */
 
+.sales-clickable-row{
+  cursor:pointer;
+  transition:background .15s ease;
+}
+
+.sales-clickable-row:hover{
+  background:#f8fafc;
+}
+
+.sales-clickable-row:focus{
+  outline:2px solid #ff7a00;
+  outline-offset:-2px;
+}
+
+.sales-clickable-row td{
+  cursor:pointer;
+}
+
+.sales-clickable-row button{
+  cursor:pointer;
+}
 
 
   
@@ -12442,7 +12466,12 @@ function renderSales(){
               .map(
                 sale => `
 
-                  <tr>
+                  <tr
+  class="sales-clickable-row"
+  onclick="openSaleDetails('${sale.id}')"
+  tabindex="0"
+  onkeydown="if(event.key==='Enter' || event.key===' '){event.preventDefault();openSaleDetails('${sale.id}')}"
+>
 
                     <td>
                       ${formatDate(
@@ -12570,11 +12599,11 @@ function renderSales(){
                     <td>
 
                       <button
-                        class="secondary"
-                        onclick="openSaleDetails('${sale.id}')"
-                      >
-                        View
-                      </button>
+  class="secondary"
+  onclick="event.stopPropagation(); openSaleDetails('${sale.id}')"
+>
+  View
+</button>
 
                     </td>
 
