@@ -14867,8 +14867,9 @@ const {
   .select("id", {
     count: "exact",
     head: true
-  });
-
+  })
+  .eq("status", "SOLD");
+    
 if(vehicleCountError)
   throw vehicleCountError;
 
