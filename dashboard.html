@@ -2599,6 +2599,169 @@ body{
   }
 
 }
+/* =========================================================
+   TRANSACTION LEDGER — MOBILE RESPONSIVE
+   ========================================================= */
+
+.ledger-summary{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+
+
+.ledger-filter-grid{
+  display:grid;
+  grid-template-columns:
+    repeat(auto-fit,minmax(180px,1fr));
+  gap:14px;
+  align-items:end;
+}
+
+
+.ledger-panel{
+  margin-top:18px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media(max-width:760px){
+
+  /* -------------------------------------------------------
+     SUMMARY CARDS
+     ------------------------------------------------------- */
+
+  .ledger-summary{
+    grid-template-columns:1fr !important;
+    gap:12px;
+  }
+
+  .ledger-summary .mini{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    padding:18px;
+  }
+
+  .ledger-summary .mini b{
+    display:block;
+    font-size:23px;
+    line-height:1.2;
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
+
+
+  /* -------------------------------------------------------
+     FILTERS
+     ------------------------------------------------------- */
+
+  .ledger-filter-grid{
+    grid-template-columns:1fr !important;
+    gap:12px;
+  }
+
+  .ledger-filter-grid .field{
+    width:100%;
+    min-width:0;
+  }
+
+  .ledger-filter-grid input,
+  .ledger-filter-grid select{
+    width:100%;
+    box-sizing:border-box;
+    min-width:0;
+  }
+
+  .ledger-filter-grid .primary{
+    width:100%;
+    min-height:50px;
+  }
+
+
+  /* -------------------------------------------------------
+     FILTER PANEL
+     ------------------------------------------------------- */
+
+  #view-transactions .panel{
+    max-width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+
+
+  /* -------------------------------------------------------
+     LEDGER TABLE
+     ------------------------------------------------------- */
+
+  .ledger-panel{
+    overflow:hidden;
+  }
+
+  .ledger-panel .panel-body{
+    padding:0;
+  }
+
+  .ledger-panel .table-wrap{
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+  }
+
+  .ledger-panel table{
+    min-width:720px;
+  }
+
+
+  /* -------------------------------------------------------
+     TABLE CELLS
+     ------------------------------------------------------- */
+
+  .ledger-panel th{
+    white-space:nowrap;
+  }
+
+  .ledger-panel td{
+    vertical-align:top;
+  }
+
+
+  /* -------------------------------------------------------
+     DESCRIPTION
+     ------------------------------------------------------- */
+
+  .ledger-panel td .name{
+    max-width:160px;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+
+
+  /* -------------------------------------------------------
+     REFERENCE
+     ------------------------------------------------------- */
+
+  .ledger-panel td:nth-child(5){
+    max-width:130px;
+    overflow-wrap:anywhere;
+  }
+
+
+  /* -------------------------------------------------------
+     AMOUNTS
+     ------------------------------------------------------- */
+
+  .ledger-panel td.amount{
+    white-space:nowrap;
+  }
+
+}
+
 </style>
 </head>
 
@@ -4327,7 +4490,7 @@ function buildTransactionsModule(){
 
     <!-- LEDGER SUMMARY -->
 
-    <div class="mini-grid">
+    <div class="mini-grid ledger-summary">
 
       <div class="mini">
 
@@ -4390,15 +4553,7 @@ function buildTransactionsModule(){
       style="margin-top:18px;"
     >
 
-      <div
-        style="
-          display:grid;
-          grid-template-columns:
-            repeat(auto-fit,minmax(180px,1fr));
-          gap:14px;
-          align-items:end;
-        "
-      >
+<div class="ledger-filter-grid">
 
         <div class="field">
 
@@ -4502,10 +4657,7 @@ function buildTransactionsModule(){
 
     <!-- LEDGER TABLE -->
 
-    <div
-      class="panel"
-      style="margin-top:18px;"
-    >
+   <div class="panel ledger-panel">
 
       <div class="panel-head">
 
