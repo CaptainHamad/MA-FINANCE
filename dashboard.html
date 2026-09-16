@@ -2762,6 +2762,238 @@ body{
 
 }
 
+  /* =========================================================
+   OFFICE EXPENSES — MOBILE RESPONSIVE
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   DESKTOP STRUCTURE
+   --------------------------------------------------------- */
+
+.expense-summary{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+
+.expense-intel-filter{
+  padding:16px;
+  border-bottom:1px solid #edf0f3;
+  display:flex;
+  gap:10px;
+  align-items:end;
+  flex-wrap:wrap;
+}
+
+.expense-intel-date{
+  min-width:170px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media(max-width:760px){
+
+  /* -------------------------------------------------------
+     SUMMARY CARDS
+     ------------------------------------------------------- */
+
+  .expense-summary{
+    grid-template-columns:1fr !important;
+    gap:12px;
+  }
+
+  .expense-summary .mini{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    padding:18px;
+  }
+
+  .expense-summary .mini b{
+    display:block;
+    font-size:23px;
+    line-height:1.2;
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
+
+
+  /* -------------------------------------------------------
+     EXPENSE INTELLIGENCE FILTER
+     ------------------------------------------------------- */
+
+  .expense-intel-filter{
+    display:grid;
+    grid-template-columns:1fr !important;
+    gap:12px;
+    padding:15px;
+  }
+
+  .expense-intel-date{
+    width:100%;
+    min-width:0 !important;
+  }
+
+  .expense-intel-date input{
+    width:100% !important;
+    box-sizing:border-box;
+    min-width:0;
+    height:46px;
+  }
+
+  .expense-intel-filter .primary{
+    width:100%;
+    min-height:48px;
+  }
+
+
+  /* -------------------------------------------------------
+     EXPENSE INTELLIGENCE PANEL
+     ------------------------------------------------------- */
+
+  #expenseIntelligenceContainer{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    overflow:hidden;
+  }
+
+
+  /* -------------------------------------------------------
+     INTELLIGENCE KPI CARDS
+     ------------------------------------------------------- */
+
+  #expenseIntelligenceContainer > .mini-grid{
+    grid-template-columns:1fr !important;
+    width:100%;
+    gap:12px;
+  }
+
+  #expenseIntelligenceContainer > .mini-grid .mini{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+
+  #expenseIntelligenceContainer > .mini-grid .mini b{
+    display:block;
+    max-width:100%;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    font-size:22px;
+  }
+
+
+  /* -------------------------------------------------------
+     EXPENSE MIX + MONTHLY TREND
+     ------------------------------------------------------- */
+
+  #expenseIntelligenceContainer > div[style*="grid-template-columns"]{
+    grid-template-columns:1fr !important;
+    width:100%;
+    gap:14px !important;
+  }
+
+
+  /* -------------------------------------------------------
+     INNER INTELLIGENCE CARDS
+     ------------------------------------------------------- */
+
+  #expenseIntelligenceContainer > div[style*="grid-template-columns"] > div{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    overflow:hidden;
+  }
+
+
+  /* -------------------------------------------------------
+     MONTHLY TREND ROWS
+     ------------------------------------------------------- */
+
+  #expenseIntelligenceContainer div[style*="65px 1fr 120px"]{
+    grid-template-columns:55px 1fr !important;
+    gap:8px !important;
+  }
+
+  #expenseIntelligenceContainer div[style*="65px 1fr 120px"] > b{
+    grid-column:1/-1;
+    text-align:left !important;
+    font-size:11px;
+  }
+
+
+  /* -------------------------------------------------------
+     TOP CATEGORIES
+     ------------------------------------------------------- */
+
+  #expenseIntelligenceContainer div[style*="justify-content:space-between"]{
+    min-width:0;
+    gap:10px;
+  }
+
+  #expenseIntelligenceContainer div[style*="justify-content:space-between"] > span{
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+
+
+  /* -------------------------------------------------------
+     MANAGEMENT INSIGHTS
+     ------------------------------------------------------- */
+
+  #expenseIntelligenceContainer > div:last-child{
+    width:100%;
+    box-sizing:border-box;
+  }
+
+
+  /* -------------------------------------------------------
+     GENERAL EXPENSE LIST
+     ------------------------------------------------------- */
+
+  #view-expenses .panel{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+
+}
+.expense-list-filter{
+  padding:16px;
+  border-bottom:1px solid #edf0f3;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+@media(max-width:760px){
+
+  .expense-list-filter{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .expense-list-filter input,
+  .expense-list-filter select{
+    width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box;
+    height:46px;
+  }
+
+}
+
+
+
+
+
+  
 </style>
 </head>
 
@@ -5371,7 +5603,7 @@ function buildExpensesModule(){
 
     <!-- SUMMARY -->
 
-    <div class="mini-grid">
+   <div class="mini-grid expense-summary">
 
       <div class="mini">
         <b id="expenseTotal">
@@ -5437,18 +5669,9 @@ function buildExpensesModule(){
   </div>
 
 
-  <div
-    style="
-      padding:16px;
-      border-bottom:1px solid #edf0f3;
-      display:flex;
-      gap:10px;
-      align-items:end;
-      flex-wrap:wrap;
-    "
-  >
+  <div class="expense-intel-filter">
 
-    <div style="min-width:170px;">
+    <div class="expense-intel-date">
 
       <label
         style="
@@ -5475,7 +5698,7 @@ function buildExpensesModule(){
     </div>
 
 
-    <div style="min-width:170px;">
+    <div class="expense-intel-date">
 
       <label
         style="
@@ -5557,15 +5780,7 @@ function buildExpensesModule(){
       </div>
 
 
-      <div
-        style="
-          padding:16px;
-          border-bottom:1px solid #edf0f3;
-          display:flex;
-          gap:10px;
-          flex-wrap:wrap;
-        "
-      >
+<div class="expense-list-filter">
 
         <input
           id="expenseSearch"
