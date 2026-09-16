@@ -3365,7 +3365,173 @@ body{
   }
 
 }
+/* =========================================================
+   FINANCIAL REPORTS — FIX PROFIT ANALYSIS MOBILE
+   OVERRIDE INLINE GRID STYLES
+   ========================================================= */
 
+@media(max-width:760px){
+
+  /* -------------------------------------------------------
+     1. PROFIT ANALYSIS — 4 KPI CARDS
+     CUSTOMER PAYMENTS
+     SALE CONTRIBUTION
+     OPERATING COSTS
+     NET PROFIT
+     ------------------------------------------------------- */
+
+  .report-section.report-page-break
+  > div[style*="repeat(4,minmax(0,1fr))"]{
+    grid-template-columns:1fr !important;
+    width:100% !important;
+    gap:12px !important;
+  }
+
+  .report-section.report-page-break
+  > div[style*="repeat(4,minmax(0,1fr))"]
+  .management-card{
+    width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+
+  .report-section.report-page-break
+  > div[style*="repeat(4,minmax(0,1fr))"]
+  .management-card strong{
+    display:block !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    font-size:21px !important;
+    line-height:1.25 !important;
+    overflow-wrap:anywhere !important;
+    word-break:break-word !important;
+  }
+
+
+  /* -------------------------------------------------------
+     2. SALE PERFORMANCE SUMMARY
+     PROFITABLE SALES
+     LOSS-MAKING SALES
+     OVERALL PROFIT MARGIN
+     ------------------------------------------------------- */
+
+  .report-section.report-page-break
+  > div[style*="repeat(3,minmax(0,1fr))"]{
+    grid-template-columns:1fr !important;
+    width:100% !important;
+    gap:12px !important;
+  }
+
+  .report-section.report-page-break
+  > div[style*="repeat(3,minmax(0,1fr))"]
+  .report-chart-card{
+    width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+
+
+  /* -------------------------------------------------------
+     3. MANAGEMENT IMPACT
+     BEST PERFORMING SALE
+     OPERATING COST IMPACT
+     ------------------------------------------------------- */
+
+  .report-section.report-page-break
+  > div[style*="1fr 1fr"]{
+    grid-template-columns:1fr !important;
+    width:100% !important;
+    gap:12px !important;
+  }
+
+  .report-section.report-page-break
+  > div[style*="1fr 1fr"]
+  .report-chart-card{
+    width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+
+
+  /* -------------------------------------------------------
+     4. OPERATING COST IMPACT ROWS
+     PREVENT TZS AMOUNTS FROM BEING CUT OFF
+     ------------------------------------------------------- */
+
+  .report-section.report-page-break
+  > div[style*="1fr 1fr"]
+  div[style*="justify-content"]{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) auto !important;
+    align-items:start !important;
+    column-gap:10px !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+
+  .report-section.report-page-break
+  > div[style*="1fr 1fr"]
+  div[style*="justify-content"] > span{
+    min-width:0 !important;
+    overflow-wrap:anywhere !important;
+    word-break:break-word !important;
+  }
+
+  .report-section.report-page-break
+  > div[style*="1fr 1fr"]
+  div[style*="justify-content"] > strong{
+    min-width:0 !important;
+    max-width:100% !important;
+    text-align:right !important;
+    white-space:normal !important;
+    overflow-wrap:anywhere !important;
+    word-break:break-word !important;
+    font-size:13px !important;
+  }
+
+
+  /* -------------------------------------------------------
+     5. BEST PERFORMING SALE
+     LONG SALE NUMBER / CUSTOMER / AMOUNT
+     ------------------------------------------------------- */
+
+  .report-section.report-page-break
+  > div[style*="1fr 1fr"]
+  strong{
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow-wrap:anywhere !important;
+    word-break:break-word !important;
+  }
+
+  .report-section.report-page-break
+  > div[style*="1fr 1fr"]
+  small{
+    display:block !important;
+    margin-top:4px !important;
+  }
+
+
+  /* -------------------------------------------------------
+     6. MANAGEMENT INSIGHTS
+     ------------------------------------------------------- */
+
+  .report-section.report-page-break
+  .report-chart-card{
+    max-width:100% !important;
+  }
+
+  .report-section.report-page-break
+  .report-chart-card p{
+    max-width:100% !important;
+    overflow-wrap:anywhere !important;
+    word-break:break-word !important;
+  }
+
+}
 
 
 
