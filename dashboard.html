@@ -2988,7 +2988,383 @@ body{
   }
 
 }
+/* =========================================================
+   FINANCIAL REPORTS — MOBILE RESPONSIVE
+   ========================================================= */
 
+@media(max-width:760px){
+
+  /* -------------------------------------------------------
+     REPORT CONTROL AREA
+     ------------------------------------------------------- */
+
+  .report-controls{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:16px;
+    margin-bottom:18px;
+  }
+
+  .report-controls h2{
+    font-size:24px;
+    line-height:1.15;
+  }
+
+  .report-controls p{
+    font-size:11px;
+    line-height:1.45;
+  }
+
+
+  /* -------------------------------------------------------
+     DATE + ACTION CONTROLS
+     ------------------------------------------------------- */
+
+  .report-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .report-field{
+    width:100%;
+    min-width:0;
+  }
+
+  .report-field input{
+    width:100%;
+    height:46px;
+    box-sizing:border-box;
+  }
+
+  .report-actions button{
+    width:100%;
+    min-height:48px;
+    box-sizing:border-box;
+  }
+
+
+  /* -------------------------------------------------------
+     MAIN REPORT CONTAINER
+     ------------------------------------------------------- */
+
+  .financial-report{
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+
+    padding:20px 16px;
+
+    border-radius:15px;
+
+    overflow:hidden;
+  }
+
+
+  /* -------------------------------------------------------
+     REPORT HEADER
+     ------------------------------------------------------- */
+
+  .report-header{
+    width:100%;
+
+    display:flex;
+    flex-direction:column;
+
+    align-items:center;
+    text-align:center;
+
+    gap:16px;
+
+    padding-bottom:22px;
+  }
+
+
+  .report-brand{
+    width:100%;
+    display:flex;
+    justify-content:center;
+  }
+
+
+  .report-logo{
+    width:170px;
+    max-width:80%;
+    height:auto;
+    max-height:90px;
+    object-fit:contain;
+  }
+
+
+  .report-title{
+    width:100%;
+    min-width:0;
+  }
+
+
+  .report-title h1{
+    font-size:21px;
+    line-height:1.2;
+    letter-spacing:.2px;
+
+    overflow-wrap:anywhere;
+  }
+
+
+  .report-title p{
+    font-size:12px;
+    line-height:1.4;
+  }
+
+
+  .report-period{
+    font-size:11px;
+    line-height:1.5;
+  }
+
+
+  .report-title small{
+    font-size:9px;
+  }
+
+
+  /* -------------------------------------------------------
+     REPORT SECTIONS
+     ------------------------------------------------------- */
+
+  .report-section{
+    margin-top:28px;
+  }
+
+  .report-section-title{
+    gap:10px;
+    margin-bottom:15px;
+  }
+
+  .report-section-title > span{
+    flex:0 0 32px;
+    width:32px;
+    height:32px;
+  }
+
+  .report-section-title h2{
+    font-size:16px;
+    line-height:1.25;
+  }
+
+  .report-section-title p{
+    font-size:10px;
+    line-height:1.45;
+  }
+
+
+  /* -------------------------------------------------------
+     REPORT KPI CARDS
+     ------------------------------------------------------- */
+
+  .report-kpis{
+    width:100%;
+    grid-template-columns:1fr !important;
+    gap:11px;
+  }
+
+  .report-kpi{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    padding:16px;
+  }
+
+  .report-kpi strong{
+    font-size:21px;
+    line-height:1.2;
+    overflow-wrap:anywhere;
+  }
+
+
+  /* -------------------------------------------------------
+     PROFIT & LOSS STATEMENT
+     ------------------------------------------------------- */
+
+  .statement{
+    width:100%;
+    min-width:0;
+  }
+
+  .statement-row{
+    gap:12px;
+    padding:12px 13px;
+    font-size:11px;
+  }
+
+  .statement-row > *{
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+
+  .statement-row strong:last-child,
+  .statement-row span:last-child{
+    text-align:right;
+    white-space:nowrap;
+  }
+
+
+  /* -------------------------------------------------------
+     REPORT GRAPHS
+     ------------------------------------------------------- */
+
+  .report-graphs{
+    width:100%;
+    grid-template-columns:1fr !important;
+    gap:14px;
+  }
+
+  .report-chart-card{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    padding:15px;
+    overflow:hidden;
+  }
+
+  .report-chart-card h3{
+    font-size:14px;
+  }
+
+  .report-chart-card p{
+    font-size:10px;
+    line-height:1.45;
+  }
+
+
+  /* -------------------------------------------------------
+     EXPENSE BAR GRAPH
+     ------------------------------------------------------- */
+
+  .report-bar-row{
+    grid-template-columns:85px 1fr !important;
+    gap:8px;
+  }
+
+  .report-bar-label{
+    font-size:10px;
+    overflow-wrap:anywhere;
+  }
+
+  .report-bar-value{
+    grid-column:1/-1;
+    text-align:left;
+    font-size:10px;
+  }
+
+
+  /* -------------------------------------------------------
+     COMPARISON GRAPH
+     ------------------------------------------------------- */
+
+  .comparison-chart{
+    width:100%;
+    height:210px;
+    gap:30px;
+    padding:10px 5px 0;
+    box-sizing:border-box;
+  }
+
+  .comparison-column{
+    height:190px;
+  }
+
+  .comparison-bar{
+    width:42px;
+  }
+
+
+  /* -------------------------------------------------------
+     SALES SUMMARY
+     ------------------------------------------------------- */
+
+  .report-mini-summary{
+    width:100%;
+    grid-template-columns:1fr !important;
+    gap:10px;
+  }
+
+  .report-mini-summary > div{
+    width:100%;
+    box-sizing:border-box;
+  }
+
+
+  /* -------------------------------------------------------
+     REPORT TABLE
+     ------------------------------------------------------- */
+
+  .report-table-wrap{
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .report-table{
+    min-width:650px;
+  }
+
+
+  /* -------------------------------------------------------
+     MANAGEMENT SUMMARY
+     ------------------------------------------------------- */
+
+  .management-grid{
+    width:100%;
+    grid-template-columns:1fr !important;
+    gap:11px;
+  }
+
+  .management-card{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+
+
+  /* -------------------------------------------------------
+     CONCLUSION
+     ------------------------------------------------------- */
+
+  .report-conclusion{
+    padding:17px;
+  }
+
+  .report-conclusion h2{
+    font-size:16px;
+  }
+
+  .report-conclusion p{
+    font-size:11px;
+    line-height:1.7;
+  }
+
+
+  /* -------------------------------------------------------
+     GENERAL REPORT SAFETY
+     ------------------------------------------------------- */
+
+  #reportsPrintArea{
+    max-width:100%;
+    min-width:0;
+    overflow:hidden;
+  }
+
+  #reportsPrintArea img{
+    max-width:100%;
+  }
+
+}
 
 
 
