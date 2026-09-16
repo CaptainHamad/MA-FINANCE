@@ -2395,6 +2395,42 @@ body{
   }
 
 }
+
+/* =========================================================
+   SALES SUMMARY — MOBILE FIX
+   ========================================================= */
+
+@media(max-width:760px){
+
+  .sales-summary{
+    width:100%;
+    grid-template-columns:1fr !important;
+    gap:12px;
+  }
+
+  .sales-summary .mini{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    padding:17px 18px;
+  }
+
+  .sales-summary .mini b{
+    display:block;
+    max-width:100%;
+    overflow:visible;
+    white-space:normal;
+    word-break:break-word;
+    font-size:23px;
+    line-height:1.2;
+  }
+
+  .sales-summary .mini span{
+    display:block;
+    margin-top:5px;
+  }
+
+}
 </style>
 </head>
 
