@@ -2291,7 +2291,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
     // AUTHENTICATION GUARD
   // ================================
 
-  const {
+ const {
     data: { user },
     error
   } = await sb.auth.getUser();
@@ -2301,7 +2301,6 @@ document.addEventListener("DOMContentLoaded",async()=>{
     return;
   }
 
-  // Show logged-in user's email
   const userEmail = document.getElementById("userEmail");
 
   if(userEmail){
