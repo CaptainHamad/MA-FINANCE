@@ -2431,6 +2431,174 @@ body{
   }
 
 }
+
+/* =========================================================
+   INTELLIGENCE CENTER — MOBILE RESPONSIVE FIX
+   ========================================================= */
+
+@media(max-width:760px){
+
+  /* -------------------------------------------------------
+     FINANCIAL CAPACITY
+     The inline 4-column grid must become one column
+     ------------------------------------------------------- */
+
+  #view-intelligence .panel-body > div[style*="grid-template-columns"]{
+    grid-template-columns:1fr !important;
+    width:100%;
+    gap:12px !important;
+  }
+
+
+  /* -------------------------------------------------------
+     CAPACITY CARDS
+     ------------------------------------------------------- */
+
+  #view-intelligence .mini{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+
+  #view-intelligence .mini b{
+    display:block;
+    max-width:100%;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    line-height:1.2;
+  }
+
+
+  /* -------------------------------------------------------
+     EXECUTIVE ASSESSMENT
+     ------------------------------------------------------- */
+
+  #intelExecutive{
+    width:100%;
+    min-width:0;
+  }
+
+  #intelExecutive > div{
+    width:100%;
+    box-sizing:border-box;
+  }
+
+
+  /* -------------------------------------------------------
+     ALERTS + OPPORTUNITIES
+     The desktop 2-column layout must become 1 column
+     ------------------------------------------------------- */
+
+  #view-intelligence > div[style*="grid-template-columns:1fr 1fr"]{
+    grid-template-columns:1fr !important;
+    width:100%;
+    gap:14px !important;
+  }
+
+
+  /* -------------------------------------------------------
+     INTELLIGENCE CARDS
+     ------------------------------------------------------- */
+
+  #intelAlerts,
+  #intelOpportunities,
+  #intelDecisions{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+
+
+  #intelAlerts > div,
+  #intelOpportunities > div,
+  #intelDecisions > div{
+    width:100%;
+    box-sizing:border-box;
+  }
+
+
+  /* -------------------------------------------------------
+     INTELLIGENCE TEXT
+     Prevent narrow columns from breaking words
+     ------------------------------------------------------- */
+
+  #view-intelligence{
+    overflow-x:hidden;
+  }
+
+  #view-intelligence p,
+  #view-intelligence span,
+  #view-intelligence b,
+  #view-intelligence div{
+    max-width:100%;
+  }
+
+
+  /* -------------------------------------------------------
+     INTELLIGENCE LIST ITEM
+     ------------------------------------------------------- */
+
+  #intelAlerts [style*="display:flex"],
+  #intelOpportunities [style*="display:flex"],
+  #intelDecisions [style*="display:flex"]{
+    width:100%;
+    box-sizing:border-box;
+    align-items:flex-start;
+  }
+
+
+  /* text area inside intelligence item */
+  
+  #intelAlerts [style*="display:flex"] > div:last-child,
+  #intelOpportunities [style*="display:flex"] > div:last-child,
+  #intelDecisions [style*="display:flex"] > div:last-child{
+    min-width:0;
+    flex:1;
+  }
+
+
+  /* -------------------------------------------------------
+     RECOMMENDED DECISIONS
+     ------------------------------------------------------- */
+
+  #intelDecisions{
+    overflow:hidden;
+  }
+
+}
+
+.intel-capacity-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+
+
+@media(max-width:760px){
+
+  .intel-capacity-grid{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+}
+
+  .intel-priority-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-bottom:20px;
+}
+
+
+@media(max-width:760px){
+
+  .intel-priority-grid{
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+
+}
 </style>
 </head>
 
@@ -23134,13 +23302,7 @@ function buildIntelligenceModule(){
 
       <div class="panel-body">
 
-        <div
-          style="
-            display:grid;
-            grid-template-columns:repeat(4,1fr);
-            gap:14px;
-          "
-        >
+       <div class="intel-capacity-grid">
 
           <div class="mini">
 
@@ -23255,14 +23417,7 @@ function buildIntelligenceModule(){
          PRIORITY ITEMS
     ====================================================== -->
 
-    <div
-      style="
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:18px;
-        margin-bottom:20px;
-      "
-    >
+  <div class="intel-priority-grid">
 
       <div class="panel">
 
