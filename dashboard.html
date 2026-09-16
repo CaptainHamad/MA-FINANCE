@@ -3242,17 +3242,98 @@ const translations = {
 
 function translateText(text){
 
-  const clean = String(text || "").trim();
+  const original = String(text || "");
+
+  const clean = original.trim();
 
   if(!clean) return text;
 
-  const dictionary =
+
+  const targetDictionary =
     translations[currentLanguage] || translations.en;
 
-  return dictionary[clean] || text;
+
+  /* ---------------------------------------------------------
+     1. Direct lookup
+     Example:
+     English mode:
+     "Financial Overview" -> "Financial Overview"
+
+     Swahili mode:
+     "Financial Overview" -> "Muhtasari wa Fedha"
+     --------------------------------------------------------- */
+
+  if(targetDictionary[clean]){
+    return original.replace(
+      clean,
+      targetDictionary[clean]
+    );
+  }
+
+
+  /* ---------------------------------------------------------
+     2. Reverse lookup
+     This allows:
+
+     Swahili -> English
+     English -> Swahili
+
+     even after the DOM has already been translated.
+     --------------------------------------------------------- */
+
+  const otherLanguage =
+    currentLanguage === "en"
+      ? "sw"
+      : "en";
+
+
+  const otherDictionary =
+    translations[otherLanguage] || {};
+
+
+  for(const englishKey in translations.en){
+
+    const englishText =
+      translations.en[englishKey];
+
+    const swahiliText =
+      translations.sw[englishKey];
+
+
+    /* Current text is English */
+    if(
+      currentLanguage === "sw" &&
+      clean === englishText
+    ){
+
+      return original.replace(
+        clean,
+        swahiliText || englishText
+      );
+
+    }
+
+
+    /* Current text is Swahili */
+    if(
+      currentLanguage === "en" &&
+      swahiliText &&
+      clean === swahiliText
+    ){
+
+      return original.replace(
+        clean,
+        englishText
+      );
+
+    }
+
+  }
+
+
+  return text;
 
 }
-
 
 /* =========================================================
    TRANSLATE PAGE
