@@ -3533,31 +3533,53 @@ body{
 
 }
 /* =========================================================
-   SALES — CLICKABLE ROW
+   SALES — CLICKABLE ROW INTERACTION
    ========================================================= */
 
 .sales-clickable-row{
   cursor:pointer;
-  transition:background .15s ease;
+  transition:
+    background-color .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
 }
 
+/* Normal hover state */
 .sales-clickable-row:hover{
-  background:#f8fafc;
+  background:#fff7ef !important;
+  box-shadow:
+    inset 4px 0 0 #ff7a00,
+    0 3px 10px rgba(15,23,42,.06);
 }
 
+/* Make the text feel active too */
+.sales-clickable-row:hover td{
+  color:#111827;
+}
+
+/* Highlight customer and vehicle names */
+.sales-clickable-row:hover .name{
+  color:#ff7a00;
+}
+
+/* Keep the View button visible and interactive */
+.sales-clickable-row:hover button{
+  border-color:#ff7a00;
+  color:#ff7a00;
+}
+
+/* Keyboard accessibility */
 .sales-clickable-row:focus{
   outline:2px solid #ff7a00;
   outline-offset:-2px;
+  background:#fff7ef !important;
 }
 
-.sales-clickable-row td{
-  cursor:pointer;
+/* When actually pressing the row */
+.sales-clickable-row:active{
+  background:#fff0df !important;
+  transform:scale(.995);
 }
-
-.sales-clickable-row button{
-  cursor:pointer;
-}
-
 
   
 </style>
