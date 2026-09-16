@@ -1917,6 +1917,99 @@ body{
     grid-template-columns:1fr;
   }
 }
+
+/* =========================================================
+   LANGUAGE SWITCHER
+   ========================================================= */
+
+.language-switcher{
+  position:relative;
+}
+
+.language-btn{
+  height:38px;
+  min-width:76px;
+  padding:0 11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:10px;
+
+  color:#26364a;
+  font-size:11px;
+  font-weight:800;
+
+  cursor:pointer;
+  transition:.18s ease;
+}
+
+.language-btn:hover{
+  background:#fff7f0;
+  border-color:#ffd7b5;
+}
+
+.language-arrow{
+  font-size:9px;
+  color:#8995a3;
+}
+
+.language-menu{
+  position:absolute;
+  top:46px;
+  right:0;
+
+  width:150px;
+
+  padding:6px;
+
+  background:#fff;
+  border:1px solid #e5e9ee;
+  border-radius:12px;
+
+  box-shadow:
+    0 18px 45px rgba(15,31,51,.14);
+
+  display:none;
+  z-index:150;
+}
+
+.language-menu.show{
+  display:block;
+}
+
+.language-menu button{
+  width:100%;
+
+  border:0;
+  background:transparent;
+
+  padding:10px 11px;
+
+  display:flex;
+  align-items:center;
+  gap:9px;
+
+  border-radius:8px;
+
+  color:#26364a;
+  font-size:11px;
+  font-weight:700;
+
+  text-align:left;
+}
+
+.language-menu button:hover{
+  background:#fff3e9;
+  color:#df6c0d;
+}
+
+.language-menu button span{
+  flex:1;
+}
 </style>
 </head>
 
@@ -2021,6 +2114,45 @@ body{
     </div>
    <div class="top-actions">
 
+<!-- LANGUAGE SWITCHER -->
+<div class="language-switcher">
+
+  <button
+    class="language-btn"
+    id="languageBtn"
+    type="button"
+    onclick="toggleLanguageMenu()"
+  >
+    <span id="languageFlag">🇬🇧</span>
+    <span id="languageLabel">EN</span>
+    <span class="language-arrow">▾</span>
+  </button>
+
+  <div
+    class="language-menu"
+    id="languageMenu"
+  >
+
+    <button
+      type="button"
+      onclick="setLanguage('en')"
+    >
+      🇬🇧
+      <span>English</span>
+    </button>
+
+    <button
+      type="button"
+      onclick="setLanguage('sw')"
+    >
+      🇹🇿
+      <span>Swahili</span>
+    </button>
+
+  </div>
+
+</div>
+     
   <button
     class="notification-btn"
     id="notificationBtn"
@@ -2820,12 +2952,536 @@ const SUPABASE_URL="https://tstpqwckgiwmcvsurqiq.supabase.co";
 const SUPABASE_KEY="sb_publishable_WfPh8lbd-UKxBRGLRAfWWw_dJuDV5TP";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
+/* =========================================================
+   LANGUAGE SYSTEM — ENGLISH / SWAHILI
+   ========================================================= */
+
+let currentLanguage =
+  localStorage.getItem("mattex_language") || "en";
+
+
+const translations = {
+
+  en: {
+
+    /* GENERAL */
+    "Dashboard":"Dashboard",
+    "Income":"Income",
+    "Office Expenses":"Office Expenses",
+    "Transaction Ledger":"Transaction Ledger",
+    "Sales":"Sales",
+    "Budgeting":"Budgeting",
+    "Intelligence":"Intelligence",
+    "Intelligence Center":"Intelligence Center",
+    "Employees":"Employees",
+    "Reports":"Reports",
+    "Accounts":"Accounts",
+    "Transfers":"Transfers",
+    "Vehicles":"Vehicles",
+    "Customers":"Customers",
+    "Suppliers":"Suppliers",
+
+    /* SECTIONS */
+    "OVERVIEW":"OVERVIEW",
+    "FINANCE":"FINANCE",
+    "BUSINESS":"BUSINESS",
+    "MANAGEMENT":"MANAGEMENT",
+
+    /* DASHBOARD */
+    "Financial Overview":"Financial Overview",
+    "Real-time financial position of Mattex Company Limited.":"Real-time financial position of Mattex Company Limited.",
+    "Total Cash":"Total Cash",
+    "Total Income":"Total Income",
+    "Overall Expenses":"Overall Expenses",
+    "Net Profit":"Net Profit",
+    "Active financial accounts":"Active financial accounts",
+    "Total customer payments received":"Total customer payments received",
+    "Sales, office, salaries & commissions":"Sales, office, salaries & commissions",
+    "Income less all business expenses":"Income less all business expenses",
+
+    /* SNAPSHOT */
+    "Business Snapshot":"Business Snapshot",
+    "Current records":"Current records",
+    "Current business records":"Current business records",
+    "Vehicles":"Vehicles",
+    "Vehicles Sold":"Vehicles Sold",
+    "Sales":"Sales",
+    "Total Sales":"Total Sales",
+
+    /* ACCOUNTS */
+    "Account Position":"Account Position",
+    "By account type":"By account type",
+    "Bank":"Bank",
+    "Cash":"Cash",
+    "Mobile Money":"Mobile Money",
+    "Other":"Other",
+    "Physical cash":"Physical cash",
+    "Bank accounts":"Bank accounts",
+    "Mobile money accounts":"Mobile money accounts",
+    "Other financial accounts":"Other financial accounts",
+    "Total Balance":"Total Balance",
+    "Across all financial accounts":"Across all financial accounts",
+
+    /* COMMON ACTIONS */
+    "Refresh":"Refresh",
+    "Save":"Save",
+    "Cancel":"Cancel",
+    "Close":"Close",
+    "Edit":"Edit",
+    "Delete":"Delete",
+    "Add":"Add",
+    "Search":"Search",
+    "View All":"View All",
+
+    /* REPORTS */
+    "Financial Reports":"Financial Reports",
+    "Financial Report":"Financial Report",
+    "Report":"Report",
+    "Summary":"Summary",
+    "Details":"Details",
+
+    /* TRANSACTIONS */
+    "Money In":"Money In",
+    "Money Out":"Money Out",
+    "Transaction":"Transaction",
+    "Transactions":"Transactions",
+    "Date":"Date",
+    "Amount":"Amount",
+    "Description":"Description",
+    "Reference":"Reference",
+    "Status":"Status",
+
+    /* EMPLOYEES */
+    "Employee":"Employee",
+    "Employees":"Employees",
+    "Salary":"Salary",
+    "Commission":"Commission",
+    "Staff":"Staff",
+    "Employee Payment":"Employee Payment",
+
+    /* SALES */
+    "Vehicle Sale":"Vehicle Sale",
+    "Vehicle Sales":"Vehicle Sales",
+    "Customer":"Customer",
+    "Customers":"Customers",
+    "Selling Price":"Selling Price",
+    "Payment":"Payment",
+    "Payments":"Payments",
+    "Balance":"Balance",
+
+    /* BUDGET */
+    "Budget":"Budget",
+    "Budgets":"Budgets",
+    "Budgeting":"Budgeting",
+    "Monthly":"Monthly",
+    "Quarterly":"Quarterly",
+    "Yearly":"Yearly",
+    "Category":"Category",
+
+    /* NOTIFICATIONS */
+    "Notifications":"Notifications",
+    "No alerts":"No alerts",
+    "No notifications":"No notifications",
+
+    /* FORMS */
+    "Name":"Name",
+    "Phone":"Phone",
+    "Currency":"Currency",
+    "Account":"Account",
+    "Account Number":"Account Number",
+    "Bank / Provider":"Bank / Provider",
+    "Opening Balance":"Opening Balance",
+    "Save Account":"Save Account",
+    "Add Financial Account":"Add Financial Account",
+    "Edit Financial Account":"Edit Financial Account"
+
+  },
+
+
+  sw: {
+
+    /* GENERAL */
+    "Dashboard":"Dashibodi",
+    "Income":"Mapato",
+    "Office Expenses":"Gharama za Ofisi",
+    "Transaction Ledger":"Daftari la Miamala",
+    "Sales":"Mauzo",
+    "Budgeting":"Bajeti",
+    "Intelligence":"Uchambuzi",
+    "Intelligence Center":"Kituo cha Uchambuzi",
+    "Employees":"Wafanyakazi",
+    "Reports":"Ripoti",
+    "Accounts":"Akaunti",
+    "Transfers":"Uhamisho",
+    "Vehicles":"Magari",
+    "Customers":"Wateja",
+    "Suppliers":"Wasambazaji",
+
+    /* SECTIONS */
+    "OVERVIEW":"MUHTASARI",
+    "FINANCE":"FEDHA",
+    "BUSINESS":"BIASHARA",
+    "MANAGEMENT":"USIMAMIZI",
+
+    /* DASHBOARD */
+    "Financial Overview":"Muhtasari wa Fedha",
+    "Real-time financial position of Mattex Company Limited.":"Hali ya kifedha ya Mattex Company Limited kwa wakati halisi.",
+    "Total Cash":"Jumla ya Fedha",
+    "Total Income":"Jumla ya Mapato",
+    "Overall Expenses":"Jumla ya Gharama",
+    "Net Profit":"Faida Halisi",
+    "Active financial accounts":"Akaunti za fedha zilizo hai",
+    "Total customer payments received":"Jumla ya malipo yaliyopokelewa kutoka kwa wateja",
+    "Sales, office, salaries & commissions":"Mauzo, ofisi, mishahara na kamisheni",
+    "Income less all business expenses":"Mapato baada ya kuondoa gharama zote za biashara",
+
+    /* SNAPSHOT */
+    "Business Snapshot":"Muhtasari wa Biashara",
+    "Current records":"Taarifa za sasa",
+    "Current business records":"Taarifa za sasa za biashara",
+    "Vehicles":"Magari",
+    "Vehicles Sold":"Magari Yaliyouzwa",
+    "Sales":"Mauzo",
+    "Total Sales":"Jumla ya Mauzo",
+
+    /* ACCOUNTS */
+    "Account Position":"Hali ya Akaunti",
+    "By account type":"Kwa aina ya akaunti",
+    "Bank":"Benki",
+    "Cash":"Fedha Taslimu",
+    "Mobile Money":"Pesa za Simu",
+    "Other":"Nyingine",
+    "Physical cash":"Fedha taslimu",
+    "Bank accounts":"Akaunti za benki",
+    "Mobile money accounts":"Akaunti za pesa za simu",
+    "Other financial accounts":"Akaunti nyingine za fedha",
+    "Total Balance":"Jumla ya Salio",
+    "Across all financial accounts":"Jumla katika akaunti zote za fedha",
+
+    /* COMMON ACTIONS */
+    "Refresh":"Onyesha Upya",
+    "Save":"Hifadhi",
+    "Cancel":"Ghairi",
+    "Close":"Funga",
+    "Edit":"Hariri",
+    "Delete":"Futa",
+    "Add":"Ongeza",
+    "Search":"Tafuta",
+    "View All":"Tazama Zote",
+
+    /* REPORTS */
+    "Financial Reports":"Ripoti za Fedha",
+    "Financial Report":"Ripoti ya Fedha",
+    "Report":"Ripoti",
+    "Summary":"Muhtasari",
+    "Details":"Maelezo",
+
+    /* TRANSACTIONS */
+    "Money In":"Fedha Zilizoingia",
+    "Money Out":"Fedha Zilizotoka",
+    "Transaction":"Muamala",
+    "Transactions":"Miamala",
+    "Date":"Tarehe",
+    "Amount":"Kiasi",
+    "Description":"Maelezo",
+    "Reference":"Rejea",
+    "Status":"Hali",
+
+    /* EMPLOYEES */
+    "Employee":"Mfanyakazi",
+    "Employees":"Wafanyakazi",
+    "Salary":"Mshahara",
+    "Commission":"Kamisheni",
+    "Staff":"Wafanyakazi",
+    "Employee Payment":"Malipo ya Mfanyakazi",
+
+    /* SALES */
+    "Vehicle Sale":"Mauzo ya Gari",
+    "Vehicle Sales":"Mauzo ya Magari",
+    "Customer":"Mteja",
+    "Customers":"Wateja",
+    "Selling Price":"Bei ya Mauzo",
+    "Payment":"Malipo",
+    "Payments":"Malipo",
+    "Balance":"Salio",
+
+    /* BUDGET */
+    "Budget":"Bajeti",
+    "Budgets":"Bajeti",
+    "Budgeting":"Bajeti",
+    "Monthly":"Kila Mwezi",
+    "Quarterly":"Kila Robo Mwaka",
+    "Yearly":"Kila Mwaka",
+    "Category":"Kategoria",
+
+    /* NOTIFICATIONS */
+    "Notifications":"Arifa",
+    "No alerts":"Hakuna tahadhari",
+    "No notifications":"Hakuna arifa",
+
+    /* FORMS */
+    "Name":"Jina",
+    "Phone":"Simu",
+    "Currency":"Sarafu",
+    "Account":"Akaunti",
+    "Account Number":"Namba ya Akaunti",
+    "Bank / Provider":"Benki / Mtoa Huduma",
+    "Opening Balance":"Salio la Mwanzo",
+    "Save Account":"Hifadhi Akaunti",
+    "Add Financial Account":"Ongeza Akaunti ya Fedha",
+    "Edit Financial Account":"Hariri Akaunti ya Fedha"
+
+  }
+
+};
+
+
+/* =========================================================
+   TRANSLATE TEXT
+   ========================================================= */
+
+function translateText(text){
+
+  const clean = String(text || "").trim();
+
+  if(!clean) return text;
+
+  const dictionary =
+    translations[currentLanguage] || translations.en;
+
+  return dictionary[clean] || text;
+
+}
+
+
+/* =========================================================
+   TRANSLATE PAGE
+   ========================================================= */
+
+function translatePage(){
+
+  document.documentElement.lang =
+    currentLanguage === "sw"
+      ? "sw"
+      : "en";
+
+
+  const walker =
+    document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT
+    );
+
+
+  const nodes = [];
+
+  let node;
+
+  while(node = walker.nextNode()){
+    nodes.push(node);
+  }
+
+
+  nodes.forEach(textNode => {
+
+    const parent =
+      textNode.parentElement;
+
+    if(!parent) return;
+
+    /* Don't touch script/style/code */
+    if(
+      ["SCRIPT","STYLE","NOSCRIPT","CODE"]
+        .includes(parent.tagName)
+    ){
+      return;
+    }
+
+    const original =
+      textNode.textContent;
+
+    const translated =
+      translateText(original);
+
+    if(translated !== original){
+
+      textNode.textContent =
+        original.replace(
+          original.trim(),
+          translated
+        );
+
+    }
+
+  });
+
+
+  updateLanguageButton();
+
+}
+
+
+/* =========================================================
+   LANGUAGE BUTTON
+   ========================================================= */
+
+function updateLanguageButton(){
+
+  const flag =
+    document.getElementById("languageFlag");
+
+  const label =
+    document.getElementById("languageLabel");
+
+  if(!flag || !label) return;
+
+
+  if(currentLanguage === "sw"){
+
+    flag.textContent = "🇹🇿";
+    label.textContent = "SW";
+
+  }else{
+
+    flag.textContent = "🇬🇧";
+    label.textContent = "EN";
+
+  }
+
+}
+
+
+/* =========================================================
+   OPEN / CLOSE LANGUAGE MENU
+   ========================================================= */
+
+function toggleLanguageMenu(){
+
+  const menu =
+    document.getElementById("languageMenu");
+
+  if(!menu) return;
+
+  menu.classList.toggle("show");
+
+}
+
+
+/* =========================================================
+   CHANGE LANGUAGE
+   ========================================================= */
+
+function setLanguage(language){
+
+  if(
+    language !== "en" &&
+    language !== "sw"
+  ){
+    return;
+  }
+
+
+  currentLanguage =
+    language;
+
+
+  localStorage.setItem(
+    "mattex_language",
+    currentLanguage
+  );
+
+
+  const menu =
+    document.getElementById("languageMenu");
+
+  if(menu){
+    menu.classList.remove("show");
+  }
+
+
+  translatePage();
+
+
+  /* Re-render current module so
+     dynamic content follows language */
+  if(typeof go === "function"){
+
+    const view =
+      currentView || "overview";
+
+    go(view);
+
+  }
+
+}
+
+
+/* =========================================================
+   CLOSE LANGUAGE MENU WHEN CLICKING OUTSIDE
+   ========================================================= */
+
+document.addEventListener("click",function(e){
+
+  const switcher =
+    document.querySelector(
+      ".language-switcher"
+    );
+
+  const menu =
+    document.getElementById(
+      "languageMenu"
+    );
+
+  if(
+    switcher &&
+    menu &&
+    !switcher.contains(e.target)
+  ){
+
+    menu.classList.remove("show");
+
+  }
+
+});
+
+
+/* =========================================================
+   AUTO TRANSLATE NEWLY GENERATED CONTENT
+   ========================================================= */
+
+const languageObserver =
+  new MutationObserver(() => {
+
+    translatePage();
+
+  });
+
+
+/* Start observing after DOM is ready */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    languageObserver.observe(
+      document.body,
+      {
+        childList:true,
+        subtree:true
+      }
+    );
+
+    translatePage();
+
+  }
+);
+
 let accounts=[];
 let editingAccountId=null;
 let currentView="overview";
 
 const viewTitles={
-  overview:"Financial Overview",income:"Income",expenses:" Office Expenses",accounts:"Accounts",
+  overview:"Financial Overview",income:"Income",expenses:"Office Expenses",accounts:"Accounts",
   transactions:"Transaction Ledger",transfers:"Transfers",vehicles:"Vehicles",customers:"Customers",
   sales:"Sales",suppliers:"Suppliers",employees:"Employees",budgets:"Budgeting",intelligence:"Intelligence Center",reports:"Reports"
 };
@@ -2883,8 +3539,11 @@ function go(view){
   document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   document.getElementById("view-"+view).classList.add("active");
-  document.getElementById("pageTitle").textContent=viewTitles[view]||view;
-  document.getElementById("crumb").textContent=(viewTitles[view]||view).toUpperCase();
+  document.getElementById("pageTitle").textContent =
+  translateText(viewTitles[view] || view);
+
+document.getElementById("crumb").textContent =
+  translateText(viewTitles[view] || view).toUpperCase();
   if(view==="accounts") loadAccounts();
 
 if(view==="income") loadIncome();
