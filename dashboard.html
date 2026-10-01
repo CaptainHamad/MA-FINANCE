@@ -15507,60 +15507,145 @@ async function saveEditedVehicleExpense(
   try{
 
     const {
-      error
-    } = await sb
+  data: updatedExpense,
+  error
+} = await sb
 
-      .from("vehicle_costs")
+  .from("vehicle_costs")
 
-      .update({
+  .update({
 
-        category:
-          category,
+    category:
+      category,
 
-        description:
-          description,
+    description:
+      description,
 
-        amount:
-          amount,
+    amount:
+      amount,
 
-        currency:
-          currency,
+    currency:
+      currency,
 
-        cost_date:
-          expenseDate,
+    cost_date:
+      expenseDate,
 
-        payment_status:
-          paymentStatus,
+    payment_status:
+      paymentStatus,
 
-        account_id:
-          accountId
+    account_id:
+      accountId
 
-      })
+  })
 
-      .eq(
-        "id",
-        expenseId
+  .eq(
+    "id",
+    expenseId
+  )
+
+  .select()
+  .single();
+
+
+if(error)
+  throw error;
+
+
+if(!updatedExpense){
+
+  throw new Error(
+    "Vehicle expense was not updated. Please check your permissions."
+  );
+
+}
+
+
+/* =======================================================
+   UPDATE LOCAL SALE DATA IMMEDIATELY
+   ======================================================= */
+
+const updatedExpenses =
+  (sale.expenses || []).map(
+    item => {
+
+      if(item.id !== expenseId)
+        return item;
+
+      return {
+        ...item,
+        ...updatedExpense
+      };
+
+    }
+  );
+
+
+const newTotalExpenses =
+  updatedExpenses.reduce(
+    (
+      total,
+      item
+    ) => {
+
+      return (
+        total +
+        Number(
+          item.amount || 0
+        )
       );
 
-
-    if(error)
-      throw error;
-
-
-    closeEditVehicleExpenseModal();
+    },
+    0
+  );
 
 
-    toast(
-      "Vehicle expense updated successfully.",
-      "ok"
-    );
+salesRecords =
+  salesRecords.map(
+    item => {
+
+      if(item.id !== saleId)
+        return item;
+
+      return {
+
+        ...item,
+
+        expenses:
+          updatedExpenses,
+
+        total_vehicle_expenses:
+          newTotalExpenses
+
+      };
+
+    }
+  );
 
 
-    await loadSales();
+/* =======================================================
+   CLOSE MODAL
+   ======================================================= */
 
-    openSaleDetails(
-      saleId
-    );
+closeEditVehicleExpenseModal();
+
+
+/* =======================================================
+   SUCCESS
+   ======================================================= */
+
+toast(
+  "Vehicle expense updated successfully.",
+  "ok"
+);
+
+
+/* =======================================================
+   OPEN UPDATED SALE DETAILS IMMEDIATELY
+   ======================================================= */
+
+openSaleDetails(
+  saleId
+);
 
 
   }
