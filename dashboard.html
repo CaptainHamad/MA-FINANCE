@@ -12156,10 +12156,13 @@ async function loadSales(){
         status,
         notes,
         customers(
-          id,
-          full_name,
-          phone
-        ),
+  id,
+  full_name,
+  phone,
+  email,
+  tin,
+  address
+),
         vehicles(
           id,
           vehicle_name,
@@ -12246,17 +12249,20 @@ async function loadSalesPayments(){
     .from("customer_payments")
 
     .select(`
-      id,
-      sale_id,
-      amount,
-      currency,
-      payment_date,
-      payment_method,
-      reference_number,
-      payment_number,
-      payment_type,
-      due_date
-    `)
+  id,
+  sale_id,
+  customer_id,
+  account_id,
+  amount,
+  currency,
+  payment_date,
+  payment_method,
+  reference_number,
+  payment_number,
+  payment_type,
+  due_date,
+  notes
+`)
 
     .in(
       "sale_id",
@@ -12350,16 +12356,17 @@ async function loadSalesExpenses(){
     .from("vehicle_costs")
 
     .select(`
-      id,
-      sale_id,
-      vehicle_id,
-      category,
-      description,
-      amount,
-      currency,
-      cost_date,
-      payment_status
-    `)
+  id,
+  sale_id,
+  vehicle_id,
+  category,
+  description,
+  amount,
+  currency,
+  cost_date,
+  payment_status,
+  account_id
+`)
 
     .in(
       "sale_id",
@@ -14102,12 +14109,23 @@ const netIncome =
       </div>
 
 
-      <button
-        class="secondary"
-        onclick="closeSaleDetails()"
-      >
-        ← Back to Sales
-      </button>
+     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+
+  <button
+    class="primary"
+    onclick="openEditSaleModal('${sale.id}')"
+  >
+    ✎ Edit Sale
+  </button>
+
+  <button
+    class="secondary"
+    onclick="closeSaleDetails()"
+  >
+    ← Back to Sales
+  </button>
+
+</div>
 
     </div>
 
@@ -14496,14 +14514,13 @@ netIncome,
               <thead>
 
                 <tr>
-
-                  <th>#</th>
-                  <th>DATE</th>
-                  <th>TYPE</th>
-                  <th>AMOUNT</th>
-                  <th>METHOD</th>
-                  <th>REFERENCE</th>
-
+<th>#</th>
+<th>DATE</th>
+<th>TYPE</th>
+<th>AMOUNT</th>
+<th>METHOD</th>
+<th>REFERENCE</th>
+<th>ACTIONS</th>
                 </tr>
 
               </thead>
@@ -14560,7 +14577,50 @@ netIncome,
                               "-"
                             )}
                           </td>
+<td>
 
+  <div style="
+    display:flex;
+    gap:6px;
+    align-items:center;
+    white-space:nowrap;
+  ">
+
+    <button
+      class="secondary"
+      type="button"
+      onclick="
+        event.stopPropagation();
+        openEditPaymentModal(
+          '${payment.id}',
+          '${sale.id}'
+        );
+      "
+    >
+      ✎
+    </button>
+
+    <button
+      class="secondary"
+      type="button"
+      style="
+        color:#dc2626;
+        border-color:#fecaca;
+      "
+      onclick="
+        event.stopPropagation();
+        deleteSalePayment(
+          '${payment.id}',
+          '${sale.id}'
+        );
+      "
+    >
+      🗑
+    </button>
+
+  </div>
+
+</td>
                         </tr>
 
                       `
@@ -14658,6 +14718,7 @@ netIncome,
                   <th>DESCRIPTION</th>
                   <th>AMOUNT</th>
                   <th>STATUS</th>
+                  <th>ACTIONS</th>
 
                 </tr>
 
@@ -14707,7 +14768,50 @@ netIncome,
                               "-"
                             )}
                           </td>
+<td>
 
+  <div style="
+    display:flex;
+    gap:6px;
+    align-items:center;
+    white-space:nowrap;
+  ">
+
+    <button
+      class="secondary"
+      type="button"
+      onclick="
+        event.stopPropagation();
+        openEditVehicleExpenseModal(
+          '${expense.id}',
+          '${sale.id}'
+        );
+      "
+    >
+      ✎
+    </button>
+
+    <button
+      class="secondary"
+      type="button"
+      style="
+        color:#dc2626;
+        border-color:#fecaca;
+      "
+      onclick="
+        event.stopPropagation();
+        deleteVehicleExpense(
+          '${expense.id}',
+          '${sale.id}'
+        );
+      "
+    >
+      🗑
+    </button>
+
+  </div>
+
+</td>
                         </tr>
 
                       `
@@ -14837,6 +14941,1690 @@ netIncome,
 
 }
 
+/* =========================================================
+   EDIT VEHICLE EXPENSE
+========================================================= */
+
+async function openEditVehicleExpenseModal(
+  expenseId,
+  saleId
+){
+
+  const sale =
+    salesRecords.find(
+      item => item.id === saleId
+    );
+
+  if(!sale){
+
+    toast(
+      "Sale not found.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const expense =
+    (sale.expenses || [])
+      .find(
+        item =>
+          item.id === expenseId
+      );
+
+  if(!expense){
+
+    toast(
+      "Vehicle expense not found.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const existing =
+    document.getElementById(
+      "editVehicleExpenseModal"
+    );
+
+  if(existing)
+    existing.remove();
+
+
+  /* -------------------------------------------------------
+     LOAD ACTIVE ACCOUNTS
+  ------------------------------------------------------- */
+
+  const {
+    data: accounts,
+    error: accountError
+  } = await sb
+
+    .from("accounts")
+
+    .select(
+      "id,name,account_type,currency"
+    )
+
+    .eq(
+      "is_active",
+      true
+    )
+
+    .order(
+      "name"
+    );
+
+
+  if(accountError){
+
+    toast(
+      "Unable to load accounts.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.className =
+    "modal-bg show";
+
+  modal.id =
+    "editVehicleExpenseModal";
+
+
+  modal.innerHTML = `
+
+    <div
+      class="modal"
+      style="
+        max-width:750px;
+        width:95%;
+        max-height:90vh;
+        overflow-y:auto;
+      "
+    >
+
+      <div class="modal-head">
+
+        <div>
+
+          <h3>
+            Edit Vehicle Expense
+          </h3>
+
+          <span>
+            ${esc(
+              sale.vehicles?.vehicle_name ||
+              "Vehicle"
+            )}
+            ${sale.vehicles?.year || ""}
+          </span>
+
+        </div>
+
+        <button
+          class="close"
+          type="button"
+          onclick="closeEditVehicleExpenseModal()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="form">
+
+
+        <div class="mini-grid">
+
+          <!-- CATEGORY -->
+
+          <div class="field">
+
+            <label>
+              EXPENSE CATEGORY *
+            </label>
+
+            <select
+              id="editVehicleExpenseCategory"
+            >
+
+              ${
+                [
+                  "Purchasing",
+                  "Wharfage",
+                  "Clearing",
+                  "Transport",
+                  "Car Wash",
+                  "Repairs",
+                  "Inspection",
+                  "Storage",
+                  "Fuel",
+                  "Documentation",
+                  "Other"
+                ]
+                .map(
+                  category => `
+                    <option
+                      value="${category}"
+                      ${
+                        expense.category === category
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${category}
+                    </option>
+                  `
+                )
+                .join("")
+              }
+
+            </select>
+
+          </div>
+
+
+          <!-- AMOUNT -->
+
+          <div class="field">
+
+            <label>
+              AMOUNT *
+            </label>
+
+            <input
+              id="editVehicleExpenseAmount"
+              type="number"
+              min="0"
+              step="0.01"
+              value="${Number(
+                expense.amount || 0
+              )}"
+            >
+
+          </div>
+
+
+          <!-- CURRENCY -->
+
+          <div class="field">
+
+            <label>
+              CURRENCY *
+            </label>
+
+            <select
+              id="editVehicleExpenseCurrency"
+            >
+
+              <option
+                value="TZS"
+                ${
+                  expense.currency === "TZS"
+                    ? "selected"
+                    : ""
+                }
+              >
+                TZS
+              </option>
+
+              <option
+                value="USD"
+                ${
+                  expense.currency === "USD"
+                    ? "selected"
+                    : ""
+                }
+              >
+                USD
+              </option>
+
+              <option
+                value="JPY"
+                ${
+                  expense.currency === "JPY"
+                    ? "selected"
+                    : ""
+                }
+              >
+                JPY
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- DATE -->
+
+          <div class="field">
+
+            <label>
+              EXPENSE DATE *
+            </label>
+
+            <input
+              id="editVehicleExpenseDate"
+              type="date"
+              value="${expense.cost_date || ""}"
+            >
+
+          </div>
+
+
+          <!-- PAYMENT STATUS -->
+
+          <div class="field">
+
+            <label>
+              PAYMENT STATUS *
+            </label>
+
+            <select
+              id="editVehicleExpenseStatus"
+            >
+
+              <option
+                value="PAID"
+                ${
+                  expense.payment_status === "PAID"
+                    ? "selected"
+                    : ""
+                }
+              >
+                PAID
+              </option>
+
+              <option
+                value="Pending"
+                ${
+                  expense.payment_status === "Pending"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Pending
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- ACCOUNT -->
+
+          <div class="field">
+
+            <label>
+              PAYMENT ACCOUNT
+            </label>
+
+            <select
+              id="editVehicleExpenseAccount"
+            >
+
+              <option value="">
+                Select account
+              </option>
+
+              ${
+                (accounts || [])
+                  .map(
+                    account => `
+                      <option
+                        value="${account.id}"
+                        ${
+                          account.id ===
+                          expense.account_id
+                            ? "selected"
+                            : ""
+                        }
+                      >
+                        ${esc(account.name)}
+                        —
+                        ${esc(account.currency)}
+                      </option>
+                    `
+                  )
+                  .join("")
+              }
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <!-- DESCRIPTION -->
+
+        <div class="field">
+
+          <label>
+            DESCRIPTION
+          </label>
+
+          <textarea
+            id="editVehicleExpenseDescription"
+            rows="4"
+            placeholder="Expense description..."
+          >${esc(
+            expense.description || ""
+          )}</textarea>
+
+        </div>
+
+
+        <div
+          style="
+            display:flex;
+            justify-content:flex-end;
+            gap:10px;
+            margin-top:10px;
+          "
+        >
+
+          <button
+            class="secondary"
+            type="button"
+            onclick="closeEditVehicleExpenseModal()"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="primary"
+            type="button"
+            onclick="
+              saveEditedVehicleExpense(
+                '${expenseId}',
+                '${saleId}'
+              )
+            "
+          >
+            Save Changes
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(
+    modal
+  );
+
+}
+
+/* =========================================================
+   CLOSE EDIT VEHICLE EXPENSE
+========================================================= */
+
+function closeEditVehicleExpenseModal(){
+
+  const modal =
+    document.getElementById(
+      "editVehicleExpenseModal"
+    );
+
+  if(modal)
+    modal.remove();
+
+}
+
+  /* =========================================================
+   SAVE EDITED VEHICLE EXPENSE
+========================================================= */
+
+async function saveEditedVehicleExpense(
+  expenseId,
+  saleId
+){
+
+  const sale =
+    salesRecords.find(
+      item => item.id === saleId
+    );
+
+  if(!sale)
+    return;
+
+
+  const expense =
+    (sale.expenses || [])
+      .find(
+        item =>
+          item.id === expenseId
+      );
+
+  if(!expense){
+
+    toast(
+      "Vehicle expense not found.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const category =
+    document.getElementById(
+      "editVehicleExpenseCategory"
+    )?.value;
+
+
+  const amount =
+    Number(
+      document.getElementById(
+        "editVehicleExpenseAmount"
+      )?.value || 0
+    );
+
+
+  const currency =
+    document.getElementById(
+      "editVehicleExpenseCurrency"
+    )?.value;
+
+
+  const expenseDate =
+    document.getElementById(
+      "editVehicleExpenseDate"
+    )?.value;
+
+
+  const paymentStatus =
+    document.getElementById(
+      "editVehicleExpenseStatus"
+    )?.value;
+
+
+  const accountId =
+    document.getElementById(
+      "editVehicleExpenseAccount"
+    )?.value || null;
+
+
+  const description =
+    document.getElementById(
+      "editVehicleExpenseDescription"
+    )?.value
+      ?.trim() || null;
+
+
+  if(!category){
+
+    toast(
+      "Select expense category.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(
+    !amount ||
+    amount <= 0
+  ){
+
+    toast(
+      "Enter a valid expense amount.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(!expenseDate){
+
+    toast(
+      "Select expense date.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  try{
+
+    const {
+      error
+    } = await sb
+
+      .from("vehicle_costs")
+
+      .update({
+
+        category:
+          category,
+
+        description:
+          description,
+
+        amount:
+          amount,
+
+        currency:
+          currency,
+
+        cost_date:
+          expenseDate,
+
+        payment_status:
+          paymentStatus,
+
+        account_id:
+          accountId
+
+      })
+
+      .eq(
+        "id",
+        expenseId
+      );
+
+
+    if(error)
+      throw error;
+
+
+    closeEditVehicleExpenseModal();
+
+
+    toast(
+      "Vehicle expense updated successfully.",
+      "ok"
+    );
+
+
+    await loadSales();
+
+    openSaleDetails(
+      saleId
+    );
+
+
+  }
+  catch(error){
+
+    console.error(
+      "Vehicle expense update error:",
+      error
+    );
+
+    toast(
+      error.message ||
+      "Unable to update vehicle expense.",
+      "error"
+    );
+
+  }
+
+}
+
+  /* =========================================================
+   DELETE VEHICLE EXPENSE
+========================================================= */
+
+async function deleteVehicleExpense(
+  expenseId,
+  saleId
+){
+
+  const sale =
+    salesRecords.find(
+      item => item.id === saleId
+    );
+
+  if(!sale)
+    return;
+
+
+  const expense =
+    (sale.expenses || [])
+      .find(
+        item =>
+          item.id === expenseId
+      );
+
+  if(!expense){
+
+    toast(
+      "Vehicle expense not found.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      `Delete this vehicle expense?\n\n` +
+
+      `Category: ${expense.category}\n` +
+
+      `Amount: ${money(
+        expense.amount,
+        expense.currency
+      )}\n` +
+
+      `Date: ${formatDate(
+        expense.cost_date
+      )}\n\n` +
+
+      `This will remove the cost from the vehicle profitability calculation.`
+    );
+
+
+  if(!confirmed)
+    return;
+
+
+  try{
+
+    const {
+      error
+    } = await sb
+
+      .from("vehicle_costs")
+
+      .delete()
+
+      .eq(
+        "id",
+        expenseId
+      );
+
+
+    if(error)
+      throw error;
+
+
+    toast(
+      "Vehicle expense deleted successfully.",
+      "ok"
+    );
+
+
+    await loadSales();
+
+    openSaleDetails(
+      saleId
+    );
+
+
+  }
+  catch(error){
+
+    console.error(
+      "Delete vehicle expense error:",
+      error
+    );
+
+    toast(
+      error.message ||
+      "Unable to delete vehicle expense.",
+      "error"
+    );
+
+  }
+
+}
+
+/* =========================================================
+   EDIT SALE — OPEN EDIT FORM
+========================================================= */
+
+function openEditSaleModal(saleId){
+
+  const sale =
+    salesRecords.find(
+      item => item.id === saleId
+    );
+
+  if(!sale){
+
+    toast(
+      "Sale not found.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const vehicle =
+    sale.vehicles || {};
+
+  const customer =
+    sale.customers || {};
+
+
+  /* ---------------------------------------------------------
+     CHECK EXISTING PAYMENTS
+  --------------------------------------------------------- */
+
+  const totalPaid =
+    Number(
+      sale.total_paid || 0
+    );
+
+  const hasPayments =
+    totalPaid > 0;
+
+
+  /* ---------------------------------------------------------
+     REMOVE OLD MODAL
+  --------------------------------------------------------- */
+
+  const existing =
+    document.getElementById(
+      "editSaleModal"
+    );
+
+  if(existing)
+    existing.remove();
+
+
+  /* ---------------------------------------------------------
+     CREATE MODAL
+  --------------------------------------------------------- */
+
+  const modal =
+    document.createElement("div");
+
+  modal.className =
+    "modal-bg show";
+
+  modal.id =
+    "editSaleModal";
+
+
+  modal.innerHTML = `
+
+    <div
+      class="modal"
+      style="
+        max-width:850px;
+        width:95%;
+        max-height:90vh;
+        overflow-y:auto;
+      "
+    >
+
+      <!-- HEADER -->
+
+      <div class="modal-head">
+
+        <div>
+
+          <h3>
+            Edit Sale
+          </h3>
+
+          <span>
+            Update customer, vehicle and sale information
+          </span>
+
+        </div>
+
+        <button
+          class="close"
+          type="button"
+          onclick="closeEditSaleModal()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- FORM -->
+
+      <form
+        class="form"
+        id="editSaleForm"
+        onsubmit="
+          event.preventDefault();
+          saveEditedSale('${sale.id}');
+        "
+      >
+
+
+        <!-- =================================================
+             CUSTOMER INFORMATION
+        ================================================== -->
+
+        <div class="section-title">
+          Customer Information
+        </div>
+
+
+        <div class="form-grid">
+
+          <div class="field">
+
+            <label>
+              FULL NAME *
+            </label>
+
+            <input
+              id="editSaleCustomerName"
+              value="${esc(customer.full_name || "")}"
+              required
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              PHONE
+            </label>
+
+            <input
+              id="editSaleCustomerPhone"
+              value="${esc(customer.phone || "")}"
+              placeholder="e.g. 0712 345 678"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              EMAIL
+            </label>
+
+            <input
+              id="editSaleCustomerEmail"
+              type="email"
+              value="${esc(customer.email || "")}"
+              placeholder="customer@email.com"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              TIN
+            </label>
+
+            <input
+              id="editSaleCustomerTin"
+              value="${esc(customer.tin || "")}"
+              placeholder="Customer TIN"
+            >
+
+          </div>
+
+
+          <div class="field full">
+
+            <label>
+              ADDRESS
+            </label>
+
+            <input
+              id="editSaleCustomerAddress"
+              value="${esc(customer.address || "")}"
+              placeholder="Customer address"
+            >
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             VEHICLE INFORMATION
+        ================================================== -->
+
+        <div class="section-title">
+          Vehicle Information
+        </div>
+
+
+        <div class="form-grid">
+
+          <div class="field">
+
+            <label>
+              VEHICLE NAME *
+            </label>
+
+            <input
+              id="editSaleVehicleName"
+              value="${esc(vehicle.vehicle_name || "")}"
+              required
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              YEAR *
+            </label>
+
+            <input
+              id="editSaleVehicleYear"
+              type="number"
+              min="1900"
+              max="2100"
+              value="${vehicle.year || ""}"
+              required
+            >
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SALE INFORMATION
+        ================================================== -->
+
+        <div class="section-title">
+          Sale Information
+        </div>
+
+
+        <div class="form-grid">
+
+          <div class="field">
+
+            <label>
+              SELLING PRICE *
+            </label>
+
+            <input
+              id="editSaleSellingPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              value="${Number(sale.selling_price || 0)}"
+              required
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              CURRENCY
+            </label>
+
+            <select
+              id="editSaleCurrency"
+              ${hasPayments ? "disabled" : ""}
+            >
+
+              <option
+                value="TZS"
+                ${sale.currency === "TZS" ? "selected" : ""}
+              >
+                TZS
+              </option>
+
+              <option
+                value="USD"
+                ${sale.currency === "USD" ? "selected" : ""}
+              >
+                USD
+              </option>
+
+              <option
+                value="JPY"
+                ${sale.currency === "JPY" ? "selected" : ""}
+              >
+                JPY
+              </option>
+
+            </select>
+
+            ${
+              hasPayments
+                ? `
+                  <small
+                    style="
+                      color:#8a949f;
+                      margin-top:5px;
+                      display:block;
+                    "
+                  >
+                    Currency cannot be changed after payments
+                    have been recorded.
+                  </small>
+                `
+                : ""
+            }
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              SALE DATE *
+            </label>
+
+            <input
+              id="editSaleDate"
+              type="date"
+              value="${sale.sale_date || ""}"
+              required
+            >
+
+          </div>
+
+
+          <div class="field full">
+
+            <label>
+              SALE NOTES
+            </label>
+
+            <textarea
+              id="editSaleNotes"
+              rows="4"
+              placeholder="Additional information about this sale..."
+            >${esc(sale.notes || "")}</textarea>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             PAYMENT INFORMATION
+        ================================================== -->
+
+        <div
+          style="
+            margin-top:10px;
+            padding:15px;
+            border:1px solid #e5e7eb;
+            border-radius:12px;
+            background:#f8fafc;
+          "
+        >
+
+          <div
+            style="
+              font-size:10px;
+              font-weight:800;
+              color:#718096;
+              text-transform:uppercase;
+              margin-bottom:7px;
+            "
+          >
+            Payment Protection
+          </div>
+
+          <div
+            style="
+              font-size:12px;
+              color:#475569;
+              line-height:1.6;
+            "
+          >
+
+            Total already paid:
+
+            <strong>
+              ${money(totalPaid, sale.currency)}
+            </strong>
+
+            <br>
+
+            Existing payment records will not be changed
+            when editing this sale.
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             ACTIONS
+        ================================================== -->
+
+        <div
+          style="
+            display:flex;
+            justify-content:flex-end;
+            gap:10px;
+            margin-top:10px;
+            padding-top:10px;
+          "
+        >
+
+          <button
+            type="button"
+            class="secondary"
+            onclick="closeEditSaleModal()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary"
+            id="saveEditedSaleButton"
+          >
+            Save Changes
+          </button>
+
+        </div>
+
+
+      </form>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(modal);
+
+}
+
+/* =========================================================
+   EDIT SALE — CLOSE
+========================================================= */
+
+function closeEditSaleModal(){
+
+  const modal =
+    document.getElementById(
+      "editSaleModal"
+    );
+
+  if(modal)
+    modal.remove();
+
+}
+
+/* =========================================================
+   EDIT SALE — SAVE CHANGES
+========================================================= */
+
+async function saveEditedSale(saleId){
+
+  const sale =
+    salesRecords.find(
+      item => item.id === saleId
+    );
+
+  if(!sale){
+
+    toast(
+      "Sale not found.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const button =
+    document.getElementById(
+      "saveEditedSaleButton"
+    );
+
+
+  try{
+
+    /* =====================================================
+       READ CUSTOMER
+    ===================================================== */
+
+    const customerName =
+      document
+        .getElementById(
+          "editSaleCustomerName"
+        )
+        ?.value
+        .trim();
+
+    const customerPhone =
+      document
+        .getElementById(
+          "editSaleCustomerPhone"
+        )
+        ?.value
+        .trim();
+
+    const customerEmail =
+      document
+        .getElementById(
+          "editSaleCustomerEmail"
+        )
+        ?.value
+        .trim();
+
+    const customerTin =
+      document
+        .getElementById(
+          "editSaleCustomerTin"
+        )
+        ?.value
+        .trim();
+
+    const customerAddress =
+      document
+        .getElementById(
+          "editSaleCustomerAddress"
+        )
+        ?.value
+        .trim();
+
+
+    /* =====================================================
+       READ VEHICLE
+    ===================================================== */
+
+    const vehicleName =
+      document
+        .getElementById(
+          "editSaleVehicleName"
+        )
+        ?.value
+        .trim();
+
+    const vehicleYear =
+      Number(
+        document
+          .getElementById(
+            "editSaleVehicleYear"
+          )
+          ?.value
+      );
+
+
+    /* =====================================================
+       READ SALE
+    ===================================================== */
+
+    const sellingPrice =
+      Number(
+        document
+          .getElementById(
+            "editSaleSellingPrice"
+          )
+          ?.value
+      );
+
+    const currency =
+      document
+        .getElementById(
+          "editSaleCurrency"
+        )
+        ?.value;
+
+    const saleDate =
+      document
+        .getElementById(
+          "editSaleDate"
+        )
+        ?.value;
+
+    const notes =
+      document
+        .getElementById(
+          "editSaleNotes"
+        )
+        ?.value
+        .trim();
+
+
+    /* =====================================================
+       EXISTING PAYMENTS
+    ===================================================== */
+
+    const totalPaid =
+      Number(
+        sale.total_paid || 0
+      );
+
+
+    /* =====================================================
+       VALIDATION
+    ===================================================== */
+
+    if(!customerName){
+
+      toast(
+        "Customer name is required.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if(!vehicleName){
+
+      toast(
+        "Vehicle name is required.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if(
+      !vehicleYear ||
+      vehicleYear < 1900 ||
+      vehicleYear > 2100
+    ){
+
+      toast(
+        "Please enter a valid vehicle year.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if(
+      !sellingPrice ||
+      sellingPrice <= 0
+    ){
+
+      toast(
+        "Selling price must be greater than zero.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if(!saleDate){
+
+      toast(
+        "Sale date is required.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    /*
+      Do not allow selling price to become
+      lower than money already received.
+    */
+
+    if(sellingPrice < totalPaid){
+
+      toast(
+        `Selling price cannot be less than the amount already paid (${money(totalPaid, sale.currency)}).`,
+        "error"
+      );
+
+      return;
+    }
+
+
+    /* =====================================================
+       BUTTON STATE
+    ===================================================== */
+
+    if(button){
+
+      button.disabled = true;
+
+      button.textContent =
+        "Saving...";
+
+    }
+
+
+    /* =====================================================
+       1. UPDATE CUSTOMER
+    ===================================================== */
+
+    const customerId =
+      sale.customer_id;
+
+
+    if(customerId){
+
+      const {
+        error: customerError
+      } = await sb
+
+        .from("customers")
+
+        .update({
+
+          full_name:
+            customerName,
+
+          phone:
+            customerPhone || null,
+
+          email:
+            customerEmail || null,
+
+          tin:
+            customerTin || null,
+
+          address:
+            customerAddress || null
+
+        })
+
+        .eq(
+          "id",
+          customerId
+        );
+
+
+      if(customerError)
+        throw customerError;
+
+    }
+
+
+    /* =====================================================
+       2. UPDATE VEHICLE
+    ===================================================== */
+
+    const vehicleId =
+      sale.vehicle_id;
+
+
+    if(vehicleId){
+
+      const {
+        error: vehicleError
+      } = await sb
+
+        .from("vehicles")
+
+        .update({
+
+          vehicle_name:
+            vehicleName,
+
+          year:
+            vehicleYear
+
+        })
+
+        .eq(
+          "id",
+          vehicleId
+        );
+
+
+      if(vehicleError)
+        throw vehicleError;
+
+    }
+
+
+    /* =====================================================
+       3. CALCULATE NEW STATUS
+    ===================================================== */
+
+    const newStatus =
+
+      totalPaid >= sellingPrice
+
+        ? "PAID"
+
+        :
+
+      totalPaid > 0
+
+        ? "PARTIAL"
+
+        :
+
+        "UNPAID";
+
+
+    /* =====================================================
+       4. UPDATE SALE
+    ===================================================== */
+
+    const {
+      error: saleError
+    } = await sb
+
+      .from("sales")
+
+      .update({
+
+        selling_price:
+          sellingPrice,
+
+        currency:
+          currency,
+
+        sale_date:
+          saleDate,
+
+        status:
+          newStatus,
+
+        notes:
+          notes || null
+
+      })
+
+      .eq(
+        "id",
+        saleId
+      );
+
+
+    if(saleError)
+      throw saleError;
+
+
+    /* =====================================================
+       SUCCESS
+    ===================================================== */
+
+    closeEditSaleModal();
+
+
+    toast(
+      "Sale updated successfully.",
+      "ok"
+    );
+
+
+    /* -----------------------------------------------------
+       RELOAD ALL SALES DATA
+
+       This refreshes:
+       - customer
+       - vehicle
+       - selling price
+       - payments
+       - balance
+       - expenses
+       - status
+    ----------------------------------------------------- */
+
+    await loadSales();
+
+
+    /* -----------------------------------------------------
+       OPEN UPDATED SALE DETAILS
+    ----------------------------------------------------- */
+
+    openSaleDetails(
+      saleId
+    );
+
+
+  }
+  catch(error){
+
+    console.error(
+      "Edit sale error:",
+      error
+    );
+
+
+    toast(
+      error.message ||
+      "Unable to update sale.",
+      "error"
+    );
+
+  }
+  finally{
+
+    if(button){
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        "Save Changes";
+
+    }
+
+  }
+
+}
 
 /* =========================================================
    BACK TO SALES
@@ -15871,7 +17659,813 @@ async function saveSalePayment(
   );
 
 }
+/* =========================================================
+   EDIT CUSTOMER PAYMENT
+========================================================= */
 
+async function openEditPaymentModal(
+  paymentId,
+  saleId
+){
+
+  const sale =
+    salesRecords.find(
+      item => item.id === saleId
+    );
+
+  if(!sale){
+
+    toast(
+      "Sale not found.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const payment =
+    (sale.payments || [])
+      .find(
+        item => item.id === paymentId
+      );
+
+  if(!payment){
+
+    toast(
+      "Payment not found.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const existing =
+    document.getElementById(
+      "editPaymentModal"
+    );
+
+  if(existing)
+    existing.remove();
+
+
+  /* -------------------------------------------------------
+     LOAD ACTIVE ACCOUNTS
+  ------------------------------------------------------- */
+
+  const {
+    data: accounts,
+    error: accountError
+  } = await sb
+
+    .from("accounts")
+
+    .select(
+      "id,name,account_type,currency"
+    )
+
+    .eq(
+      "is_active",
+      true
+    )
+
+    .order(
+      "name"
+    );
+
+
+  if(accountError){
+
+    toast(
+      "Unable to load accounts.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.className =
+    "modal-bg show";
+
+  modal.id =
+    "editPaymentModal";
+
+
+  modal.innerHTML = `
+
+    <div
+      class="modal"
+      style="
+        max-width:700px;
+        width:95%;
+        max-height:90vh;
+        overflow-y:auto;
+      "
+    >
+
+      <div class="modal-head">
+
+        <div>
+
+          <h3>
+            Edit Customer Payment
+          </h3>
+
+          <span>
+            Payment #${payment.payment_number || "-"}
+            — ${esc(
+              sale.customers?.full_name ||
+              "Customer"
+            )}
+          </span>
+
+        </div>
+
+        <button
+          class="close"
+          type="button"
+          onclick="closeEditPaymentModal()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="form">
+
+        <div class="mini-grid">
+
+          <!-- AMOUNT -->
+
+          <div class="field">
+
+            <label>
+              AMOUNT *
+            </label>
+
+            <input
+              id="editPaymentAmount"
+              type="number"
+              min="0"
+              step="0.01"
+              value="${Number(
+                payment.amount || 0
+              )}"
+              required
+            >
+
+          </div>
+
+
+          <!-- DATE -->
+
+          <div class="field">
+
+            <label>
+              PAYMENT DATE *
+            </label>
+
+            <input
+              id="editPaymentDate"
+              type="date"
+              value="${payment.payment_date || ""}"
+              required
+            >
+
+          </div>
+
+
+          <!-- TYPE -->
+
+          <div class="field">
+
+            <label>
+              PAYMENT TYPE *
+            </label>
+
+            <select
+              id="editPaymentType"
+            >
+
+              <option
+                value="Deposit"
+                ${payment.payment_type === "Deposit" ? "selected" : ""}
+              >
+                Deposit
+              </option>
+
+              <option
+                value="Installment"
+                ${payment.payment_type === "Installment" ? "selected" : ""}
+              >
+                Installment
+              </option>
+
+              <option
+                value="Final Payment"
+                ${payment.payment_type === "Final Payment" ? "selected" : ""}
+              >
+                Final Payment
+              </option>
+
+              <option
+                value="Payment"
+                ${payment.payment_type === "Payment" ? "selected" : ""}
+              >
+                Payment
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- METHOD -->
+
+          <div class="field">
+
+            <label>
+              PAYMENT METHOD *
+            </label>
+
+            <select
+              id="editPaymentMethod"
+            >
+
+              <option
+                value="BANK"
+                ${payment.payment_method === "BANK" ? "selected" : ""}
+              >
+                Bank
+              </option>
+
+              <option
+                value="CASH"
+                ${payment.payment_method === "CASH" ? "selected" : ""}
+              >
+                Cash
+              </option>
+
+              <option
+                value="MOBILE MONEY"
+                ${payment.payment_method === "MOBILE MONEY" ? "selected" : ""}
+              >
+                Mobile Money
+              </option>
+
+              <option
+                value="CHEQUE"
+                ${payment.payment_method === "CHEQUE" ? "selected" : ""}
+              >
+                Cheque
+              </option>
+
+              <option
+                value="OTHER"
+                ${payment.payment_method === "OTHER" ? "selected" : ""}
+              >
+                Other
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <!-- ACCOUNT -->
+
+        <div class="field">
+
+          <label>
+            RECEIVING ACCOUNT *
+          </label>
+
+          <select
+            id="editPaymentAccount"
+          >
+
+            <option value="">
+              Select account
+            </option>
+
+            ${
+              (accounts || [])
+                .map(
+                  account => `
+                    <option
+                      value="${account.id}"
+                      ${
+                        account.id === payment.account_id
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${esc(account.name)}
+                      —
+                      ${esc(account.currency)}
+                    </option>
+                  `
+                )
+                .join("")
+            }
+
+          </select>
+
+        </div>
+
+
+        <!-- REFERENCE -->
+
+        <div class="field">
+
+          <label>
+            REFERENCE NUMBER
+          </label>
+
+          <input
+            id="editPaymentReference"
+            value="${esc(
+              payment.reference_number || ""
+            )}"
+            placeholder="e.g. NMB-12345"
+          >
+
+        </div>
+
+
+        <!-- NOTES -->
+
+        <div class="field">
+
+          <label>
+            NOTES
+          </label>
+
+          <textarea
+            id="editPaymentNotes"
+            rows="4"
+            placeholder="Payment notes..."
+          >${esc(
+            payment.notes || ""
+          )}</textarea>
+
+        </div>
+
+
+        <div
+          style="
+            padding:14px;
+            border:1px solid #e5e7eb;
+            border-radius:10px;
+            background:#f8fafc;
+            font-size:12px;
+            line-height:1.6;
+          "
+        >
+
+          Existing payment:
+
+          <strong>
+            ${money(
+              payment.amount,
+              payment.currency
+            )}
+          </strong>
+
+          <br>
+
+          Editing this record will automatically
+          recalculate the sale balance and status.
+
+        </div>
+
+
+        <div
+          style="
+            display:flex;
+            justify-content:flex-end;
+            gap:10px;
+            margin-top:10px;
+          "
+        >
+
+          <button
+            class="secondary"
+            type="button"
+            onclick="closeEditPaymentModal()"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="primary"
+            type="button"
+            onclick="
+              saveEditedPayment(
+                '${paymentId}',
+                '${saleId}'
+              )
+            "
+          >
+            Save Changes
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(
+    modal
+  );
+
+}
+
+/* =========================================================
+   CLOSE EDIT PAYMENT
+========================================================= */
+
+function closeEditPaymentModal(){
+
+  const modal =
+    document.getElementById(
+      "editPaymentModal"
+    );
+
+  if(modal)
+    modal.remove();
+
+}
+
+/* =========================================================
+   SAVE EDITED PAYMENT
+========================================================= */
+
+async function saveEditedPayment(
+  paymentId,
+  saleId
+){
+
+  const sale =
+    salesRecords.find(
+      item => item.id === saleId
+    );
+
+  if(!sale)
+    return;
+
+
+  const payment =
+    (sale.payments || [])
+      .find(
+        item => item.id === paymentId
+      );
+
+  if(!payment){
+
+    toast(
+      "Payment not found.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const amount =
+    Number(
+      document.getElementById(
+        "editPaymentAmount"
+      )?.value || 0
+    );
+
+
+  const paymentDate =
+    document.getElementById(
+      "editPaymentDate"
+    )?.value;
+
+
+  const paymentType =
+    document.getElementById(
+      "editPaymentType"
+    )?.value;
+
+
+  const paymentMethod =
+    document.getElementById(
+      "editPaymentMethod"
+    )?.value;
+
+
+  const accountId =
+    document.getElementById(
+      "editPaymentAccount"
+    )?.value;
+
+
+  const referenceNumber =
+    document.getElementById(
+      "editPaymentReference"
+    )?.value
+      ?.trim() || null;
+
+
+  const notes =
+    document.getElementById(
+      "editPaymentNotes"
+    )?.value
+      ?.trim() || null;
+
+
+  if(
+    !amount ||
+    amount <= 0
+  ){
+
+    toast(
+      "Enter a valid payment amount.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(!paymentDate){
+
+    toast(
+      "Select payment date.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(!paymentMethod){
+
+    toast(
+      "Select payment method.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(!accountId){
+
+    toast(
+      "Select receiving account.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  /* -------------------------------------------------------
+     CALCULATE OTHER PAYMENTS
+
+     The edited payment itself is excluded.
+  ------------------------------------------------------- */
+
+  const otherPaymentsTotal =
+    (sale.payments || [])
+      .filter(
+        item =>
+          item.id !== paymentId
+      )
+      .reduce(
+        (sum,item) =>
+          sum +
+          Number(
+            item.amount || 0
+          ),
+        0
+      );
+
+
+  const sellingPrice =
+    Number(
+      sale.selling_price || 0
+    );
+
+
+  if(
+    otherPaymentsTotal +
+    amount >
+    sellingPrice
+  ){
+
+    toast(
+      "Payment total cannot exceed the selling price.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  try{
+
+    const {
+      error
+    } = await sb
+
+      .from("customer_payments")
+
+      .update({
+
+        amount:
+          amount,
+
+        payment_date:
+          paymentDate,
+
+        payment_type:
+          paymentType,
+
+        payment_method:
+          paymentMethod,
+
+        account_id:
+          accountId,
+
+        reference_number:
+          referenceNumber,
+
+        notes:
+          notes
+
+      })
+
+      .eq(
+        "id",
+        paymentId
+      );
+
+
+    if(error)
+      throw error;
+
+
+    closeEditPaymentModal();
+
+
+    toast(
+      "Payment updated successfully.",
+      "ok"
+    );
+
+
+    await loadSales();
+
+    openSaleDetails(
+      saleId
+    );
+
+
+  }
+  catch(error){
+
+    console.error(
+      "Payment update error:",
+      error
+    );
+
+    toast(
+      error.message ||
+      "Unable to update payment.",
+      "error"
+    );
+
+  }
+
+}
+
+/* =========================================================
+   DELETE CUSTOMER PAYMENT
+========================================================= */
+
+async function deleteSalePayment(
+  paymentId,
+  saleId
+){
+
+  const sale =
+    salesRecords.find(
+      item => item.id === saleId
+    );
+
+  if(!sale)
+    return;
+
+
+  const payment =
+    (sale.payments || [])
+      .find(
+        item => item.id === paymentId
+      );
+
+  if(!payment){
+
+    toast(
+      "Payment not found.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      `Delete this payment?\n\n` +
+
+      `Amount: ${money(
+        payment.amount,
+        payment.currency
+      )}\n` +
+
+      `Date: ${formatDate(
+        payment.payment_date
+      )}\n\n` +
+
+      `This will reduce the total amount paid ` +
+      `and recalculate the outstanding balance.`
+    );
+
+
+  if(!confirmed)
+    return;
+
+
+  try{
+
+    const {
+      error
+    } = await sb
+
+      .from("customer_payments")
+
+      .delete()
+
+      .eq(
+        "id",
+        paymentId
+      );
+
+
+    if(error)
+      throw error;
+
+
+    toast(
+      "Payment deleted successfully.",
+      "ok"
+    );
+
+
+    await loadSales();
+
+    openSaleDetails(
+      saleId
+    );
+
+
+  }
+  catch(error){
+
+    console.error(
+      "Delete payment error:",
+      error
+    );
+
+    toast(
+      error.message ||
+      "Unable to delete payment.",
+      "error"
+    );
+
+  }
+
+}
 /* =========================================================
    VEHICLE EXPENSES
 ========================================================= */
