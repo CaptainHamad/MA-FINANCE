@@ -18284,45 +18284,32 @@ async function saveEditedPayment(
 
   try{
 
-    const {
-      error
-    } = await sb
+   const {
+  data: updatedPayment,
+  error
+} = await sb
+  .from("customer_payments")
+  .update({
+    amount: amount,
+    payment_date: paymentDate,
+    payment_type: paymentType,
+    payment_method: paymentMethod,
+    account_id: accountId,
+    reference_number: referenceNumber,
+    notes: notes
+  })
+  .eq("id", paymentId)
+  .select()
+  .single();
 
-      .from("customer_payments")
+if(error)
+  throw error;
 
-      .update({
-
-        amount:
-          amount,
-
-        payment_date:
-          paymentDate,
-
-        payment_type:
-          paymentType,
-
-        payment_method:
-          paymentMethod,
-
-        account_id:
-          accountId,
-
-        reference_number:
-          referenceNumber,
-
-        notes:
-          notes
-
-      })
-
-      .eq(
-        "id",
-        paymentId
-      );
-
-
-    if(error)
-      throw error;
+if(!updatedPayment){
+  throw new Error(
+    "Payment was not updated. Check your Supabase permissions."
+  );
+}
 
 
     closeEditPaymentModal();
