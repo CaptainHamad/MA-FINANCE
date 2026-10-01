@@ -18311,21 +18311,89 @@ if(!updatedPayment){
   );
 }
 
+/* =======================================================
+   UPDATE LOCAL SALE DATA IMMEDIATELY
+   ======================================================= */
 
-    closeEditPaymentModal();
+const newTotalPaid =
+  otherPaymentsTotal + amount;
+
+const newBalance =
+  Math.max(
+    sellingPrice - newTotalPaid,
+    0
+  );
+
+const newStatus =
+  newTotalPaid >= sellingPrice
+    ? "PAID"
+    : newTotalPaid > 0
+      ? "PARTIAL"
+      : "UNPAID";
 
 
-    toast(
-      "Payment updated successfully.",
-      "ok"
-    );
+salesRecords =
+  salesRecords.map(item => {
+
+    if(item.id !== saleId)
+      return item;
+
+    const updatedPayments =
+      (item.payments || []).map(itemPayment => {
+
+        if(itemPayment.id !== paymentId)
+          return itemPayment;
+
+        return {
+          ...itemPayment,
+          ...updatedPayment
+        };
+
+      });
+
+    return {
+      ...item,
+
+      payments:
+        updatedPayments,
+
+      total_paid:
+        newTotalPaid,
+
+      balance:
+        newBalance,
+
+      status:
+        newStatus
+    };
+
+  });
 
 
-    await loadSales();
+/* =======================================================
+   CLOSE MODAL
+   ======================================================= */
 
-    openSaleDetails(
-      saleId
-    );
+closeEditPaymentModal();
+
+
+/* =======================================================
+   SUCCESS MESSAGE
+   ======================================================= */
+
+toast(
+  "Payment updated successfully.",
+  "ok"
+);
+
+
+/* =======================================================
+   OPEN UPDATED SALE DETAILS IMMEDIATELY
+   ======================================================= */
+
+openSaleDetails(
+  saleId
+);
 
 
   }
