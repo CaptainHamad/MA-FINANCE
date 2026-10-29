@@ -15122,7 +15122,7 @@ function generateCustomerStatement(saleId) {
           <img src="/mattex-logo.png" alt="Mattex Motors Logo"
                onerror="this.style.display='none'">
           <div>
-            <h1>MATTEX MOTORS</h1>
+            <h1>MATTEX COMPANY LIMITED</h1>
             <strong>CUSTOMER PAYMENT STATEMENT</strong>
             <p>Official record of payments received and outstanding balance.</p>
           </div>
@@ -15184,14 +15184,14 @@ function generateCustomerStatement(saleId) {
         <div class="note">
           <strong>Dear ${safe(customer.full_name || "Customer")},</strong>
           <p>
-            This statement confirms the payments recorded by Mattex Motors
+            This statement confirms the payments recorded by Mattex Company Limited
             as of the date this statement is generated. Please contact us
             if any payment is missing or the details need clarification.
           </p>
         </div>
 
         <footer>
-          MATTEX MOTORS · Customer Payment Statement ·
+          MATTEX COMPANY LIMITED · Customer Payment Statement ·
           Generated on ${safe(new Date().toLocaleDateString("en-GB"))}
         </footer>
       </main>
