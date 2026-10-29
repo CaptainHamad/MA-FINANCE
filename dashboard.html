@@ -3587,6 +3587,34 @@ body{
   transform:scale(.995);
 }
 
+/* =========================================================
+   COMPLETED VEHICLE SALES — PURPLE HIGHLIGHT
+========================================================= */
+
+.sales-completed-row td {
+  background: #f3e8ff !important;
+  color: #581c87 !important;
+  border-bottom-color: #e9d5ff !important;
+}
+
+.sales-completed-row .name {
+  color: #6b21a8 !important;
+  font-weight: 700;
+}
+
+.sales-completed-row:hover td {
+  background: #e9d5ff !important;
+  color: #581c87 !important;
+}
+
+.sales-completed-row:hover .name {
+  color: #6b21a8 !important;
+}
+
+.sales-completed-row {
+  box-shadow: inset 4px 0 0 #9333ea;
+}
+
   
 </style>
 </head>
@@ -12153,8 +12181,9 @@ async function loadSales(){
         selling_price,
         currency,
         sale_date,
-        status,
-        notes,
+status,
+notes,
+completed_at,
         customers(
   id,
   full_name,
@@ -12423,6 +12452,79 @@ async function loadSalesExpenses(){
 
 
 /* =========================================================
+   MARK VEHICLE SALE AS COMPLETE
+========================================================= */
+
+async function toggleSaleCompletion(saleId){
+
+  const sale = salesRecords.find(
+    item => item.id === saleId
+  );
+
+  if(!sale) return;
+
+  const isCompleted = Boolean(sale.completed_at);
+
+  const confirmMessage = isCompleted
+    ? "Unmark this sale as complete?"
+    : "Mark this vehicle sale as complete?";
+
+  if(!confirm(confirmMessage)) return;
+
+  const newCompletedAt = isCompleted
+    ? null
+    : new Date().toISOString();
+
+  try {
+
+    const { error } = await sb
+      .from("sales")
+      .update({
+        completed_at: newCompletedAt
+      })
+      .eq("id", saleId);
+
+    if(error) throw error;
+
+    // Update the local sales record
+    salesRecords = salesRecords.map(item =>
+      item.id === saleId
+        ? {
+            ...item,
+            completed_at: newCompletedAt
+          }
+        : item
+    );
+
+    // Refresh the list and move completed sales down
+    renderSales();
+
+    toast(
+      newCompletedAt
+        ? "Sale marked as complete."
+        : "Sale marked as incomplete.",
+      "ok"
+    );
+
+  } catch(error) {
+
+    console.error(
+      "Sale completion error:",
+      error
+    );
+
+    toast(
+      error.message || "Failed to update sale completion.",
+      "error"
+    );
+
+  }
+
+}
+
+  
+
+/* =========================================================
    RENDER SALES TABLE
 ========================================================= */
 
@@ -12497,12 +12599,27 @@ function renderSales(){
         <tbody>
 
           ${
-            salesRecords
-              .map(
-                sale => `
+            [...salesRecords]
+  .sort((a, b) => {
+
+    const aCompleted = Boolean(a.completed_at);
+    const bCompleted = Boolean(b.completed_at);
+
+    // Incomplete sales first; completed sales last
+    if(aCompleted !== bCompleted) {
+      return Number(aCompleted) - Number(bCompleted);
+    }
+
+    // Keep newest sales first within each group
+    return new Date(b.sale_date || 0)
+      - new Date(a.sale_date || 0);
+
+  })
+  .map(
+    sale => `
 
                   <tr
-  class="sales-clickable-row"
+  class="sales-clickable-row ${sale.completed_at ? 'sales-completed-row' : ''}"
   onclick="openSaleDetails('${sale.id}')"
   tabindex="0"
   onkeydown="if(event.key==='Enter' || event.key===' '){event.preventDefault();openSaleDetails('${sale.id}')}"
@@ -12610,37 +12727,56 @@ function renderSales(){
                     </td>
 
 
-                    <td>
+                    
+<td>
 
-                      <span class="badge">
+  <span class="badge">
 
-                        ${
-                          sale.balance <= 0
-                          ?
-                          "PAID"
-                          :
-                          sale.total_paid > 0
-                          ?
-                          "PARTIAL"
-                          :
-                          "UNPAID"
-                        }
+    ${
+      sale.balance <= 0
+      ?
+      "PAID"
+      :
+      sale.total_paid > 0
+      ?
+      "PARTIAL"
+      :
+      "UNPAID"
+    }
 
-                      </span>
+  </span>
 
-                    </td>
+  ${
+    sale.completed_at
+    ?
+    '<span class="badge" style="background:#9333ea;color:white;margin-left:5px;">COMPLETED</span>'
+    :
+    ''
+  }
+
+</td>
 
 
-                    <td>
+                    
+<td>
 
-                      <button
-  class="secondary"
-  onclick="event.stopPropagation(); openSaleDetails('${sale.id}')"
->
-  View
-</button>
+  <button
+    class="secondary"
+    onclick="event.stopPropagation(); openSaleDetails('${sale.id}')"
+  >
+    View
+  </button>
 
-                    </td>
+  <button
+    class="${sale.completed_at ? 'secondary' : 'primary'}"
+    style="${sale.completed_at ? 'background:#9333ea;color:white;border-color:#9333ea;' : ''}"
+    onclick="event.stopPropagation(); toggleSaleCompletion('${sale.id}')"
+  >
+    ${sale.completed_at ? '↶ Undo Complete' : '✓ Mark Complete'}
+  </button>
+
+</td>
+
 
                   </tr>
 
