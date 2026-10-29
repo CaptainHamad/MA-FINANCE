@@ -14118,6 +14118,14 @@ const netIncome =
   >
     📄 Sale Report
   </button>
+<button
+  class="primary"
+  type="button"
+  onclick="generateCustomerStatement('${sale.id}')"
+>
+  📄 Customer Payment Statement
+</button>
+
 
   <button
     class="primary"
@@ -14946,6 +14954,252 @@ netIncome,
     behavior:"smooth"
   });
 
+}
+
+
+
+  
+function generateCustomerStatement(saleId) {
+  const sale = salesRecords.find(item => item.id === saleId);
+
+  if (!sale) {
+    toast("Sale not found.", "err");
+    return;
+  }
+
+  const customer = sale.customers || {};
+  const vehicle = sale.vehicles || {};
+  const payments = [...(sale.payments || [])].sort((a, b) =>
+    String(a.payment_date || "").localeCompare(String(b.payment_date || ""))
+  );
+
+  const price = Number(sale.selling_price || 0);
+  const paid = payments.reduce(
+    (sum, p) => sum + Number(p.amount || 0), 0
+  );
+  const balance = Math.max(price - paid, 0);
+  const currency = sale.currency || "TZS";
+
+  const fmt = amount => {
+    try {
+      return new Intl.NumberFormat("en-TZ", {
+        maximumFractionDigits: 0
+      }).format(Number(amount || 0)) + " " + currency;
+    } catch {
+      return currency + " " + amount;
+    }
+  };
+
+  const safe = value => String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+  const rows = payments.length
+    ? payments.map((p, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${safe(formatDate(p.payment_date))}</td>
+          <td>${safe(p.payment_type || "Payment")}</td>
+          <td>${safe(p.reference_number || "-")}</td>
+          <td class="amount">${fmt(p.amount)}</td>
+        </tr>
+      `).join("")
+    : `<tr><td colspan="5" class="empty">No payments recorded yet.</td></tr>`;
+
+  const reportWindow = window.open("", "_blank");
+
+  if (!reportWindow) {
+    toast("Please allow pop-ups to generate the statement.", "err");
+    return;
+  }
+
+  reportWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Customer Payment Statement</title>
+      <style>
+        * { box-sizing: border-box; }
+        body {
+          font-family: Arial, sans-serif;
+          color: #17202a;
+          background: #f3f5f7;
+          margin: 0;
+          padding: 28px;
+          font-size: 12px;
+        }
+        .sheet {
+          max-width: 850px;
+          margin: auto;
+          padding: 38px;
+          background: #fff;
+          border: 1px solid #e5e9ee;
+        }
+        header {
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          border-bottom: 4px solid #f58220;
+          padding-bottom: 22px;
+        }
+        header img { width: 150px; max-height: 90px; object-fit: contain; }
+        h1 { margin: 0 0 7px; font-size: 23px; }
+        h2 { margin: 28px 0 5px; font-size: 18px; }
+        p { color: #66717d; line-height: 1.6; }
+        .meta {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin: 22px 0;
+        }
+        .card {
+          padding: 15px;
+          border: 1px solid #e5e9ee;
+          border-radius: 10px;
+        }
+        .label { color: #77818d; font-size: 10px; margin-bottom: 7px; }
+        .value { font-weight: bold; font-size: 14px; overflow-wrap: anywhere; }
+        .summary {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+          margin: 20px 0 28px;
+        }
+        .summary .card { background: #fafbfc; }
+        .summary .value { font-size: 16px; }
+        .balance { background: #fff4e9 !important; border-color: #f8d7b8 !important; }
+        table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+        th {
+          text-align: left;
+          padding: 11px 8px;
+          background: #f4f6f8;
+          color: #59636e;
+          font-size: 10px;
+        }
+        td { padding: 12px 8px; border-bottom: 1px solid #e9edf0; }
+        .amount { text-align: right; white-space: nowrap; font-weight: bold; }
+        .empty { text-align: center; color: #77818d; padding: 22px; }
+        .note { margin-top: 26px; padding: 15px; background: #fafbfc; }
+        footer {
+          margin-top: 35px;
+          padding-top: 15px;
+          border-top: 1px solid #e5e9ee;
+          color: #77818d;
+          font-size: 10px;
+          text-align: center;
+        }
+        .actions { text-align: right; margin: 0 auto 12px; max-width: 850px; }
+        .actions button {
+          border: 0; border-radius: 8px; padding: 11px 16px;
+          background: #f58220; font-weight: bold; cursor: pointer;
+        }
+        @media print {
+          body { padding: 0; background: #fff; }
+          .sheet { border: 0; padding: 12px; }
+          .actions { display: none; }
+          @page { size: A4; margin: 12mm; }
+        }
+        @media(max-width:600px) {
+          body { padding: 10px; }
+          .sheet { padding: 18px; }
+          header { gap: 12px; }
+          header img { width: 90px; }
+          .summary { grid-template-columns: 1fr; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="actions">
+        <button onclick="window.print()">Print / Save as PDF</button>
+      </div>
+      <main class="sheet">
+        <header>
+          <img src="/mattex-logo.png" alt="Mattex Motors Logo"
+               onerror="this.style.display='none'">
+          <div>
+            <h1>MATTEX MOTORS</h1>
+            <strong>CUSTOMER PAYMENT STATEMENT</strong>
+            <p>Official record of payments received and outstanding balance.</p>
+          </div>
+        </header>
+
+        <h2>Customer & Vehicle Details</h2>
+        <div class="meta">
+          <div class="card">
+            <div class="label">CUSTOMER NAME</div>
+            <div class="value">${safe(customer.full_name || "-")}</div>
+          </div>
+          <div class="card">
+            <div class="label">PHONE NUMBER</div>
+            <div class="value">${safe(customer.phone || "-")}</div>
+          </div>
+          <div class="card">
+            <div class="label">VEHICLE</div>
+            <div class="value">${safe(vehicle.vehicle_name ||
+              `${vehicle.make || ""} ${vehicle.model || ""}`.trim() || "-")}
+              ${safe(vehicle.year || "")}</div>
+          </div>
+          <div class="card">
+            <div class="label">SALE DATE / REFERENCE</div>
+            <div class="value">${safe(formatDate(sale.sale_date))}
+              / ${safe(sale.sale_number || "-")}</div>
+          </div>
+        </div>
+
+        <h2>Payment Summary</h2>
+        <div class="summary">
+          <div class="card">
+            <div class="label">TOTAL AGREED PRICE</div>
+            <div class="value">${fmt(price)}</div>
+          </div>
+          <div class="card">
+            <div class="label">TOTAL PAID</div>
+            <div class="value" style="color:#15803d">${fmt(paid)}</div>
+          </div>
+          <div class="card balance">
+            <div class="label">OUTSTANDING BALANCE</div>
+            <div class="value" style="color:#b91c1c">${fmt(balance)}</div>
+          </div>
+        </div>
+
+        <h2>Payment History</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Payment Date</th>
+              <th>Payment Type</th>
+              <th>Reference</th>
+              <th style="text-align:right">Amount Received</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+
+        <div class="note">
+          <strong>Dear ${safe(customer.full_name || "Customer")},</strong>
+          <p>
+            This statement confirms the payments recorded by Mattex Motors
+            as of the date this statement is generated. Please contact us
+            if any payment is missing or the details need clarification.
+          </p>
+        </div>
+
+        <footer>
+          MATTEX MOTORS · Customer Payment Statement ·
+          Generated on ${safe(new Date().toLocaleDateString("en-GB"))}
+        </footer>
+      </main>
+    </body>
+    </html>
+  `);
+
+  reportWindow.document.close();
 }
 
 /* =========================================================
